@@ -11,8 +11,83 @@
 #include <optional>
 #include <set>
 
+//버텍스 버퍼 추가
+#include <glm/glm.hpp>
+#include <array>
+
 const int WIDTH = 800;
 const int HEIGHT = 600;
+
+/*
+셰이더 코드의 정점 데이터를 프로그램 코드의 배열로 옮김
+벡터와 행렬과 같은 선형 대수학 관련 유형을 제공하는 glm라이브러리를
+include하는 것으로 시작 위치와 벡터 지정
+*/
+struct Vertex {
+	glm::vec2 pos;
+	glm::vec3 color;
+
+	/*
+	gpu 메모리에 업로드된 vulkan에게 이 데이터 형식을 버텍스 쉐이더에 전달하는 방법을 알려주는 것
+	이 정보를 전달하는 데 필요한 두 가지 유형의 구조가 있음
+	첫번째 구조체는 VkVertexInputBindingDescription이며 Vertex구조체에 멤버 함수를 추가하여 올바른 데이터로 채웁
+
+	*/
+	static VkVertexInputBindingDescription getBindingDesctiption() {
+		VkVertexInputBindingDescription bindingDescription = {};
+
+		bindingDescription.binding = 0;//이거 dx11레지스터 index
+		bindingDescription.stride = sizeof(Vertex);//이거 dx11의 레이아웃 단위 지정할 떄 쓰는 그거
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;//이거 vertex/instance구분 인자 (VK_VERTEX_INPUT_RATE_INCTANCE는 정점 그리고 정점 데이터 유지함)
+		return bindingDescription;
+	}
+
+	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+
+		//location0을 가진 버텍스 쉐이더의 input은 두개의 32비트 sfloat를 갖는 location임
+		attributeDescriptions[0].binding = 0;//binding 매개변수는 Vulkan에게 각 정점 데이터가 바인딩되는 것을 알려줌
+		attributeDescriptions[0].location = 0;//location은 버택스 쉐이더에서 입력의 location를 알려줌 
+		/*
+		format매개변수는 속성에 대한 데이터 유형을 설명함 색상 형식과 동일해 혼동이 가능함
+		VK_FORMAT_R32_SFLOAT
+		VK_FORMAT_R32G32_SFLOAT
+		VK_FORMAAT_R32G32B32_SFLOAT..
+		SINT, UINT, VK_FORMAT_R64_.. 각각 int uint double도 있음 ㅇㅇ
+		*/
+		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;//
+		/*
+		offsetof - 
+		struct s_a{
+		short b;
+		int c;
+		}
+		s_a a;
+		가 있을 때 b의 위치는 &a인데 c의 위치 구할 때 사용하는 매크로
+		offsetof(struct s_a, c)인경우 아키텍쳐에 따라 2아니면 4가 됨 올..
+		*/
+		attributeDescriptions[0].offset = offsetof(Vertex, pos);
+		
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		return attributeDescriptions;
+	}
+};
+
+//이게 정점 데이터 인풋레이아웃임 
+const std::vector<Vertex> vertices = {
+	{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
+	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+};
+
+/*
+버택스 입력을 처리하는 방법을 설명하는 두 번째 구조는 VkVertexInputAttributeDescription임
+함
+*/
 
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_LUNARG_standard_validation"
@@ -649,11 +724,16 @@ private:
 
 		VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
+		auto bindingDescription = Vertex::getBindingDesctiption();
+		auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
