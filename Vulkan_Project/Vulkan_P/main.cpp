@@ -23,6 +23,10 @@ const int HEIGHT = 600;
 벡터와 행렬과 같은 선형 대수학 관련 유형을 제공하는 glm라이브러리를
 include하는 것으로 시작 위치와 벡터 지정
 */
+
+/*
+버택스 버퍼는 자동으로 메모리를 할당하지 않음 내가 만들어야해
+*/
 struct Vertex {
 	glm::vec2 pos;
 	glm::vec3 color;
@@ -79,7 +83,7 @@ struct Vertex {
 
 //이게 정점 데이터 인풋레이아웃임 
 const std::vector<Vertex> vertices = {
-	{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
 	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
 	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 };
@@ -183,6 +187,15 @@ private:
 	VkSemaphore renderFinishedSemaphore;
 
 	
+	/*
+	버택스 버퍼
+	*/
+	VkBuffer vertexBuffer;
+	VkMemoryRequirements memRequirements;
+	VkPhysicalDeviceMemoryProperties memProperties;
+	VkDeviceMemory vertexBufferMemory;
+
+
 	void initWindow() {
 		glfwInit();
 
@@ -223,6 +236,7 @@ private:
 		createGraphicsPipeline();
 		createFramebuffers();
 		createCommandPool();
+		createVertexBuffer();
 		createCommandBuffers();
 		createSemaphores();
 	}
@@ -415,6 +429,13 @@ private:
 
 	void cleanup() {
 		cleanupSwapChain();
+
+		/*
+		버퍼는 프로그램 종료까지 명령 렌더링에 사용할 수 있어야 하며 스왑체인에 의존하지 않으므로 
+		cleanup함수에서 호출하여 제거
+		*/
+		vkDestroyBuffer(device, vertexBuffer, nullptr);
+		vkFreeMemory(device, vertexBufferMemory, nullptr);
 
 		vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
@@ -900,6 +921,123 @@ private:
 		}
 	}
 
+	void createVertexBuffer() {
+		/*
+		버퍼를 만들기 위해 VKBufferCreateInfo구조체 정보를 준비해야 함
+		*/
+		VkBufferCreateInfo bufferInfo = {};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = sizeof(vertices[0]) * vertices.size();//byte단위로 버퍼 크기를 지정
+		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;//vertexbuffer라는걸 알려줌
+		/*
+		버퍼는 특정 명령큐 패밀리가 소유하거나 여러 시간에 동시에 공유될 수 있음 
+		버퍼는 그래픽 대기열에서만 사용되므로 독점적인 액세스를 유지할 수 있음
+		flags매개변수는 현재 관련이 없는 희소한 버퍼 메모리를 구성하는 데 사용됨 ???
+		*/
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create vertex buffer!");
+		}
+
+		/*
+		아직 실제로 할당된 메모리가 없음 버퍼에 메모리를 할당해야함 
+		1. 메모리 요구사항 쿼리
+		VkMemmoryRequirements 구조체에는 세 개의 필드가 있습
+		size : 필요한 메모리양의 크기, bufferInfo.size와 다를 수 있음
+		alignment : 할당 된 메모리 영역에서 버퍼가 시작되는 바이트 오프셋, bufferInfo.usage와 bufferInfo.flags에 의존
+		memmoryTypeBits : 버퍼에 적합한 메모리 유형의 비트 필드
+		*/
+		vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+		/*
+		올바른 메모리 타입을 결정하는 방법을 알아봄 그래서 VkMemoryAllocateInfo구조체를 채워 메모리를 실제로 할당 할 수있음
+
+		*/
+		VkMemoryAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
+			throw std::runtime_error("failed to allocate vertex buffer memory!");
+		}
+
+		//메모리 할당
+		vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+		/*
+		처음 세 매개 변수는 무엇인지 바로 알 수 있음 네 번째 매개변수는 메모리 영역 내의 오프셋임
+		이 메모리는 정점 버퍼에 대해 특별히 할당되기 떄문에 오프셋은 단순히 0임
+		오프셋이 0이 아닌경우 memRequirements.alignment로 나눌 수 있어야해
+		물론 c++의 동적 메모리 할당과 메모리는 어느 시점에서 해제되어야 함, 버퍼 객체에 바인드 된 메모리는 버퍼가 더 이상 사용되지 않을 경우 해제해야 하므로 버퍼가 삭제된 후 해제해야해
+		*/
+
+		/*
+		filling the vertex buffer
+		이제 버텍스 데이터를 버퍼에 복사할 차례 
+		이는 vkMapMemory를 사용해 버퍼 메모리를 CPU가 액세스 가능 하도록 메모리에 매핑하여 수행
+		*/
+		void* data;
+		/*
+		이 함수는 오프셋과 크기로 정의된 지정된 메모리 리소스의 영역에 액세스 할 수 있게함
+		여기서 오프셋과 크기는 각각 0과 bufferInfo.size임 특수값 VK_WHOLE_SIZE를 지정하여 모든 메모리를 매핑 할 수도 있음
+		두 번쨰 매개변수는 플래그를 지정하는데 사용할 수있지만 지금 API에는 아직 사용할 수 있는 매개변수가 없음
+		마지막 값은 매핑된 메모리에 대한 포인터의 출력을 지정
+		*/
+		vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+		memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+		
+		/*
+		이제 vkUnmapMemory 를 사용하여 버텍스 데이터를 매핑 된 메모리에 memcpy하고 다시 매핑 해제할 수 있음
+		불행히도 드라이버는 예를 들어 캐싱 때문에 버퍼 메모리에 데이터를 즉시 복사하지 않을 수 있음
+		버퍼에 쓰기가 매핑된 메모리에 아직 표시되지 않을 수도 있음 이 문제를 해결할 수 있는 두가지 방법 
+		 - VK_MEMORY_PROPERTY_HOST_COHERENT_BIT와 함께 표시되는 호스트 일관된 메모리 힙을 사용해라
+		  - 매핑된 메모리에 쓰기 후에 vkFlushMappedMemoryRanges를 호출하고 매핑 된 메모리에서 읽기전 vkInvalidateMappedMemoryRanges를 호출해라
+
+		  우리는 매핑된 메모리가 할당 된 메모리의 내용과 할상 일치하는지 확인하는 첫 번째 방법을 찾아갔음 
+		  명시적 플러싱 보다 성능이 약간 떨어질 수 있음
+		*/
+		vkUnmapMemory(device, vertexBufferMemory);
+
+	}
+
+
+	/*
+	그래픽 카드는 할당 할 수 있는 여러 유형의 메모리를 제공할 ㅅ ㅜ있음 
+	각 유형의 메모리는 허용되는 작업 및 성능 특성에 따라 다름 
+	버퍼의 요구 사항과 자체 애플리케이션 요구사항을 결합하여 사용할 올바른 유형의 메모리를 찾아야함
+
+	*/
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+		/*
+		VkPhysicalDeviceMemoryProperties 구조체에는 두 개의 배열 memoryTypes및 memoryHeaps가 있음
+		메모리 힙은 VRAM이 부족한 경우 RAM의 전용 VRAM 및 스왑 공간과 같은 별개의 메모리 리소스입니다. 이 힙에는 여러 유형의 메ㅗ밀가 있습
+		지금 우리는 메모리 윻ㅇ에 대해서만 관심을 가질것임 그것이 위치한 힙이 아니라 성능에 영향을 미칠 수 있다고 상상할 수 있음
+		*/
+		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+		/*
+		typeFilter 매개 변수는 적절한 메모리 유형의 비트 필드를 지정하는 데 사용됩니다. 즉 단순히 반복하여 해당 비트가 1로 설정되어 있는지 확인하여 적절한 메모리 유형의 인덱스를 찾을 수 있음
+		정점 데이터를 해당 메모리에 쓸 수 있어야해 
+		memoryTypes 배열은 각 메모리 유형의 힙 및 속성을 지정하는 VkMemoryType 구조체로 구성됨
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT로 표시되지만
+		VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 속성도 사용해야 함
+		이제 이 속성의 지원을 확인하기 위해 루프를 수정할 수 있음
+		*/
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
+			if ( (typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties ) {
+				return i;
+			}
+		}
+		/*
+		둘 이상의 속성을 가질 수 있으므로 비트 AND의 결과가 단지 0이 아닌 원하는 속성 비트 필드와 같은지 확인해야 함
+		필요로 하는 모든 프로퍼티를 가지는 버퍼에 적절한 메모리 형이 존재하면, 그 인덱스를 돌려주어 그렇지 않은 경우 오류
+		*/
+		throw std::runtime_error("failed to find suitable memory type!");
+		
+	}
+
 	void createCommandBuffers() {
 		commandBuffers.resize(swapChainFramebuffers.size());
 		VkCommandBufferAllocateInfo allocInfo = {};
@@ -958,6 +1096,16 @@ private:
 			*/
 			//basic drawing commands
 			vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+			/*vkCmdBindVertexBuffers 
+			vkCmdBindVertexBuffers 함수는 이전 장에서 설정 한 것과 같이 바인딩에 정점 버퍼를 바인딩하는 데 사용
+			커멘드 버퍼 외의 최초의 2개의 파라미터는, 정점 버퍼를 지정하는 오프셋 및 바이너리의 수를 지정함
+			마지막 두 매개 변수는 바인딩 할 정점 버퍼의 배열을 지정하고 정점 데이터를 읽는 바이트 오프셋을 지정함
+			또한 vkCmdDraw에 대한 호출을 변경하여 하드 코드 된 숫자 3과 반대로 버퍼의 정점 수를 전달해야함
+			*/
+			VkBuffer vertexBuffers[] = { vertexBuffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(commandBuffers[i], 0/*offset ?? */, 1/*정점의 수*/, vertexBuffers, offsets);
 
 			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 
