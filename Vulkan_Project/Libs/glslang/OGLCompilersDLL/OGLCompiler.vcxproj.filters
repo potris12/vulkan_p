@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\VulkanSDK\1.1.73.0\glslang\OGLCompilersDLL\InitializeDll.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\VulkanSDK\1.1.73.0\glslang\OGLCompilersDLL\InitializeDll.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\VulkanSDK\1.1.73.0\glslang\OGLCompilersDLL\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4C1210AA-FC7E-399A-B01C-BE37B326B539}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

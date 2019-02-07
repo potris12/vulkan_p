@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\VulkanSDK\1.1.73.0\glslang\External\spirv-tools\CMakeLists.txt" />
+    <CustomBuild Include="C:\VulkanSDK\1.1.73.0\glslang\CMakeFiles\b4f927007218d53dd45ca3c10bf55a5e\spirv-tools-shared-pkg-config.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\VulkanSDK\1.1.73.0\glslang\External\spirv-tools\CMakeFiles\spirv-tools-shared-pkg-config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{FDA80679-539E-3B22-BA37-BFD3D751138F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

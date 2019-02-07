@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\VulkanSDK\1.1.73.0\glslang\CMakeFiles\37c7e42d9e5debc8a55731c9d6425c1e\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{FDA80679-539E-3B22-BA37-BFD3D751138F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
