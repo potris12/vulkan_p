@@ -27,6 +27,32 @@ include하는 것으로 시작 위치와 벡터 지정
 /*
 버택스 버퍼는 자동으로 메모리를 할당하지 않음 내가 만들어야해
 */
+
+/*
+staging buffer
+ vertex buffer가 아닌 cpu에서 접근 가능한 버퍼. 좀 cpu에 최적화된 버퍼임. 
+ cpu용인 이 버퍼를 이용해서 데이터를 여기에 넣고 버텍스 버퍼에 복사해서 사용함 
+
+지금 우리가 가지고 있는 버텍스 버퍼는 제대로 작동하지만 우리가 cpU에서 액세스 할 수 있는 메모리 타입으로 읽을 수 있는 메모리는 그래픽 카드 자체에 대한 최적의 메모리 타입이 아닐 수 있음 
+ - 그래픽 카드에 최적의 메모리 형태가 아니래
+
+ 가장 최적의 메모리는 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT 플래그를 갖는 메모리로, 일반적으로 전용 그래픽 카드에 적합하며 CPU에 의해 액세스 할 수 없음
+ 이 장에서 우리는 두 개의 버텍스 버퍼를 만들것
+
+ 정점 어레이로부터 데이터를 업로드 하기 위한 CPU가 액세스 가능한 메모리인 staging buffer이고 다른 하나는 디바이스의 로컬 메모리인 정점 버퍼임
+ 우리는 staging 버퍼로부터 데이터를 실제 정점 버퍼로 이동하는 버퍼 복사 명령을 사용할 수 있음 
+
+  - Transfer queue 전송 큐
+ 버퍼 복사 명령에는 전송 작업을 지원하는 대기열 패밀리가 필요 VK_QUEUE_TRANSFER_BIT 를 사용하여 표시됨
+ 좋은 소식은 VK_QUEUE_GRAPHICS_BIT 또는 VK_QUEUE_COMPUTE_BIT 기능이 있는 대기열 패밀리가 이미 VK_QUEUE_TRANSFER_BIT작업을 암시적으로 지원한다는 것
+  이 경우 구현시 queueFlags에 명시적으로 나열 할 필요가 없음
+ 필요가 없지만 만약 너가 넣고 싶으면
+ QueueFamilyIndices 및 findQueueFamilies를 수정하여 VK_QUEUE_TRANSFER 비트가 있지만 VK_QUEUE_GRAPHICS_BIT가 아닌 대기열 패밀리를 명시적으로 찾음
+ Modify 전송 큐에 대한 핸들을 요청하기 위한 createLogicalDevice
+ 전송대기열에 제출된 명령 버퍼에 대한 두 번째 명령 풀 만들기 
+ 리소스의 sharingMode를 VK_SHARING_MODE_CONCURRENT로 변경하고 그래픽 및 전송 대기열 패밀리를 모두 지정해야함
+ vkCmdCopyBuffer 와 같은 전송 명령을 그래픽 대기열 대신 전송 대기열에 제출함
+ */
 struct Vertex {
 	glm::vec2 pos;
 	glm::vec3 color;
@@ -425,6 +451,36 @@ private:
 
     vkQueuePresentKHR(presentQueue, &presentInfo);
 		*/
+	}
+
+	/*
+	이 함수를 사용하여 다양한 유형의 버퍼를 만들 수 있도록 버퍼 크기, 메모리 속성 및 사용법에 대한 매개변수를 추가해야 함
+	마지막 두 매개변수를 핸들을 쓰는 출력변수
+	*/
+	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+		VkBufferCreateInfo bufferInfo = {};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = size;
+		bufferInfo.usage = usage;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create buffer!");
+		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+		if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+			throw std::runtime_error("failed to allocate buffer memory!");
+		}
+
+		vkBindBufferMemory(device, buffer, bufferMemory, 0);
 	}
 
 	void cleanup() {
@@ -922,49 +978,8 @@ private:
 	}
 
 	void createVertexBuffer() {
-		/*
-		버퍼를 만들기 위해 VKBufferCreateInfo구조체 정보를 준비해야 함
-		*/
-		VkBufferCreateInfo bufferInfo = {};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = sizeof(vertices[0]) * vertices.size();//byte단위로 버퍼 크기를 지정
-		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;//vertexbuffer라는걸 알려줌
-		/*
-		버퍼는 특정 명령큐 패밀리가 소유하거나 여러 시간에 동시에 공유될 수 있음 
-		버퍼는 그래픽 대기열에서만 사용되므로 독점적인 액세스를 유지할 수 있음
-		flags매개변수는 현재 관련이 없는 희소한 버퍼 메모리를 구성하는 데 사용됨 ???
-		*/
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create vertex buffer!");
-		}
-
-		/*
-		아직 실제로 할당된 메모리가 없음 버퍼에 메모리를 할당해야함 
-		1. 메모리 요구사항 쿼리
-		VkMemmoryRequirements 구조체에는 세 개의 필드가 있습
-		size : 필요한 메모리양의 크기, bufferInfo.size와 다를 수 있음
-		alignment : 할당 된 메모리 영역에서 버퍼가 시작되는 바이트 오프셋, bufferInfo.usage와 bufferInfo.flags에 의존
-		memmoryTypeBits : 버퍼에 적합한 메모리 유형의 비트 필드
-		*/
-		vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
-
-		/*
-		올바른 메모리 타입을 결정하는 방법을 알아봄 그래서 VkMemoryAllocateInfo구조체를 채워 메모리를 실제로 할당 할 수있음
-
-		*/
-		VkMemoryAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate vertex buffer memory!");
-		}
-
-		//메모리 할당
-		vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+		createBuffer(bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, vertexBuffer, vertexBufferMemory);
 
 		/*
 		처음 세 매개 변수는 무엇인지 바로 알 수 있음 네 번째 매개변수는 메모리 영역 내의 오프셋임
@@ -985,8 +1000,8 @@ private:
 		두 번쨰 매개변수는 플래그를 지정하는데 사용할 수있지만 지금 API에는 아직 사용할 수 있는 매개변수가 없음
 		마지막 값은 매핑된 메모리에 대한 포인터의 출력을 지정
 		*/
-		vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-		memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+		vkMapMemory(device, vertexBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, vertices.data(), (size_t)bufferSize);
 		
 		/*
 		이제 vkUnmapMemory 를 사용하여 버텍스 데이터를 매핑 된 메모리에 memcpy하고 다시 매핑 해제할 수 있음
