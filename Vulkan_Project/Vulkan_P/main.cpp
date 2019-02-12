@@ -17,7 +17,6 @@
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
-
 /*
 셰이더 코드의 정점 데이터를 프로그램 코드의 배열로 옮김
 벡터와 행렬과 같은 선형 대수학 관련 유형을 제공하는 glm라이브러리를
@@ -107,11 +106,25 @@ struct Vertex {
 	}
 };
 
-//이게 정점 데이터 인풋레이아웃임 
+////이게 정점 데이터 인풋레이아웃임 
+//const std::vector<Vertex> vertices = {
+//	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+//	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
+//	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+//};
+
+/*
+인덱스 데이터
+*/
 const std::vector<Vertex> vertices = {
-	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
-	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	{ { -0.5f, -0.5f },{1.0f, 0.0f, 0.0f} },
+	{ { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },
+	{ { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f } },
+	{ { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f } }
+};
+
+const std::vector<uint16_t> indices = {
+	0,1,2,2,3,0
 };
 
 /*
@@ -220,7 +233,12 @@ private:
 	VkMemoryRequirements memRequirements;
 	VkPhysicalDeviceMemoryProperties memProperties;
 	VkDeviceMemory vertexBufferMemory;
-
+	/*
+	인덱스 버퍼
+	인덱스는 gpu가 액세스 할 수 있도록 VkBUffer에 업로드 해야함
+	*/
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
 
 	void initWindow() {
 		glfwInit();
@@ -263,6 +281,7 @@ private:
 		createFramebuffers();
 		createCommandPool();
 		createVertexBuffer();
+		createIndexBuffer();
 		createCommandBuffers();
 		createSemaphores();
 	}
@@ -492,6 +511,9 @@ private:
 		*/
 		vkDestroyBuffer(device, vertexBuffer, nullptr);
 		vkFreeMemory(device, vertexBufferMemory, nullptr);
+
+		vkDestroyBuffer(device, indexBuffer, nullptr);
+		vkFreeMemory(device, indexBufferMemory, nullptr);
 
 		vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
@@ -1038,6 +1060,31 @@ private:
 		vkFreeMemory(device, stagingBufferMemory, nullptr);
 	}
 
+	void createIndexBuffer() {
+		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+		void* data; 
+		vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, indices.data(), (size_t)bufferSize);
+		vkUnmapMemory(device, stagingBufferMemory);
+
+		createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+		copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+		vkDestroyBuffer(device, stagingBuffer, nullptr);
+		vkFreeMemory(device, stagingBufferMemory, nullptr);
+	/*
+	차이는 두가지 뿐임 
+	bufferSize 는 인덱스 유형의 크기인 uint16_t 또는 uint32_t의 크기에 해당하는 인덱스 수와 같음
+	indexBuffer사용법은 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT대신 USAGE_INDEX_BUFFER_BIT를 쓰면됨 
+	*/
+	}
+
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1183,9 +1230,18 @@ private:
 			VkBuffer vertexBuffers[] = { vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffers[i], 0/*offset ?? */, 1/*정점의 수*/, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-
+			//vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1/*인스턴스 수*/, 0, 0, 0);
+			/*
+	VkCommandBuffer                             commandBuffer,
+    uint32_t                                    indexCount,
+    uint32_t                                    instanceCount,
+    uint32_t                                    firstIndex,
+    int32_t                                     vertexOffset,
+    uint32_t                                    firstInstance
+			*/
 			vkCmdEndRenderPass(commandBuffers[i]);
 
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
