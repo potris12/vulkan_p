@@ -128,9 +128,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Debuger.cpp" />
+    <ClCompile Include="Framework.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debuger.h" />
+    <ClInclude Include="Framework.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="shared.h" />
   </ItemGroup>
   <ItemGroup>

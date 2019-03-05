@@ -16,15 +16,42 @@
     <Filter Include="소스 파일\shared">
       <UniqueIdentifier>{0c8a4951-74f7-4d5c-8d17-b28a5dc83b7d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Framework">
+      <UniqueIdentifier>{0b01b8df-05b7-4e98-bda1-dd9d8176bbf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Debuger">
+      <UniqueIdentifier>{f8379b77-edd3-41c8-a09c-b640cf13383d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\01.Object">
+      <UniqueIdentifier>{2f4c9ad4-310d-4827-98ae-afbf3a4af59f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Framework.cpp">
+      <Filter>소스 파일\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Debuger.cpp">
+      <Filter>소스 파일\Debuger</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>소스 파일\01.Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.h">
       <Filter>소스 파일\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework.h">
+      <Filter>소스 파일\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Debuger.h">
+      <Filter>소스 파일\Debuger</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>소스 파일\01.Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
