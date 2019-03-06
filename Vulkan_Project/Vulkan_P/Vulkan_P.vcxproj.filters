@@ -25,6 +25,15 @@
     <Filter Include="소스 파일\01.Object">
       <UniqueIdentifier>{2f4c9ad4-310d-4827-98ae-afbf3a4af59f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\02.Buffer">
+      <UniqueIdentifier>{fef4a1f8-54df-4f28-b313-b0358fe744e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Mesh">
+      <UniqueIdentifier>{acd81791-d683-4865-9f3a-3326b9b5f957}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\PCH">
+      <UniqueIdentifier>{1f19d951-636b-49f7-99b3-066971d3bc45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -39,6 +48,15 @@
     <ClCompile Include="Object.cpp">
       <Filter>소스 파일\01.Object</Filter>
     </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>소스 파일\02.Buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일\PCH</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.h">
@@ -52,6 +70,15 @@
     </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>소스 파일\01.Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>소스 파일\02.Buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>소스 파일\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>소스 파일\PCH</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

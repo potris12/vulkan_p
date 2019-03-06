@@ -1,10 +1,10 @@
 #include "Framework.h"
 
 int main() {
-	Framework app;
+	auto app = std::make_shared<Framework>();
 
 	try {
-		app.run();
+		app->run();
 	}
 	catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
