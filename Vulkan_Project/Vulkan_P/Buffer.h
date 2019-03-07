@@ -1,5 +1,7 @@
 #pragma once
 #include "stdafx.h"
+
+#include "DeviceManager.h"
 #include "Object.h"
 
 class Framework;

@@ -19,10 +19,10 @@ void Buffer::destroy()
 	auto framework = weak_framework_.lock();
 	if (nullptr == framework) return;
 
-	vkDestroyBuffer(framework->getDevice(), stagingBuffer, nullptr);
-	vkFreeMemory(framework->getDevice(), stagingBufferMemory, nullptr);
-	vkDestroyBuffer(framework->getDevice(), buffer, nullptr);
-	vkFreeMemory(framework->getDevice(), bufferMemory, nullptr);
+	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory, nullptr);
+	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), buffer, nullptr);
+	vkFreeMemory(DEVICE_MANAGER->getDevice(), bufferMemory, nullptr);
 }
 
 void Buffer::map(void* data)
@@ -37,7 +37,7 @@ void Buffer::map(void* data)
 	마지막 값은 매핑된 메모리에 대한 포인터의 출력을 지정
 	*/
 	void* tmp_data;
-	vkMapMemory(framework->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &tmp_data);
+	vkMapMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &tmp_data);
 	memcpy(tmp_data, data, (size_t)bufferSize);
 }
 
@@ -58,7 +58,7 @@ void Buffer::unmap()
 	auto framework = weak_framework_.lock();
 	if (nullptr == framework) return;
 
-	vkUnmapMemory(framework->getDevice(), stagingBufferMemory);
+	vkUnmapMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory);
 }
 
 void Buffer::prepareBuffer()
@@ -77,23 +77,23 @@ void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if (vkCreateBuffer(framework->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+	if (vkCreateBuffer(DEVICE_MANAGER->getDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create buffer!");
 	}
 
 	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(framework->getDevice(), buffer, &memRequirements);
+	vkGetBufferMemoryRequirements(DEVICE_MANAGER->getDevice(), buffer, &memRequirements);
 
 	VkMemoryAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
 	allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-	if (vkAllocateMemory(framework->getDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+	if (vkAllocateMemory(DEVICE_MANAGER->getDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate buffer memory!");
 	}
 
-	vkBindBufferMemory(framework->getDevice(), buffer, bufferMemory, 0);
+	vkBindBufferMemory(DEVICE_MANAGER->getDevice(), buffer, bufferMemory, 0);
 }
 
 void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
@@ -120,7 +120,7 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
-	vkAllocateCommandBuffers(framework->getDevice(), &allocInfo, &commandBuffer);
+	vkAllocateCommandBuffers(DEVICE_MANAGER->getDevice(), &allocInfo, &commandBuffer);
 
 	VkCommandBufferBeginInfo beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;//한 번만 사용하고 복사 작업이 실행을 마칠 떄 까지 함수에서 돌아오기를 기다릴 것 
@@ -141,8 +141,8 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer;
 
-	vkQueueSubmit(framework->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-	vkQueueWaitIdle(framework->getGraphicsQueue());
+	vkQueueSubmit(DEVICE_MANAGER->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(DEVICE_MANAGER->getGraphicsQueue());
 
 	/*
 	draw와 달리 기다리지 않아도 됨 즉시 전송 실해앟려고함
@@ -151,7 +151,7 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	차단 장치를 사용하면 동시에 여러 번 전송을 예약하고 한 번에 하나 씩 실행하는 대신 완료된 모든 전송을 기다릴 수 있음
 	그것은 운전자에게 더 많은 기회를 최적화 시킬 수 있음
 	*/
-	vkFreeCommandBuffers(framework->getDevice(), framework->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
+	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), framework->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
 }
 
 uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -164,7 +164,7 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 	메모리 힙은 VRAM이 부족한 경우 RAM의 전용 VRAM 및 스왑 공간과 같은 별개의 메모리 리소스입니다. 이 힙에는 여러 유형의 메ㅗ밀가 있습
 	지금 우리는 메모리 윻ㅇ에 대해서만 관심을 가질것임 그것이 위치한 힙이 아니라 성능에 영향을 미칠 수 있다고 상상할 수 있음
 	*/
-	vkGetPhysicalDeviceMemoryProperties(framework->getPhysicalDevice()
+	vkGetPhysicalDeviceMemoryProperties(DEVICE_MANAGER->getPhysicalDevice()
 		, &framework->getPhysicalDeviceMemoryProperties());
 
 	/*
@@ -190,7 +190,7 @@ uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 
 
 Buffer::Buffer(std::weak_ptr<Framework> weak_framework, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-: weak_framework_(weak_framework), bufferSize(size), usage_(usage), properties_(properties)
+: weak_framework_(weak_framework), bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
 {
 	auto framework = weak_framework_.lock();
 	if (nullptr == framework) return;

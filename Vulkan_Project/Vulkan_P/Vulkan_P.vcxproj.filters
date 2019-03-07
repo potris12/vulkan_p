@@ -34,6 +34,12 @@
     <Filter Include="소스 파일\PCH">
       <UniqueIdentifier>{1f19d951-636b-49f7-99b3-066971d3bc45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Manager">
+      <UniqueIdentifier>{f17308c3-a493-418f-9625-8fd44df7dbcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Manager\DeviceManager">
+      <UniqueIdentifier>{3bc03b0a-7f36-46b1-88b4-6881acf27171}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -57,6 +63,9 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일\PCH</Filter>
     </ClCompile>
+    <ClCompile Include="DeviceManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.h">
@@ -79,6 +88,12 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>소스 파일\PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>소스 파일\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceManager.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

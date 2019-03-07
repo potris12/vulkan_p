@@ -20,6 +20,7 @@ Framework의 할일
 
  - surface 
 ## glfw 멀티플랫폼 랜더 api glfw의 surface를 제작함
+ = resize는??
 
  - physical device
  = 이 때 선언해 놓은 필요한 기능 extention을 이용해서 모든 extention을 지원하는 물리디바이스를 찾음
@@ -55,7 +56,7 @@ vkGetSwapchainImagesKHR로 스왑체인 images를 얻어옴 2장 이상 이겟지?
  - logical device
  - queue family (graphics, present) 
  - swap chain
-
+ - GLFWwindow
 
 2. graphics pipe line layer
  - image views  =render target view

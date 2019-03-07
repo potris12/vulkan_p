@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Buffer.h"
+#include "DeviceManager.h"
 
+#define DEVICE_MANAGER DeviceManager::GetInstance()
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_LUNARG_standard_validation"
 };
@@ -138,60 +140,24 @@ const std::vector<uint16_t> indices = {
 함
 */
 
-struct QueueFamilyIndices {
-	std::optional<uint32_t> graphicsFamily;
-	std::optional<uint32_t> presentFamily;
-
-	bool isComplete() {
-		return graphicsFamily.has_value() && presentFamily.has_value();
-	}
-};
-
-struct SwapChainSupportDetails {
-	VkSurfaceCapabilitiesKHR capabilities;
-	std::vector<VkSurfaceFormatKHR> formats;
-	std::vector<VkPresentModeKHR> presentModes;
-};
 
 class Framework : public std::enable_shared_from_this<Framework>
 {
 public:
 	void run() {
-		initWindow();
 		initVulkan();
 		mainLoop();
 		cleanup();
 	}
 
-	const VkDevice& getDevice() { return device; }
 	const VkCommandPool& getCommandPool() { return commandPool; }
-	const VkQueue& getGraphicsQueue() { return graphicsQueue; }
-	const VkPhysicalDevice& getPhysicalDevice() { return physicalDevice;}
 	VkPhysicalDeviceMemoryProperties& getPhysicalDeviceMemoryProperties() { return memProperties; }
 private:
-
+	
 	VkPhysicalDeviceMemoryProperties memProperties;
 
 	std::shared_ptr<Buffer> vertex_buffer_ = nullptr;
 	std::shared_ptr<Buffer> index_buffer_ = nullptr;
-
-	GLFWwindow * window;//s
-
-	VkInstance instance;
-	VkDebugUtilsMessengerEXT callback;
-	VkSurfaceKHR surface;//s
-
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	VkDevice device;//s
-
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
-
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
-	std::vector<VkImageView> swapChainImageViews;
 
 	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
@@ -216,9 +182,6 @@ private:
 	/*
 	버택스 버퍼
 	*/
-	
-
-	void initWindow();
 
 	/* glfw의 콜백함수임 불행이도 인수로만 함수 포인터를 받아들이므로 멤버함수를 직접 사용할 수는 없음
 	0이 아닌 거 체크 - 0채크 안하면 창이 최소화 되어 스왑체인 작성이 실패할 수 있음 */
@@ -260,20 +223,6 @@ private:
 	
 	void cleanup();
 
-	void createInstance();
-
-	void setupDebugCallback();
-
-	void createSurface();
-
-	void pickPhysicalDevice();
-
-	void createLogicalDevice();
-
-	void createSwapChain();
-
-	void createImageViews();
-
 	void createRenderPass();
 
 	void createGraphicsPipeline();
@@ -298,14 +247,6 @@ private:
 
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
-	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-
-	bool isDeviceSuitable(VkPhysicalDevice device);
-
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
 	std::vector<const char*> getRequiredExtensions();
 
 	bool checkValidationLayerSupport();
@@ -326,12 +267,6 @@ private:
 		file.close();
 
 		return buffer;
-	}
-
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
-		return VK_FALSE;
 	}
 
 

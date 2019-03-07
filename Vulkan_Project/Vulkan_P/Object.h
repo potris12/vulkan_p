@@ -1,4 +1,6 @@
 #pragma once
+#include "stdafx.h"
+
 class Object
 {
 public:
@@ -8,8 +10,9 @@ public:
 	virtual void destroy() = 0;
 private:
 	__int32 object_id_ = 0;
+	std::string obj_name_;
 public:
-	Object();
+	Object(std::string name);
 	virtual ~Object();
 };
 
