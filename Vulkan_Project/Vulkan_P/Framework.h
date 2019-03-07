@@ -6,7 +6,8 @@ const std::vector<const char*> validationLayers = {
 };
 
 const std::vector<const char*> deviceExtensions = {
-	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+	VK_KHR_STORAGE_BUFFER_STORAGE_CLASS_EXTENSION_NAME
 };
 
 #ifdef NDEBUG

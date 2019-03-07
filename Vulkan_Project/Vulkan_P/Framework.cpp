@@ -49,9 +49,9 @@ void Framework::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapChain();
-	createImageViews();//render target view
 	//device 레이어 변경 거의 안됨 - resize아니면
 
+	createImageViews();//render target view
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
@@ -418,7 +418,7 @@ void Framework::createSwapChain()
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
-	if (indices.graphicsFamily != indices.presentFamily) {
+	if (indices.graphicsFamily != indices.presentFamily) {//present랑 graphics랑 queue가 다르면 처리가 다름
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -474,6 +474,7 @@ void Framework::createImageViews()
 
 void Framework::createRenderPass()
 {
+	//depth, stencil, render target 초기화 
 	VkAttachmentDescription colorAttachment = {};
 	colorAttachment.format = swapChainImageFormat;
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;

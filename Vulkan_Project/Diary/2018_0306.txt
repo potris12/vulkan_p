@@ -1,0 +1,85 @@
+shared_from_this는
+내가 MAKE_shared하나 이상 있어야 함 안그럼 못씀
+
+https://noirstar.tistory.com/12 - 미리 컴파일된 헤더 
+
+이즈음에서 한번 정리 필요함 
+Framework의 할일  
+전체적인 틀 
+
+각각 집합들을 layer단위라고 생각하자 
+1. device layer
+ - instance
+ = app info (app version, name, )
+ = extention (확장 기능)
+## 추가설명 vulkan은 최소한의 디버깅을 지원한다(최고 속도를 위해) 디버깅을 위해선 그래서 이를 확장해줘야함 그게 validation layer임
+
+ - debuger
+## 위의 extention 해준 validation layer의 직접적인 사용 layer
+ = debuging을 위해 message를 듣고 처리한 messenger를 등록함
+
+ - surface 
+## glfw 멀티플랫폼 랜더 api glfw의 surface를 제작함
+
+ - physical device
+ = 이 때 선언해 놓은 필요한 기능 extention을 이용해서 모든 extention을 지원하는 물리디바이스를 찾음
+ = extention은 현재 VK_KHR_SWAPCHAIN_EXTENSION_NAME만 선언되어 있지만 저가말고 더 많은 확장기능들이 있음 
+## 현재 기기의 여러 그래픽 카드중 가장 좋은걸 선택한다. 
+
+- queue 
+ = queue ## queue는 응용 프로그램과 물리적 장치가 통신하는 수단임// 이를 physical device, glfw등에 문의해서 지원하는지 지원하는 queue family를 얻어옴
+ = queue를 얻어올 때 그래픽 패밀리만 얻어왔음 - 이떄 그래픽이면서 present가 가능한 graphics queue를 얻어옴
+ = 정리 지금 가지고 있는 queue 는 graphic/ present 두가지 기능을 가진 녀석임 이거 따로도 가능할듯 
+<
+queue 는 gpu cpu간의 명령을 전달하는 연결 통로이고 비동기적으로 작동함 이건 device에서 가져오는데 여러 device가 지원하는 여러 queue 중에 내가 원하는 기능을 가진 queue를 확인해 저장해 둘 수 있음 
+ => 이 이야기는 여러 queue를 저장해 두었다가 여러 명령을 ㅇ한꺼번에 내릴 수 있다는 이야기임 
+>
+
+ - logical device
+## 위에서 얻은 physical device 를 이용해서 logical device를 제작함
+ = 얻어온 (사용가능한)queue famiy, 이전에 검사한 extention(내가 입력함 )을 이용해 제작
+ = 정리 extention(확장 기능) validation layer(디버깅용) queue family(명령 전달위함), physical device (이전에 선택한 좋은 물리장치)을이용해 제작
+
+ - swap chain
+ = glfw라이브러리로 swap chain을 지원하나 검사 후 진행
+ = glfw라이브러리에서 얻어온 정보를 이용해서 SwapChain정보를 채움 surfaceFormat, PresentMode, Extent, ImageCount
+VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR\ 알파 설정도 있네
+이전 스왑체인 이미지 처리 방법도 있고 
+vkGetSwapchainImagesKHR로 스왑체인 images를 얻어옴 2장 이상 이겟지? 
+
+===== 다음에 할 꺼 device layer 클래스들 정리 
+1. deviceManager 싱글톤으로 제작 
+ - instance
+ - debuger (validation layer)
+ - physical device
+ - logical device
+ - queue family (graphics, present) 
+ - swap chain
+
+
+2. graphics pipe line layer
+ - image views  =render target view
+ - render pass
+ - graphics pipe line
+ - frame buffers 
+ - command pool
+
+3. object layer 
+ - vertex buffer
+ - index buffer
+ - command buffers 
+ - semaphores 
+
+update 
+awake
+start
+
+
+계획 
+1. 사각형 모양을 가진 object 그림 ㅇㅇ 그림
+2. 이걸 Object화 해서 key 입력 받아서 움직이도록 하자 
+ - 이 때 객체는 model, world, projection 변환을 모두 거치도록 제작
+3. instance 시작 
+4. mesh, object분리 
+5. mesh 정리  
+ - vertex buffer, index buffer 가지도록 하기 
