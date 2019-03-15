@@ -31,20 +31,15 @@ public:
 	VkSurfaceKHR& getSurface() { return surface; }
 
 	VkPhysicalDevice& getPhysicalDevice() { return physicalDevice; }
+	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 	const VkDevice& getDevice() { return device; }
 	const VkQueue& getGraphicsQueue() { return graphicsQueue; }
 	const VkQueue& getPresentQueue() { return presentQueue; }
 
-	//swap chain
-	VkSwapchainKHR& getSwapChain() { return swapChain; }
-	VkFormat& getSwapChainImageFormat() { return swapChainImageFormat; }
-	VkExtent2D& getSwapChainExtent() { return swapChainExtent; }
-	std::vector<VkImageView>& getSwapChainImageViews() { return swapChainImageViews; }
-	//tmp public create funcion 
-	void createSwapChain();
-	void createImageViews();
+	const int getWIDTH() { return WIDTH; }
+	const int getHEIGHT() { return HEIGHT;}
 private:
 
 	const std::vector<const char*> validationLayers = {
@@ -93,28 +88,16 @@ private:
 	void pickPhysicalDevice();
 	bool isDeviceSuitable(VkPhysicalDevice device);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
 	//logical device
 	VkDevice device;
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 	void createLogicalDevice();
-	
-	//swap chain
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
-	std::vector<VkImageView> swapChainImageViews;
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR & capabilities);
-
-
 
 public:
 	DeviceManager();
 	virtual ~DeviceManager();
 };
 
+#define DEVICE_MANAGER DeviceManager::GetInstance()

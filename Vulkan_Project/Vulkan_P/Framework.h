@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Buffer.h"
 #include "DeviceManager.h"
+#include "Renderer.h"
 
-#define DEVICE_MANAGER DeviceManager::GetInstance()
 const std::vector<const char*> validationLayers = {
 	"VK_LAYER_LUNARG_standard_validation"
 };

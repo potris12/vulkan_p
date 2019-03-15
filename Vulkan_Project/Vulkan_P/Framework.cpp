@@ -12,7 +12,7 @@ VkExtent2D Framework::chooseSwapExtent()
 void Framework::initVulkan()
 {
 	DEVICE_MANAGER->awake();
-	
+	RENDERER->awake();
 
 	createRenderPass();
 	createGraphicsPipeline();
@@ -37,14 +37,17 @@ void Framework::cleanupSwapChain()
 	vkDestroyPipelineLayout(DEVICE_MANAGER->getDevice(), pipelineLayout, nullptr);
 	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), renderPass, nullptr);
 
+
+	RENDERER->destroy();
+	DEVICE_MANAGER->destroy();
 }
 
 void Framework::recreateSwapChain()
 {
 	vkDeviceWaitIdle(DEVICE_MANAGER->getDevice());
 
-	DEVICE_MANAGER->createSwapChain();
-	DEVICE_MANAGER->createImageViews();
+	RENDERER->createSwapChain();
+	RENDERER->createImageViews();
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
@@ -84,7 +87,7 @@ void Framework::drawFrame()
 	//if (chooseSwapExtent().height == 0 || chooseSwapExtent().width) return;
 
 	uint32_t imageIndex;
-	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), DEVICE_MANAGER->getSwapChain(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), RENDERER->getSwapChain(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	/* 스왑체인이 이미지를 획득하려고 시도할 때 오래된 것으로 판명되면 더 이상 프레젠테이션 할 수 없음 따라서 우리는 즉시 스왑체인을 다시 만들고
 	다음 dawFrame호출을 다시 시도해야 함
@@ -147,7 +150,7 @@ void Framework::drawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	VkSwapchainKHR swapChains[] = { DEVICE_MANAGER->getSwapChain() };
+	VkSwapchainKHR swapChains[] = { RENDERER->getSwapChain() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
 	presentInfo.pImageIndices = &imageIndex;
@@ -220,7 +223,7 @@ void Framework::createRenderPass()
 {
 	//depth, stencil, render target 초기화 
 	VkAttachmentDescription colorAttachment = {};
-	colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
+	colorAttachment.format = RENDERER->getSwapChainImageFormat();
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -327,14 +330,14 @@ void Framework::createGraphicsPipeline()
 	VkViewport viewport = {};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)DEVICE_MANAGER->getSwapChainExtent().width;
-	viewport.height = (float)DEVICE_MANAGER->getSwapChainExtent().height;
+	viewport.width = (float)RENDERER->getSwapChainExtent().width;
+	viewport.height = (float)RENDERER->getSwapChainExtent().height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 
 	VkRect2D scissor = {};
 	scissor.offset = { 0, 0 };
-	scissor.extent = DEVICE_MANAGER->getSwapChainExtent();
+	scissor.extent = RENDERER->getSwapChainExtent();
 
 	VkPipelineViewportStateCreateInfo viewportState = {};
 	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -435,7 +438,7 @@ void Framework::createGraphicsPipeline()
 void Framework::createFramebuffers()
 {
 	//모든 프레임 버퍼를 포함할 ㅅ ㅜ있도록 컨테이너의 크기를 설정하여 시작!
-	auto swapChainImageViews = DEVICE_MANAGER->getSwapChainImageViews();
+	auto swapChainImageViews = RENDERER->getSwapChainImageViews();
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		VkImageView attachments[] = {
@@ -447,8 +450,8 @@ void Framework::createFramebuffers()
 		framebufferInfo.renderPass = renderPass;
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = attachments;
-		framebufferInfo.width = DEVICE_MANAGER->getSwapChainExtent().width;
-		framebufferInfo.height = DEVICE_MANAGER->getSwapChainExtent().height;
+		framebufferInfo.width = RENDERER->getSwapChainExtent().width;
+		framebufferInfo.height = RENDERER->getSwapChainExtent().height;
 		framebufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(DEVICE_MANAGER->getDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
@@ -547,7 +550,7 @@ void Framework::createCommandBuffers()
 		renderPassInfo.framebuffer = swapChainFramebuffers[i];
 		//첫번쨰 매개변수는 랜더 패스 자체와 바인딩 할 어테치먼트, 각 스왑체인 이미지에 대해 color attachment로 지정하는 프레임 버퍼를 만들었
 		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = DEVICE_MANAGER->getSwapChainExtent();
+		renderPassInfo.renderArea.extent = RENDERER->getSwapChainExtent();
 		//다음 두 매개변수는 랜더링 여역의 크기를 정의 렌더링 영역은 셰이더 로드 및 저장이 수행되는 위치를 정의
 		//이 영역 밖의 픽셀에는 정의되지 않은 값이 있음 최상의 성능을 위해 어테치먼트의 크기와 일치해야함
 		VkClearValue clearValue = {};
