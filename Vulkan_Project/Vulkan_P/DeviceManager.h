@@ -40,6 +40,14 @@ public:
 
 	const int getWIDTH() { return WIDTH; }
 	const int getHEIGHT() { return HEIGHT;}
+
+	/*
+	그래픽 카드는 할당 할 수 있는 여러 유형의 메모리를 제공할 ㅅ ㅜ있음
+	각 유형의 메모리는 허용되는 작업 및 성능 특성에 따라 다름
+	버퍼의 요구 사항과 자체 애플리케이션 요구사항을 결합하여 사용할 올바른 유형의 메모리를 찾아야함
+	*/
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
 private:
 
 	const std::vector<const char*> validationLayers = {
@@ -94,6 +102,10 @@ private:
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 	void createLogicalDevice();
+
+	//메모리 요구사항?
+	VkPhysicalDeviceMemoryProperties memProperties;
+
 
 public:
 	DeviceManager();

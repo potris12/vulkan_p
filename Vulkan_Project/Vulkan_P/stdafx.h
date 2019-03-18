@@ -13,3 +13,7 @@
 #include <optional>
 #include <set>
 
+
+//버텍스 버퍼 추가
+#include <glm/glm.hpp>
+#include <array>

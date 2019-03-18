@@ -40,6 +40,9 @@
     <Filter Include="소스 파일\Manager\DeviceManager">
       <UniqueIdentifier>{3bc03b0a-7f36-46b1-88b4-6881acf27171}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Data">
+      <UniqueIdentifier>{5af11df9-5472-47b4-807d-b19c0dbd4143}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -64,6 +67,9 @@
       <Filter>소스 파일\PCH</Filter>
     </ClCompile>
     <ClCompile Include="DeviceManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -94,6 +100,12 @@
     </ClInclude>
     <ClInclude Include="DeviceManager.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>소스 파일\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

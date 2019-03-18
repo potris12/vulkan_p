@@ -16,9 +16,6 @@ void Buffer::update()
 
 void Buffer::destroy()
 {
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
-
 	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), stagingBuffer, nullptr);
 	vkFreeMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory, nullptr);
 	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), buffer, nullptr);
@@ -27,9 +24,6 @@ void Buffer::destroy()
 
 void Buffer::map(void* data)
 {
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
-
 	/*
 	이 함수는 오프셋과 크기로 정의된 지정된 메모리 리소스의 영역에 액세스 할 수 있게함
 	여기서 오프셋과 크기는 각각 0과 bufferInfo.size임 특수값 VK_WHOLE_SIZE를 지정하여 모든 메모리를 매핑 할 수도 있음
@@ -54,10 +48,6 @@ void Buffer::unmap()
 	우리는 매핑된 메모리가 할당 된 메모리의 내용과 할상 일치하는지 확인하는 첫 번째 방법을 찾아갔음
 	명시적 플러싱 보다 성능이 약간 떨어질 수 있음
 	*/
-
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
-
 	vkUnmapMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory);
 }
 
@@ -68,9 +58,6 @@ void Buffer::prepareBuffer()
 
 void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
 {
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
-
 	VkBufferCreateInfo bufferInfo = {};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	bufferInfo.size = size;
@@ -87,7 +74,7 @@ void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	VkMemoryAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+	allocInfo.memoryTypeIndex = DEVICE_MANAGER->findMemoryType(memRequirements.memoryTypeBits, properties);
 
 	if (vkAllocateMemory(DEVICE_MANAGER->getDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate buffer memory!");
@@ -110,13 +97,11 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	stagingBuffer에 대한 전송 소스 플래그와 vertexBUffer에 대한 전송 대상 플래그를 정점 버퍼 사용 플래그와 함께 지저앟여 이를 수행할 예정임을 표시해야함
 
 	*/
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
-
+	
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = framework->getCommandPool();//아직 command pool이 하나라서 이렇게 작성
+	allocInfo.commandPool = RENDERER->getCommandPool();//아직 command pool이 하나라서 이렇게 작성
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -151,49 +136,12 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	차단 장치를 사용하면 동시에 여러 번 전송을 예약하고 한 번에 하나 씩 실행하는 대신 완료된 모든 전송을 기다릴 수 있음
 	그것은 운전자에게 더 많은 기회를 최적화 시킬 수 있음
 	*/
-	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), framework->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
+	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), RENDERER->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
 }
 
-uint32_t Buffer::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
+: bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
 {
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return uint32_t{};
-
-	/*
-	VkPhysicalDeviceMemoryProperties 구조체에는 두 개의 배열 memoryTypes및 memoryHeaps가 있음
-	메모리 힙은 VRAM이 부족한 경우 RAM의 전용 VRAM 및 스왑 공간과 같은 별개의 메모리 리소스입니다. 이 힙에는 여러 유형의 메ㅗ밀가 있습
-	지금 우리는 메모리 윻ㅇ에 대해서만 관심을 가질것임 그것이 위치한 힙이 아니라 성능에 영향을 미칠 수 있다고 상상할 수 있음
-	*/
-	vkGetPhysicalDeviceMemoryProperties(DEVICE_MANAGER->getPhysicalDevice()
-		, &framework->getPhysicalDeviceMemoryProperties());
-
-	/*
-	typeFilter 매개 변수는 적절한 메모리 유형의 비트 필드를 지정하는 데 사용됩니다. 즉 단순히 반복하여 해당 비트가 1로 설정되어 있는지 확인하여 적절한 메모리 유형의 인덱스를 찾을 수 있음
-	정점 데이터를 해당 메모리에 쓸 수 있어야해
-	memoryTypes 배열은 각 메모리 유형의 힙 및 속성을 지정하는 VkMemoryType 구조체로 구성됨
-	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT로 표시되지만
-	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 속성도 사용해야 함
-	이제 이 속성의 지원을 확인하기 위해 루프를 수정할 수 있음
-	*/
-	for (uint32_t i = 0; i < framework->getPhysicalDeviceMemoryProperties().memoryTypeCount; ++i) {
-		if ((typeFilter & (1 << i)) && (framework->getPhysicalDeviceMemoryProperties().memoryTypes[i].propertyFlags & properties) == properties) {
-			return i;
-		}
-	}
-	/*
-	둘 이상의 속성을 가질 수 있으므로 비트 AND의 결과가 단지 0이 아닌 원하는 속성 비트 필드와 같은지 확인해야 함
-	필요로 하는 모든 프로퍼티를 가지는 버퍼에 적절한 메모리 형이 존재하면, 그 인덱스를 돌려주어 그렇지 않은 경우 오류
-	*/
-	throw std::runtime_error("failed to find suitable memory type!");
-
-}
-
-
-Buffer::Buffer(std::weak_ptr<Framework> weak_framework, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-: weak_framework_(weak_framework), bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
-{
-	auto framework = weak_framework_.lock();
-	if (nullptr == framework) return;
 	/*
 	처음 세 매개 변수는 무엇인지 바로 알 수 있음 네 번째 매개변수는 메모리 영역 내의 오프셋임
 	이 메모리는 정점 버퍼에 대해 특별히 할당되기 떄문에 오프셋은 단순히 0임

@@ -319,6 +319,37 @@ SwapChainSupportDetails DeviceManager::querySwapChainSupport(VkPhysicalDevice de
 }
 
 
+uint32_t DeviceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+{
+	/*
+	VkPhysicalDeviceMemoryProperties 구조체에는 두 개의 배열 memoryTypes및 memoryHeaps가 있음
+	메모리 힙은 VRAM이 부족한 경우 RAM의 전용 VRAM 및 스왑 공간과 같은 별개의 메모리 리소스입니다. 이 힙에는 여러 유형의 메ㅗ밀가 있습
+	지금 우리는 메모리 윻ㅇ에 대해서만 관심을 가질것임 그것이 위치한 힙이 아니라 성능에 영향을 미칠 수 있다고 상상할 수 있음
+	*/
+	vkGetPhysicalDeviceMemoryProperties(physicalDevice
+		, &memProperties);
+
+	/*
+	typeFilter 매개 변수는 적절한 메모리 유형의 비트 필드를 지정하는 데 사용됩니다. 즉 단순히 반복하여 해당 비트가 1로 설정되어 있는지 확인하여 적절한 메모리 유형의 인덱스를 찾을 수 있음
+	정점 데이터를 해당 메모리에 쓸 수 있어야해
+	memoryTypes 배열은 각 메모리 유형의 힙 및 속성을 지정하는 VkMemoryType 구조체로 구성됨
+	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT로 표시되지만
+	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 속성도 사용해야 함
+	이제 이 속성의 지원을 확인하기 위해 루프를 수정할 수 있음
+	*/
+	for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
+		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+			return i;
+		}
+	}
+	/*
+	둘 이상의 속성을 가질 수 있으므로 비트 AND의 결과가 단지 0이 아닌 원하는 속성 비트 필드와 같은지 확인해야 함
+	필요로 하는 모든 프로퍼티를 가지는 버퍼에 적절한 메모리 형이 존재하면, 그 인덱스를 돌려주어 그렇지 않은 경우 오류
+	*/
+	throw std::runtime_error("failed to find suitable memory type!");
+
+}
+
 DeviceManager::DeviceManager() : CSingleTonBase<DeviceManager>("device manager")
 {
 }

@@ -1,0 +1,43 @@
+
+void Framework::cleanupSwapChain()
+{
+	for (size_t i = 0; i < swapChainFramebuffers.size(); i++) {
+		vkDestroyFramebuffer(device, swapChainFramebuffers[i], nullptr);
+	}
+
+	vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+	vkDestroyPipeline(device, graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+	vkDestroyRenderPass(device, renderPass, nullptr);
+
+	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+		vkDestroyImageView(device, swapChainImageViews[i], nullptr);
+	}
+
+	vkDestroySwapchainKHR(device, swapChain, nullptr);
+}
+
+void Framework::recreateSwapChain()
+{
+	vkDeviceWaitIdle(device);
+
+	createSwapChain();
+	createImageViews();
+	createRenderPass();
+	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandBuffers();
+	/* vkDeviceWaitIdle을 호출하기 떄문에 사용중인 리소스에 접근하지 않음
+	목표 스왑체인 자체를 다시 만드는것
+	이미지 뷰는 스왑체인 이미지를 직접 기반으로 하므로 다시 만들어야함
+	렌더 패스는 스왑체인 이미지 형식에 따라 다르기 때문에 다시 작성해야함
+	스왑체인 이미지 형식은 창 크기 조정과 같은 작업 중에 변경되는 경우는 거의 없지만 여전히 처리해야함
+	뷰포트 및 시저 크기는 그래픽 파이프라인 생성 중 지정되므로 파이프라인도 다시 작성
+	뷰포트와 시저 사각형에 동적 상태를 사용하여 이를 피할 수 있음
+	마지막으로 프레임 버퍼와 명령 버퍼는 스왑체인 이미지에 직접 의존합
+
+	이러한 객체들을 다시 만들기 전에 기존의 리소스를 정리해야 하는데 이를 하려며 cleanup코드중 일부를 recreateS
+	*/
+}
+
+아아 아아아
