@@ -44,6 +44,8 @@ void DeviceManager::destroy()
 	}
 	vkDestroyInstance(instance, nullptr);
 	glfwDestroyWindow(window);
+
+	glfwTerminate();
 }
 
 void DeviceManager::createInstance()

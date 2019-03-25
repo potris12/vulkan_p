@@ -41,3 +41,20 @@ void Framework::recreateSwapChain()
 }
 
 아아 아아아
+
+
+frame work ! main 함수 !
+void run() {
+		awake();
+		update();
+		destroy();
+	}
+끝!
+
+이제 해야하는거 object 제작, mesh 제작 
+line그리기 
+
+번외 
+ - DEVICE_MANAGER
+ - RENDERER 
+외부 라이브러리로 빼보기

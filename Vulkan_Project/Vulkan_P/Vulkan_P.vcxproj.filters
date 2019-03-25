@@ -43,6 +43,9 @@
     <Filter Include="소스 파일\Data">
       <UniqueIdentifier>{5af11df9-5472-47b4-807d-b19c0dbd4143}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Manager\Renderer">
+      <UniqueIdentifier>{0a50bd63-b12b-4e35-b8ef-92d059007e27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,11 +69,11 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일\PCH</Filter>
     </ClCompile>
-    <ClCompile Include="DeviceManager.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Manager\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="DeviceManager.cpp">
+      <Filter>소스 파일\Manager\DeviceManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,14 +101,14 @@
     <ClInclude Include="Singleton.h">
       <Filter>소스 파일\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="DeviceManager.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>소스 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>소스 파일\Manager\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="DeviceManager.h">
+      <Filter>소스 파일\Manager\DeviceManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

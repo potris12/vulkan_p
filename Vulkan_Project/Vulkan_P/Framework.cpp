@@ -6,7 +6,7 @@ void Framework::awake()
 	RENDERER->awake();
 }
 
-void Framework::mainLoop()
+void Framework::update()
 {
 	while (!glfwWindowShouldClose(DEVICE_MANAGER->getWindow())) {
 		glfwPollEvents();
@@ -23,10 +23,8 @@ void Framework::mainLoop()
 	이 기능들을 동기화를 수행하는 매우 기초적인 방법으로 사용될 수 있음 */
 }
 
-void Framework::cleanup()
+void Framework::destroy()
 {	
 	RENDERER->destroy();
 	DEVICE_MANAGER->destroy();
-
-	glfwTerminate();
 }

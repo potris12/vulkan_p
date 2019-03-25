@@ -7,14 +7,17 @@ class Framework : public std::enable_shared_from_this<Framework>
 public:
 	void run() {
 		awake();
-		mainLoop();
-		cleanup();
+		update();
+		destroy();
 	}
 
 private:
+	// ¹úÄ­ ÃÊ±âÈ­
 	void awake();
-	void mainLoop();
-	void cleanup();
+	// update & draw
+	void update();
+	// ¹úÄ­ ¼Ò¸ê
+	void destroy();
 	
 public:
 	
