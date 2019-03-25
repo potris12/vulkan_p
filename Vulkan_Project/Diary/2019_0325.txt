@@ -1,0 +1,25 @@
+
+이제 해야하는거 object(uniform buffer) 제작, mesh 제작 + shader + graphics pipe line 
+line그리기 
+
+번외 
+ - DEVICE_MANAGER
+ - RENDERER 
+외부 라이브러리로 빼보기
+
+
+
+
+==============================================
+1. mesh 제작하기 
+
+vertex가 있고 이녀석이 버퍼정보를 만듬 
+이건 좀 그럼 mesh에 static 함수로 데이터를 제작할 수 있돌고 하는게 좋아보임? 
+vertex객체를 만들어야 하나 /  객체 제작 x mesh에서 정점 정보를 벡터로 가지고 이걸 버퍼로 만드는 함수, 버퍼들을 가지고 있고 
+이걸 set하는 것이 맞음 
+
+
+mesh의 update는 command buffer가 필요함 근데 이건 기록하는 중에 mesh를 만들어서 그 안에 데이터를 넣고있음? 근데 
+이걸 말이야 jpdaate 할 떄 어떻게 정리하지 
+begin - end 이 사이에 mesh랑 buffer들을 set하도록 만들어야 하는데 어떻게 하지 
+command buffer를 미리 만들고 그걸 update에서 비긴 render end render사이에 저걸 넣어야 하는데 되는건가 ㄴ

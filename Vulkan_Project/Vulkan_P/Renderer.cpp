@@ -11,10 +11,70 @@ void Renderer::awake()
 	createFramebuffers();
 	createCommandPool();
 
-	createVertexBuffer();
-	createIndexBuffer();
 	createCommandBuffers();
+	//create mesh
+	rect_mesh_ = std::make_shared<Mesh>("rect_mesh");
+	rect_mesh_->awake();
+
 	createSemaphores();
+}
+
+void Renderer::update()
+{
+
+	//명령 버퍼 기록 시작
+	/* 드로잉은 vkCmdBeginRenderPass로 렌더 패스를 시작하여 시작 랜더패스는 VKRenderPassBeginInfo구조체의 일부 매개변수를 사용하여 구성
+	*/
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex_];
+	//첫번쨰 매개변수는 랜더 패스 자체와 바인딩 할 어테치먼트, 각 스왑체인 이미지에 대해 color attachment로 지정하는 프레임 버퍼를 만들었
+	renderPassInfo.renderArea.offset = { 0,0 };
+	renderPassInfo.renderArea.extent = swapChainExtent;
+	//다음 두 매개변수는 랜더링 여역의 크기를 정의 렌더링 영역은 셰이더 로드 및 저장이 수행되는 위치를 정의
+	//이 영역 밖의 픽셀에는 정의되지 않은 값이 있음 최상의 성능을 위해 어테치먼트의 크기와 일치해야함
+	VkClearValue clearValue = {};
+	clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearValue;
+
+	VkCommandBufferBeginInfo commandBufferInfo = {};
+	commandBufferInfo.pNext = nullptr;
+	commandBufferInfo.pInheritanceInfo = nullptr;
+	commandBufferInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+	commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	vkBeginCommandBuffer(commandBuffers[imageIndex_], &commandBufferInfo);
+
+	vkCmdBeginRenderPass(commandBuffers[imageIndex_], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	/* 이제 렌더링 패스를 시작할 수 있음 명령을 기록하는 모든 기능은 vkCmd접두어로 알아 볼 수 있음
+	모둔 void를 리턴함 우리가 기록을 마칠 떄 까지 오류 처리가 없을 것임
+	모든 명령의 첫번째 매개변수는 항상 명령을 기록하는 명령 버퍼임
+	두번째 매개변수는 방금 제공한 렌더링 패스의 세부 정보를 지정
+	마지막 매개변수는 랜더 패스 내에서 드로잉 명령을 제공하는 방법을 제어
+	VK_SUBPASS_CONTENTS_INLINE - 렌더링 패스 명령은 기본 명령 버퍼 자체에 포함되며 보조 명령 버퍼는 실행되지 않음
+	VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS  - 렌더 패스 명령은 보조 명령 버퍼에서 실행
+	*/
+	//basic drawing commands
+	vkCmdBindPipeline(commandBuffers[imageIndex_], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+	//mesh update & draw
+	rect_mesh_->update();
+	rect_mesh_->draw();
+
+	/*
+	VkCommandBuffer                             commandBuffer,
+	uint32_t                                    indexCount,
+	uint32_t                                    instanceCount,
+	uint32_t                                    firstIndex,
+	int32_t                                     vertexOffset,
+	uint32_t                                    firstInstance
+	*/
+	vkCmdEndRenderPass(commandBuffers[imageIndex_]);
+
+	if (vkEndCommandBuffer(commandBuffers[imageIndex_]) != VK_SUCCESS) {
+		throw std::runtime_error("failed to record command buffer!");
+	}
 }
 
 void Renderer::destroy()
@@ -22,12 +82,7 @@ void Renderer::destroy()
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), renderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), imageAvailableSemaphore, nullptr);
 
-	/*
-	버퍼는 프로그램 종료까지 명령 렌더링에 사용할 수 있어야 하며 스왑체인에 의존하지 않으므로
-	cleanup함수에서 호출하여 제거
-	*/
-	vertex_buffer_->destroy();
-	index_buffer_->destroy();
+	rect_mesh_->destroy();
 
 	cleanupSwapChain();
 
@@ -39,8 +94,7 @@ void Renderer::drawFrame()
 {
 	//if (chooseSwapExtent().height == 0 || chooseSwapExtent().width) return;
 
-	uint32_t imageIndex;
-	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex_);
 
 	/* 스왑체인이 이미지를 획득하려고 시도할 때 오래된 것으로 판명되면 더 이상 프레젠테이션 할 수 없음 따라서 우리는 즉시 스왑체인을 다시 만들고
 	다음 dawFrame호출을 다시 시도해야 함
@@ -52,6 +106,11 @@ void Renderer::drawFrame()
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 		throw std::runtime_error("failed to acquire swap chain image!");
 	}
+
+	//command buffer update 
+	update();
+
+
 	/*
 	vkAcquireNextImageKHR 의 처음 두 매개변수는 이미지를 가져오려는 논리 장치와 스왑체인임 세번째 매개변수는 이미지가 사용가능하게 되는 시간을 나노초로 지정
 	다음 두 매개 변수는 프레젠테이션 엔진이 이미지 사용을 마치면 신호를 보낼 동기화 개체를 지정
@@ -78,7 +137,7 @@ void Renderer::drawFrame()
 	다음 두
 	*/
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
+	submitInfo.pCommandBuffers = &commandBuffers[imageIndex_];
 	/*
 	다음 두 매개변수는 실행을 위해 실제로 제출할 명령 버퍼를 지정
 	앞서 언급했듯이 방금 가져온 스왑체인이미지를 색상 첨부로 바인딩하는 명령버퍼를 제출
@@ -106,7 +165,7 @@ void Renderer::drawFrame()
 	VkSwapchainKHR swapChains[] = { swapChain };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &imageIndex;
+	presentInfo.pImageIndices = &imageIndex_;
 	//이미지를 표시할 스왑 체인과 각 스왑 체인의 이미지 인덱스를 지정 이건 거의 하나임
 
 	presentInfo.pResults = nullptr;
@@ -547,7 +606,7 @@ void Renderer::createCommandPool()
 	VkCommandPoolCreateInfo poolInfo = {};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-	poolInfo.flags = 0;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 	/* 명령 버퍼는 우리가 검색한 그래픽 및 프리젠테이션 대기열과 같은 장치 대기열 중 하나에 이를 제출하여 실행됨
 	각 명령 풀은 단일 유형의 큐에 제출된 명령 버퍼만 할당 할 수 있음
 	우리는 그림 그리기 명령을 기록할 것이기 때문에 그래픽대기열 패밀리를 선택해야함
@@ -581,75 +640,9 @@ void Renderer::createCommandBuffers()
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
+	//이부분이 command buffer만드는 부분임 
 	if (vkAllocateCommandBuffers(DEVICE_MANAGER->getDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
-	}
-
-	for (auto i = 0; i < commandBuffers.size(); ++i) {
-		//명령 버퍼 기록 시작
-		/* 드로잉은 vkCmdBeginRenderPass로 렌더 패스를 시작하여 시작 랜더패스는 VKRenderPassBeginInfo구조체의 일부 매개변수를 사용하여 구성
-		*/
-		VkRenderPassBeginInfo renderPassInfo = {};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = renderPass;
-		renderPassInfo.framebuffer = swapChainFramebuffers[i];
-		//첫번쨰 매개변수는 랜더 패스 자체와 바인딩 할 어테치먼트, 각 스왑체인 이미지에 대해 color attachment로 지정하는 프레임 버퍼를 만들었
-		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = swapChainExtent;
-		//다음 두 매개변수는 랜더링 여역의 크기를 정의 렌더링 영역은 셰이더 로드 및 저장이 수행되는 위치를 정의
-		//이 영역 밖의 픽셀에는 정의되지 않은 값이 있음 최상의 성능을 위해 어테치먼트의 크기와 일치해야함
-		VkClearValue clearValue = {};
-		clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
-		renderPassInfo.clearValueCount = 1;
-		renderPassInfo.pClearValues = &clearValue;
-
-		VkCommandBufferBeginInfo commandBufferInfo = {};
-		commandBufferInfo.pNext = nullptr;
-		commandBufferInfo.pInheritanceInfo = nullptr;
-		commandBufferInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-		commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		vkBeginCommandBuffer(commandBuffers[i], &commandBufferInfo);
-
-		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		/* 이제 렌더링 패스를 시작할 수 있음 명령을 기록하는 모든 기능은 vkCmd접두어로 알아 볼 수 있음
-		모둔 void를 리턴함 우리가 기록을 마칠 떄 까지 오류 처리가 없을 것임
-		모든 명령의 첫번째 매개변수는 항상 명령을 기록하는 명령 버퍼임
-		두번째 매개변수는 방금 제공한 렌더링 패스의 세부 정보를 지정
-		마지막 매개변수는 랜더 패스 내에서 드로잉 명령을 제공하는 방법을 제어
-		VK_SUBPASS_CONTENTS_INLINE - 렌더링 패스 명령은 기본 명령 버퍼 자체에 포함되며 보조 명령 버퍼는 실행되지 않음
-		VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS  - 렌더 패스 명령은 보조 명령 버퍼에서 실행
-		*/
-		//basic drawing commands
-		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
-		/*vkCmdBindVertexBuffers
-		vkCmdBindVertexBuffers 함수는 이전 장에서 설정 한 것과 같이 바인딩에 정점 버퍼를 바인딩하는 데 사용
-		커멘드 버퍼 외의 최초의 2개의 파라미터는, 정점 버퍼를 지정하는 오프셋 및 바이너리의 수를 지정함
-		마지막 두 매개 변수는 바인딩 할 정점 버퍼의 배열을 지정하고 정점 데이터를 읽는 바이트 오프셋을 지정함
-		또한 vkCmdDraw에 대한 호출을 변경하여 하드 코드 된 숫자 3과 반대로 버퍼의 정점 수를 전달해야함
-		*/
-		auto vertexBuffer = vertex_buffer_->getBuffer();
-		auto indexBuffer = index_buffer_->getBuffer();
-		VkBuffer vertexBuffers[] = { vertexBuffer };
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffers[i], 0/*offset ?? */, 1/*정점의 수*/, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-		//vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1/*인스턴스 수*/, 0, 0, 0);
-		/*
-		VkCommandBuffer                             commandBuffer,
-		uint32_t                                    indexCount,
-		uint32_t                                    instanceCount,
-		uint32_t                                    firstIndex,
-		int32_t                                     vertexOffset,
-		uint32_t                                    firstInstance
-		*/
-		vkCmdEndRenderPass(commandBuffers[i]);
-
-		if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
-			throw std::runtime_error("failed to record command buffer!");
-		}
 	}
 }
 
@@ -701,32 +694,6 @@ void Renderer::recreateSwapChain()
 
 	이러한 객체들을 다시 만들기 전에 기존의 리소스를 정리해야 하는데 이를 하려며 cleanup코드중 일부를 recreateS
 	*/
-}
-
-void Renderer::createVertexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	vertex_buffer_->map((void*)vertices.data());
-	vertex_buffer_->unmap();
-	vertex_buffer_->prepareBuffer();
-
-}
-
-void Renderer::createIndexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	index_buffer_->map((void*)indices.data());
-	index_buffer_->unmap();
-	index_buffer_->prepareBuffer();
-
 }
 
 Renderer::Renderer() : CSingleTonBase<Renderer>("Renderer")

@@ -2,42 +2,16 @@
 #include "stdafx.h"
 #include "Singleton.h"
 
+#include "Mesh.h"
 #include "Buffer.h"
 #include "Vertex.h"
-
-////이게 정점 데이터 인풋레이아웃임 
-//const std::vector<Vertex> vertices = {
-//	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-//	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
-//	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-//};
-
-/*
-인덱스 데이터
-*/
-const std::vector<Vertex> vertices = {
-	{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f } },
-{ { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f } },
-{ { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f } },
-{ { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f } }
-};
-
-const std::vector<uint16_t> indices = {
-	0,1,2,2,3,0
-};
-
-/*
-버택스 입력을 처리하는 방법을 설명하는 두 번째 구조는 VkVertexInputAttributeDescription임
-함
-*/
-
 
 class Renderer : public CSingleTonBase<Renderer>
 {
 public:
 	void awake();
 	void start() {};
-	void update() {};
+	void update();
 	void destroy();
 
 
@@ -118,7 +92,11 @@ public:
 	//Draw
 	void drawFrame();
 
+	VkCommandBuffer& getCurCommandBuffer() { return commandBuffers[imageIndex_]; }
 private:
+	//cur swap chain image index
+	uint32_t imageIndex_ = 0;
+
 	//swap chain
 	void createSwapChain();
 	void createImageViews();
@@ -146,12 +124,6 @@ private:
 	VkCommandPool commandPool;
 	void createCommandPool();
 
-
-	std::shared_ptr<Buffer> vertex_buffer_ = nullptr;
-	std::shared_ptr<Buffer> index_buffer_ = nullptr;
-	void createVertexBuffer();
-	void createIndexBuffer();
-
 	/* 이제 명령 버퍼를 할당하고 명령 버퍼를 기록할 수 있음 드로잉 명령 중 하나는 올바른 VkFramebuffer를 바인딩 하기 떄문에 실제로 스왑체인의 모든 이미지에 대한 며열ㅇ 버퍼를 다시 기록 해야함
 	이를 위해 VkCommandBuffer객체 목록을 클래스 멤버로 만들어야함
 	명령 버퍼는 명령 풀이 삭제되면 자동으로 해제되므로 명시적인 정리가 필요하지 않음*/
@@ -163,6 +135,8 @@ private:
 	VkSemaphore renderFinishedSemaphore;
 	void createSemaphores();
 
+	//mesh info
+	std::shared_ptr<Mesh> rect_mesh_ = nullptr;
 public:
 	Renderer();
 	~Renderer();
