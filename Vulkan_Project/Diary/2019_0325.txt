@@ -23,3 +23,150 @@ mesh의 update는 command buffer가 필요함 근데 이건 기록하는 중에 mesh를 만들어서 
 이걸 말이야 jpdaate 할 떄 어떻게 정리하지 
 begin - end 이 사이에 mesh랑 buffer들을 set하도록 만들어야 하는데 어떻게 하지 
 command buffer를 미리 만들고 그걸 update에서 비긴 render end render사이에 저걸 넣어야 하는데 되는건가 ㄴ
+ -> command buffer가 그 뭐냐 멀티 버퍼링에 따라서 랜더 버퍼의 수 만큼 제작되어 있음 
+이걸 제작부와 갱신부 2가ㅈ로 나누고 
+갱신부에서 mesh안의 buffer를 update, draw ? set 하는 방식으로 가도록 함 
+
+====================================================
+객체 제작하기 앞서 
+공부공부 변환 복습 
+opengl은 열우선 행렬이어서 
+
+** 행렬 x 버텍스 (이 순서로 곱해야 합니다!!) = 변형된_버텍스
+
+vulkan
+glm::mat4 myMatrix;
+glm::vec4 myVector;
+
+glm::vec4 transformedVector = myMatrix * myVector; 
+
+GLSL
+mat4 myMatrix;
+vec4 myVector;
+vec4 transformedVector = myMatrix*myVector
+
+** 기억하자 기존의 directX matrix에서 전부 전치행렬을 시키면 opengl의 mtx다 
+
+** 평행이동 코드
+
+glm
+#include <glm/gtx/transform.hpp> //after<glm/glm.hpp>
+
+glm::mat4 myMatrix = glm::translate(glm::mat4(), glm::vec3(10.f, 0.f, 0.f));
+glm::vec4 myVector(10.f, 10.f, 10.f, 0.f);
+glm::vec4 transformedVector = myMatrix * myVector 
+
+GLSL
+vec4 transformedVector = myMatrix & myVector;
+
+** 단위 행렬
+glm
+
+glm::mat4 myIdentityMatrix = glm::mat4(1.0f);
+
+** 스케일링 mtx
+glm::mat4 myScalingMatrix = glm::scale(2.0f, 2.0f, 2.0f);
+
+** 회전 mtx
+glm::vec3 myRotationAxis(x, y, z);
+glm::rotate(angle_in_degrees, myRotationAxis);
+
+** 변환 순서 
+TransformedVector = TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector; 
+<<스케일링 -> 회전 -> 이동 이거시 규칙>>
+
+** MVP mtx
+
+** view mtx (camera mtx)
+glm::mat4 ViewMatrix = glm::translate(glm::mat4(), glm::vec3(-3.0f, 0.0f, 0.0f); 
+
+** glm lookAt 함수
+glm::mat4 CameraMatrix = glm::lookAt(cameraPosition, cameraTarget, upVector);
+
+** perspective mtx
+glm::at4 projectionMatrix = glm::perspective(
+	glm::radian(Fov), // 화각
+	4.0f/3.0f, //화면비
+	0.1f, // near 
+	100.f // far
+)
+
+** 변환 예시.. 자꾸 같ㅇ느소리하네 
+glm::mat4 MVPMatrix = projection * view * model; 
+glsl 
+ransformed_vertex = MVP * invertex;
+
+
+
+** 전역변수 !!!! <상수 버퍼>
+descriptor layout and buffer
+
+Vulkan에서 Resource Descriptor를 사용하면 해결된데 
+Descriptor는 셰이더가 버퍼 및 이미지와 같은 리소스에 자유롭게 액세스 할 수 있는 방법임 
+우리는 변환 행렬을 포함하고 버텍스 쉐이더가 디스크립터를 통해 액세스 할 수 있도록 버퍼를 설정하려고 함 
+설명자의 사용은 세 부분으로 구성됨 
+1. 파이프 라인 생성 중에 디스크립터 레이아웃 지정
+2. 디스크립터 풀에서 디스크립터 세트 할당 
+3. 렌더링 시에 디스크립터 세트를 바인드 
+디스크립터 레이아웃은 렌더링 패스가 액세스 할 첨부 유형을 지정하는 것처럼 파이프라인에서 액세스 할 리소스 유형을 지정함 
+디스크립터 세트는 프레임 버퍼가 패스 첨부물을 렌더링 하기 위해 바인딩 할 실제 이미지 뷰를 지정하는 것처럼 디스크립터에 바인딩 될 실제 버퍼 또는 이미지 리소스를 지정 
+그 후 디스크립터 세트는 정점 버퍼 및 프레임 버퍼와 같이 드로잉 ㅋ멘드에 바인드됨 
+많은 유형의 디스크립터가 있지만 UBO uniform buffer objects 를 사용할 것 
+
+다음 구조체가 있다고 가정하자 
+struct UniformBufferObject{
+ glm::mat4 model;
+ glm::mat4 view;
+ glm::mat4 proj;
+};
+그런다음 VkBuffer에 데이터를 복사하고 다음과 같이 정점 쉐이더의 유니폼 버퍼 객체 설명자를 통해 액세스 할 수 있음 
+layout(binding = 0) uniform UniformBufferObject{
+ mat4 model;
+ mat4 view;
+ mat4 proj;
+} ubo;
+
+void main(){
+ gl_Position = ubo.proj* ubo.view * ubo.model * vec4(inPositino, 0.0, 1.0);
+ fragColor = inColor;
+}
+
+매 프레임 모델, 뷰, 투영행렬을 업데이트 할 것음 
+
+** Vertex Shader 
+#version 450
+#extension GL_ARB_separate_shader_objects : enable
+
+<<layout(bindin = 0 -- 0번 슬롯에 바인딩된 상수버퍼, uniform buffer object>>
+<<layout(location = 0) in .. input layout 에 지정된 vertex 버퍼 0번 슬롯에 바인딩된 정보>>
+<<layout(location = 1) in .. input layout 에 지정된 vertex 버퍼 1번 슬롯에 바인딩된 정보>>
+<<layout(location = 0) out .. >> shader의 output중 1번 원소의 자료구조 
+<<out ...>> shader의 output의 구조체
+
+uniform, in/ out 선언의 순서는 중요하지 않음 바인딩 지시문은 속성에 대한 위치 지시문과 비슷함
+우리는 디스크립터 레이아웃에서 이 바인딩을 참조할 것임 
+gl_Position이 있는 행은 변환을 사용하여 클립 좌표의 최종 위치를 계산하도옭 변경됨 2D삼각형과 달리 클립 좌표의 마지막 구성요소는 1이 아니므로 화면의 최종 표준화 장치 좌표로 변환 할 때 나눗셈이 발생함
+이것은 원근 투영으로 투시 투영에 사용되며 더 가까운 물체를 더 멀리 보이는 물체보다 크게 보이게 하는 데 필수적임
+
+** Descriptor set layout ( vulkan )
+다음 단계는 c++측에서 UBO를 정의하고 Vulkan에게 버텍스 쉐이더에서 이 설명자를 알리는 것임
+glm 에서 데이터 유형ㅇ르 사용하여 쉐이더의 정의와 정확하게 일치시킬 수 있음 
+행렬의 데이터는 쉐이더가 예상하는 방식과 이진 호환이 가능하므로 나중에 UniformBufferObject를 VkBuffer에 memcpy할 수 있음
+우리는 파이프라인 생성을 위해 쉐이더에서 사용된 모든 설명자 바인딩에 대한 세부 정보를 제공해야 함 
+모든 정점 특성과 위치 인덱스에 대해 수행해야 했던것처럼..
+우리는 createDescriptorSetLayout이라는 이 모든 정보를 정의하는 새로운 함수를 설정할 것임
+파이프라인이 필요하기 때문에 파이프 라인 생성 전에 바로 호출해야함 
+
+*** 중요 - constant buffer는 어느 쉐이더에서 사용할지 flag로 설정해 줘야함 
+상수버퍼랑 index buffer, vertex buffer는 역시 따로 분리해야해 - 이건 뭐 flag를 밖에서 따로 주면 되고 map unmap 함수 이미 만들었고 밖에서 데이터만 잘 주면 따로 분리할 필요가 없겠는데 ?
+
+** uniform buffer update 
+ - uniform buffer제작할 때 만든 buffer_memory를 map, unmap 해서 데이터를 갱신해줌 따로 command buffer에 버퍼 자체를 set 해줄 필요는 없음 
+
+이제 Object 만들고 Shader를 만들어야함 
+1. Object 만들기 전에 MVP 행렬 쉐이더에 올려서 변환 해보고 
+2. ubo만들어서 command buffer에 set해봐야함 
+3. oBject는 work mtx 가지게 만들고 
+4. camera는 view, projectino mtx를 가지게 함 
+5. oBject랑 camera 이용해서 객체 드려본 후에 
+shader 정리 ㄱㄱ
