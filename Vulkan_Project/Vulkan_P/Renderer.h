@@ -6,6 +6,13 @@
 #include "Buffer.h"
 #include "Vertex.h"
 
+struct UniformBufferObject
+{
+	glm::mat4 world;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
+
 class Renderer : public CSingleTonBase<Renderer>
 {
 public:
@@ -89,6 +96,14 @@ public:
 	이러한 세마포어 객체를 저장할 두개의 클래스 멤버를 만듬
 
 	*/
+
+	//uniform buffer
+	void createDescriptorSetLayout();
+	void createUniformBuffer();
+	void createDescriptorPool();
+	void createDescriptorSet();
+
+	void updateUniformBuffer();
 	//Draw
 	void drawFrame();
 
@@ -137,6 +152,16 @@ private:
 
 	//mesh info
 	std::shared_ptr<Mesh> rect_mesh_ = nullptr;
+
+	//uniform buffer
+	VkBuffer uniformBuffer;
+	VkDeviceMemory uniformBufferMemory;
+
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSet descriptorSet;
+
+	//std::shared_ptr<Buffer> uniform_buffer_ = nullptr;
 public:
 	Renderer();
 	~Renderer();

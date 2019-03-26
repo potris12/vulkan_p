@@ -1,0 +1,9 @@
+validation layer: You must call vkBeginCommandBuffer() before this call to vkCmdBindDescriptorSets(). The spec valid usage text states 'commandBuffer must be in the recording state' (https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#VUID-vkCmdBindDescriptorSets-commandBuffer-recording)
+validation layer: VkPipeline 0x12 uses set #0 but that set is not bound
+
+
+layout을 set하는.. vkCmdBindDescriptorSets 이 함수는 vkBeginCommandBuffer 이후에 set 할 수 있음 
+mesh정보 같은건 vkBeginCommandBuffer이전에 set해놓고 상수버퍼 같은 애들은 BeinCommandBuffer이후에 셋해야 하는것이 ㅂUpdater와 Renderer의 분리가 필요해 보이는 각인가 
+
+
+https://vulkan-tutorial.com/Texture_mapping - 이제 여기 보면서 공부해야해 영어로! 예잉!
