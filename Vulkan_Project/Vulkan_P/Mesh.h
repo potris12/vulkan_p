@@ -12,6 +12,7 @@ public:
 	void update() override;
 	void destroy() override;
 
+	void registeConstantData(VkCommandBuffer& commandBuffer);
 	void draw();
 private:
 	////이게 정점 데이터 인풋레이아웃임 

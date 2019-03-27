@@ -5,5 +5,29 @@ validation layer: VkPipeline 0x12 uses set #0 but that set is not bound
 layout을 set하는.. vkCmdBindDescriptorSets 이 함수는 vkBeginCommandBuffer 이후에 set 할 수 있음 
 mesh정보 같은건 vkBeginCommandBuffer이전에 set해놓고 상수버퍼 같은 애들은 BeinCommandBuffer이후에 셋해야 하는것이 ㅂUpdater와 Renderer의 분리가 필요해 보이는 각인가 
 
+object와 mesh 정리 필요 
+
+ - 파이프라인 처음 제작 시에 바로 설정해줄 녀석과 동적으로 설정해줄 녀석들을 분리해야함 
+ - 버퍼도 그렇고 
+프레임 버퍼만큼 생성된 커맨드 버퍼
+ 저 안에 mesh, 상수버퍼 중 상수들 0 perspective mtx 같은 애들 은 커맨드 버퍼 제작시에 바로 set
+ object의 world mtx, camera mtx 같은 애들은 따로 
 
 https://vulkan-tutorial.com/Texture_mapping - 이제 여기 보면서 공부해야해 영어로! 예잉!
+
+rect_mesh_->draw();
+	
+
+validation layer: You must call vkBeginCommandBuffer() before this call to vkCmdDrawIndexed(). The spec valid usage text states 'commandBuffer must be in the recording state' (https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#VUID-vkCmdDrawIndexed-commandBuffer-recording)
+validation layer: No active render pass found at draw-time in Pipeline (0x25)!
+
+
+
+==================================================================================================================================================
+=========================================================================
+파이프라인 녀석은 동적이지 않음 
+동적으로 설정 할 수는 있는데 비효율적임 
+막 상태가 변경될 일이 있는 애들은 command buffer를 동적으로도 변경 할 수 있는데 추천하지 않음 
+그렇다고 모든 상태에 따른 파이프라인을 다 만들자니 이거도 비효율적일듯 함 - 음.. 
+
+일단 command buffer / pipeline은 변하지 않는 것이라고 가정하고 가보자 
