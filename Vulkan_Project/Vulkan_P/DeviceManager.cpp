@@ -357,6 +357,32 @@ uint32_t DeviceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
 
 }
 
+VkFormat DeviceManager::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+{
+	/*
+	VkFOrmatProperties 3개 를 가짐
+	linearTilingFeatures : 선형 타일링에서 지원되는 사례
+	optimalTilingFeatures : 최적의 타일링으로 지원되는 사례
+	bufferFeatures : 버퍼에서 지원되는 사용 사례
+	*/
+	for (VkFormat format : candidates) {
+		VkFormatProperties props;
+		vkGetPhysicalDeviceFormatProperties(DEVICE_MANAGER->getPhysicalDevice(), format, &props);
+		if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+		{
+			return format;
+		}
+		else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+		{
+			return format;
+		}
+	}
+
+	//if none
+	throw std::runtime_error("failed to find supported format!");
+
+}
+
 DeviceManager::DeviceManager() : CSingleTonBase<DeviceManager>("device manager")
 {
 }

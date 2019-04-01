@@ -3,7 +3,7 @@
 
 
 struct Vertex {
-	glm::vec2 pos;
+	glm::vec3 pos;
 	glm::vec3 color;
 	glm::vec2 texCoord;
 
@@ -35,7 +35,7 @@ struct Vertex {
 											  VK_FORMAAT_R32G32B32_SFLOAT..
 											  SINT, UINT, VK_FORMAT_R64_.. 각각 int uint double도 있음 ㅇㅇ
 											  */
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;//
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;//
 																  /*
 																  offsetof -
 																  struct s_a{

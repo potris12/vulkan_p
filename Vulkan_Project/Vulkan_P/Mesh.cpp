@@ -7,7 +7,7 @@ void Mesh::awake()
 
 
 	createVertexBuffer();
-	createIndexBuffer();
+	//createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
 	vkCmdBindVertexBuffers 함수는 이전 장에서 설정 한 것과 같이 바인딩에 정점 버퍼를 바인딩하는 데 사용
@@ -35,18 +35,19 @@ void Mesh::destroy()
 	cleanup함수에서 호출하여 제거
 	*/
 	vertex_buffer_->destroy();
-	index_buffer_->destroy();
+	//index_buffer_->destroy();
 }
 
 void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)
 {
 	auto vertexBuffer = vertex_buffer_->getBuffer();
-	auto indexBuffer = index_buffer_->getBuffer();
+	//auto indexBuffer = index_buffer_->getBuffer();
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0/*offset ?? */, 1/*정점의 수*/, vertexBuffers, offsets);
-	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1/*인스턴스 수*/, 0, 0, 0);//draw는 어찌됬든 제일 마지막에 호출되야 함 
+	vkCmdBindVertexBuffers(commandBuffer, 0/*offset ?? */, 1/*정점버퍼의의 수*/, vertexBuffers, offsets);
+	//vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+	//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1/*인스턴스 수*/, 0, 0, 0);//draw는 어찌됬든 제일 마지막에 호출되야 함 
+	vkCmdDraw(commandBuffer, vertices_.size(), 1, 0, 0);
 }
 
 void Mesh::draw()
