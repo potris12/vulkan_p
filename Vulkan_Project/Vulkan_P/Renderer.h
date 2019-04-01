@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+
 #include "Singleton.h"
 
 #include "Mesh.h"
@@ -104,6 +105,14 @@ public:
 	void createDescriptorSet();
 
 	void updateUniformBuffer();
+
+	//loading an image 
+	void createTextureImage();
+	//image view and sampler
+	void createTextureImageView();
+	//sampler
+	void createTextureSampler();
+
 	//Draw
 	void drawFrame();
 
@@ -161,7 +170,25 @@ private:
 	VkDescriptorPool descriptorPool;
 	VkDescriptorSet descriptorSet;
 
+	//load image
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+
+	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	//helper func
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void transitionImageLayout(VkImage image, VkFormat, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	//std::shared_ptr<Buffer> uniform_buffer_ = nullptr;
+	VkImageView createImageView(VkImage image, VkFormat format);
+
+	VkImageView textureImageView;
+	VkSampler textureSampler;
+
 public:
 	Renderer();
 	~Renderer();

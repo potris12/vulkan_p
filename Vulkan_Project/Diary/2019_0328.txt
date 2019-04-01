@@ -1,0 +1,57 @@
+텍스처 추가하는 과정 
+1. 이미지 객체 제작
+2. 이미지 픽셀 채우기 
+3. 샘플러 설명자 추가 
+
+이미지를 생성하고 픽셀데이터를 채우는건 버텍스 버퍼 생성과 유사함 
+준비 리소스를 만들어 픽셀 데이터로 채운 다음 렌더링에 사용할 최정 오미지 객체에 이 리소스를 복사함 
+이 목적을 위해 스테이징 이미지를 만들 수도 있지만 vulkan을 사용하면 VkBuffer에서 이미지로 픽셀을 복사할 수 있으며 이 경우 API는 실제로 일부 하드웨어에서 더 빠름 ! 
+이 버퍼를 만들어 픽셀 값으로 채우고 픽셀을 복사할 이미지를 만듬
+이미지 생성은 버퍼 생성과 크게 다르지 않음
+이전에 보앗듯 메모리 요구사항ㅇ르 쿼리하고 장치 메모리를 할당하며 바인딩함 
+
+이미지 생성 시 신경싸야 하는 부분 
+: 이미지는 픽셀이 메모리에 구성되는 방식에 영향을 주는 다양한 레이아웃을 가질 수 있음 - view이야기 같음
+그래픽 하드웨어가 작동하는 방식으로 인해 픽셀을 행 단위로 저장하는 것이 최상의 성능으로 이어지지 않을 수 있음 ?? 
+이미지에서 작업을 수행하 ㄹ 때 해당 작업에서 사용하기에 가장 적합한 레이아웃을 가지고 있는지 확인해야함 렌더패스를 지정할 때 실제로 이미 이러한 레이아웃 중 일부를 보았음 
+
+VK_IMAGE_LAYOUT_PRESENT_SRC_KHR - 프레젠테이션에 최적
+VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL - ps에서 색 가져다 쓰기 최적
+VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL - vkCmdCopyImageToBuffer와 같은 전송 작업에서 원본 최적
+VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL - vkCmdCopyBufferToImage에서 전송 목적지
+VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL - 쉐이더 샘플링에 최적 
+
+이미지의 레이아수을 전환하는 가장 일반적인 방법중 하나는 파이프라인 베리어 임
+파이프라인 베리어는 주로 이미지가 읽히기 전에 작성되었는지 확인하는 것과 같이 리소스에 대한 액세스를 동기화 하는데 주로 사용되지만 레이아웃을 전환하는데도 사용할 수 있음
+이 장에서느 ㄴ이러한 목적으로 파이프라인 베리어가 사용되는 방법을 살펴보겠음 
+베리어를 추가로 사용하여 큐 패밀이 소유권을 전송할 수 있음 
+[VK_SHARING_MODE_EXCLUSIVE]
+
+stbi_load 함수는 인수로 로드 할 파일 경로와 채널 수를 사용합니다 
+STBI_rgb_alpha 값은 이미지에 알파 채널이 로드되도록 합니다. 
+다른 텍스처와의 일관성을 위해 좋음 가운데 세 매개변수는 이미지의 너비 높이 및 실제 채널 수에 대한 출력임 
+반환되는 포인터는 픽셀 값의 배열에서 첫 번째 요소임 픽셀은 STBI_rgba_alpha의 경우 픽셀당 4바이트로 행별로 배치되어 총 texWidhth* texHeight * 4값을 갖음
+
+/////
+앞의 표에서 앍수 있듯 파이프라인 전송 단계에서 전송 쓰기가 발생해야 함
+쓰기가 어떤 것도 기다릴 필요가 없으므로 빈 마스크와 가능한 가장 빠른 파이프라인 스테이지 vk_PIpeline_stage_top_of_pipeline_bit 를 사전 베리어 작업으로 지정할 수 있음
+VK_PIPELINE_STAGE_TRANSFER_BIT는 그래픽 및 컴퓨팅 파이프라인의 실제 스테이지가 아님
+그것은 이전이 일어나느 의사 단계 이상의 것임
+의사단계에 대한 자세한 정보및 기타 예제는 설명서 참조
+이미지는 동일한 파이프라인 단계에서 쓰여지고 이후 픽셀 쉐이더에서 읽히므로 픽셀 쉐이더 읽기 액세스를 지정
+앞으로 더 많은 전환을 수행해야 한다면 함수를 확장할 것 아직 시각적인 변화는 없지만 응용 프로그램은 이제 성공적으로 실행될것
+한가지 주의할점은 명령 버퍼 제출은 시작시 암시적은 VK_ACCESS_HOST_WRITE_BIT동기화 결과를 초래한다느 ㄴ것
+transitionImageLayout함수는 하나의 명령으로 만 명령 버퍼를 실핸하므로 이 암시적 동기화를 사용하고 ㅇ레이아웃 전환에 VK_Access_HOS_WRITE_BIT종속성이 필요한 경우 srcAccessMask를 0 으로설정할 수 있음
+그것은 당신이 그것에 대해 명시하고 시지 않겠는가에 달려있지만 , 나느 ㄴ개인적으로 opengl과 같은 숨겨진 작업에 의존하지 않음
+실제로 모든 작업 VK_IMAGE_LAYOUT_GENERAL을 지원하는 특별한 유형의 이미지 레이아웃이 있음 물론 문제는 모든 작업에 최상의 성능을 제공하지 않는다는것
+입/출력으로 이미지를 사용하거나 미리 초기화 된 레이아웃을 벗어난 이미지를 읽는 것과 같은 특별한 경우가 필요
+지금까지 명령을 제출한 모든 도ㅇ미 함수는 대기열이 윻 상태가 될때까지 대기하여 동기식으로 실행되도록 설정
+실용적인 응용프로그램의 경우 이러한 작업을 단일 명령 버퍼로 결함 하여 높은 처리량 특히 createTextureImage함수의 전환 및 복사를 위해 비동기 적으로 실행하는 것이 좋음 헬퍼 함수가 명령을 기록하는 setupCommandBuffer를 작성하여 이것을 시험해 보고 flushSetupCommands를 추가하여 지금까지 기록된 명령을 실행하십쇼
+텍스쳐 매핑이 작동한 후에 텍스쳐 리소스가 여전히 올바르게 설정되어 있는지 확인해야함 
+
+
+
+validation layer: vkCreateImageView() format VK_FORMAT_UNDEFINED differs from image 16 format VK_FORMAT_B8G8R8A8_UNORM.  Formats MUST be IDENTICAL unless VK_IMAGE_CREATE_MUTABLE_FORMAT BIT was set on image creation. The spec valid usage text states 'If image was not created with the VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT flag, format must be identical to the format used to create image' (https://www.khronos.org/registry/vulkan/specs/1.0/html/vkspec.html#VUID-VkImageViewCreateInfo-image-01019)
+<
+That's because anisotropic filtering is actually an optional device feature. We need to update the createLogicalDevice function to request it:
+>

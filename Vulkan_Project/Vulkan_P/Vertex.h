@@ -5,6 +5,7 @@
 struct Vertex {
 	glm::vec2 pos;
 	glm::vec3 color;
+	glm::vec2 texCoord;
 
 	/*
 	gpu 메모리에 업로드된 vulkan에게 이 데이터 형식을 버텍스 쉐이더에 전달하는 방법을 알려주는 것
@@ -21,8 +22,8 @@ struct Vertex {
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
 
 		//location0을 가진 버텍스 쉐이더의 input은 두개의 32비트 sfloat를 갖는 location임
 		attributeDescriptions[0].binding = 0;//binding 매개변수는 Vulkan에게 각 정점 데이터가 바인딩되는 것을 알려줌
@@ -52,6 +53,11 @@ struct Vertex {
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[1].offset = offsetof(Vertex, color);
 
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 		return attributeDescriptions;
 	}
 };

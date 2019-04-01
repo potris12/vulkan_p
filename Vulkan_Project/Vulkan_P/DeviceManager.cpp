@@ -202,6 +202,8 @@ void DeviceManager::createLogicalDevice()
 	}
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
+	//to use anisotropic filtering 표본 이방성?
+	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	VkDeviceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -291,6 +293,9 @@ bool DeviceManager::isDeviceSuitable(VkPhysicalDevice device)
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
+
+	VkPhysicalDeviceFeatures supportedFeatures;
+	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
 	return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
