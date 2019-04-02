@@ -2,6 +2,11 @@
 #include "stdafx.h"
 
 
+// Per-instance data block
+struct InstanceData {
+	glm::mat4 world_mtx;
+};
+
 struct Vertex {
 	glm::vec3 pos;
 	glm::vec3 color;
@@ -13,17 +18,24 @@ struct Vertex {
 	첫번째 구조체는 VkVertexInputBindingDescription이며 Vertex구조체에 멤버 함수를 추가하여 올바른 데이터로 채웁
 
 	*/
-	static VkVertexInputBindingDescription getBindingDesctiption() {
-		VkVertexInputBindingDescription bindingDescription = {};
+	static std::array<VkVertexInputBindingDescription, 2> getBindingDesctiption() {
+		std::array<VkVertexInputBindingDescription, 2> bindingDescriptions = {};
 
-		bindingDescription.binding = 0;//이거 dx11레지스터 index
-		bindingDescription.stride = sizeof(Vertex);//이거 dx11의 레이아웃 단위 지정할 떄 쓰는 그거
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;//이거 vertex/instance구분 인자 (VK_VERTEX_INPUT_RATE_INCTANCE는 정점 그리고 정점 데이터 유지함)
-		return bindingDescription;
+		bindingDescriptions[0].binding = 0;//이거 dx11레지스터 index
+		bindingDescriptions[0].stride = sizeof(Vertex);//이거 dx11의 레이아웃 단위 지정할 떄 쓰는 그거
+		bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;//이거 vertex/instance구분 인자 (VK_VERTEX_INPUT_RATE_INCTANCE는 정점 그리고 정점 데이터 유지함)
+		
+		
+		bindingDescriptions[1].binding = 1;//이거 dx11레지스터 index
+		bindingDescriptions[1].stride = sizeof(InstanceData);//이거 dx11의 레이아웃 단위 지정할 떄 쓰는 그거
+		bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;//이거 vertex/instance구분 인자 (VK_VERTEX_INPUT_RATE_INCTANCE는 정점 그리고 정점 데이터 유지함)
+
+
+		return bindingDescriptions;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
+	static std::array<VkVertexInputAttributeDescription, 7> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 7> attributeDescriptions = {};
 
 		//location0을 가진 버텍스 쉐이더의 input은 두개의 32비트 sfloat를 갖는 location임
 		attributeDescriptions[0].binding = 0;//binding 매개변수는 Vulkan에게 각 정점 데이터가 바인딩되는 것을 알려줌
@@ -58,6 +70,29 @@ struct Vertex {
 		attributeDescriptions[2].location = 2;
 		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
+
+		attributeDescriptions[3].binding = 1;//binding 매개변수는 Vulkan에게 각 정점 데이터가 바인딩되는 것을 알려줌
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[3].offset = 0;
+
+		attributeDescriptions[4].binding = 1;
+		attributeDescriptions[4].location = 4;
+		attributeDescriptions[4].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[4].offset = sizeof(float) * 4;
+
+
+		attributeDescriptions[5].binding = 1;
+		attributeDescriptions[5].location = 5;
+		attributeDescriptions[5].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[5].offset = sizeof(float) * 8;
+
+
+		attributeDescriptions[6].binding = 1;
+		attributeDescriptions[6].location = 6;
+		attributeDescriptions[6].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+		attributeDescriptions[6].offset = sizeof(float) * 12;
 		return attributeDescriptions;
 	}
 };

@@ -4,6 +4,7 @@
 #include "Buffer.h"
 #include "Vertex.h"
 
+
 class Mesh : public Object
 {
 public:
@@ -15,6 +16,8 @@ public:
 	void registeConstantData(VkCommandBuffer& commandBuffer);
 	void draw();
 private:
+	std::vector<InstanceData> instanceData;
+
 	////이게 정점 데이터 인풋레이아웃임 
 	//const std::vector<Vertex> vertices = {
 	//	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
@@ -106,10 +109,12 @@ private:
 	std::shared_ptr<Buffer> vertex_buffer_ = nullptr;
 	//std::vector<uint16_t> indices_;
 	std::shared_ptr<Buffer> index_buffer_ = nullptr;
+	//std::vector<uint16_t> indices_;
+	std::shared_ptr<Buffer> instance_buffer_ = nullptr;
 
 	void createIndexBuffer();
 	void createVertexBuffer();
-
+	void createInstanceBuffer();
 public:
 	Mesh(std::string mesh_name);
 	~Mesh();

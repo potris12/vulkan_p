@@ -2,6 +2,8 @@
 #include "Renderer.h"
 
 
+#define INSTANCE_COUNT 10
+
 void Mesh::awake()
 {
 
@@ -15,7 +17,7 @@ void Mesh::awake()
 	마지막 두 매개 변수는 바인딩 할 정점 버퍼의 배열을 지정하고 정점 데이터를 읽는 바이트 오프셋을 지정함
 	또한 vkCmdDraw에 대한 호출을 변경하여 하드 코드 된 숫자 3과 반대로 버퍼의 정점 수를 전달해야함
 	*/
-
+	createInstanceBuffer();
 }
 
 void Mesh::start()
@@ -24,7 +26,20 @@ void Mesh::start()
 
 void Mesh::update()
 {
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
 	
+	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// Distribute rocks randomly on two different rings
+	for (auto i = 0; i < INSTANCE_COUNT; i++) {
+
+		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
+	}
+
+	instance_buffer_->map_tmp((void*)instanceData.data());
 }
 
 void Mesh::destroy()
@@ -36,6 +51,40 @@ void Mesh::destroy()
 	*/
 	vertex_buffer_->destroy();
 	//index_buffer_->destroy();
+	instance_buffer_->destroy();
+}
+
+void Mesh::createInstanceBuffer()
+{
+	instanceData.resize(INSTANCE_COUNT);
+/*
+	std::default_random_engine rndGenerator(benchmark.active ? 0 : (unsigned)time(nullptr));
+	std::uniform_real_distribution<float> uniformDist(0.0, 1.0);
+	std::uniform_int_distribution<uint32_t> rndTextureIndex(0, textures.rocks.layerCount);
+*/
+	// Distribute rocks randomly on two different rings
+	for (auto i = 0; i < INSTANCE_COUNT; i++) {
+		
+		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2)* 2, 0.0f, 0.0f));
+	}
+
+	// Staging
+	// Instanced data is static, copy to device local memory 
+	// This results in better performance
+
+	struct {
+		VkDeviceMemory memory;
+		VkBuffer buffer;
+	} stagingBuffer;
+
+	VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
+	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
+	instance_buffer_->map((void*)instanceData.data());
+	instance_buffer_->unmap();
+	instance_buffer_->prepareBuffer();
 }
 
 void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)
@@ -44,10 +93,20 @@ void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)
 	//auto indexBuffer = index_buffer_->getBuffer();
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0/*offset ?? */, 1/*정점버퍼의의 수*/, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1/*정점버퍼의의 수*/, vertexBuffers, offsets);
+	
+	// Binding point 1 : Instance data buffer
+	auto instanceBuffer = instance_buffer_->getBuffer();
+	//auto indexBuffer = index_buffer_->getBuffer();
+	VkBuffer instanceBuffers[] = { instanceBuffer };
+	VkDeviceSize offsets2[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 1, 1, instanceBuffers, offsets2);
+
+	
 	//vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 	//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1/*인스턴스 수*/, 0, 0, 0);//draw는 어찌됬든 제일 마지막에 호출되야 함 
-	vkCmdDraw(commandBuffer, vertices_.size(), 1, 0, 0);
+	vkCmdDraw(commandBuffer, vertices_.size(), INSTANCE_COUNT, 0, 0);
+	//vkCmdDrawIndirect(commandBuffer, vertexBuffers, 1, 0, 0);
 }
 
 void Mesh::draw()

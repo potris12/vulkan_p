@@ -15,6 +15,8 @@ public:
 	virtual void destroy();
 
 	void map(void* data);
+
+	void map_tmp(void* data);
 	void unmap();
 
 	void prepareBuffer();

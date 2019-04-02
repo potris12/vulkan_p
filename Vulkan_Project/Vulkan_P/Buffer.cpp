@@ -35,6 +35,15 @@ void Buffer::map(void* data)
 	memcpy(tmp_data, data, (size_t)bufferSize);
 }
 
+void Buffer::map_tmp(void * data)
+{
+	void* tmp_data;
+	vkMapMemory(DEVICE_MANAGER->getDevice(), bufferMemory, 0, bufferSize, 0, &tmp_data);
+	memcpy(tmp_data, data, (size_t)bufferSize);
+
+	vkUnmapMemory(DEVICE_MANAGER->getDevice(), bufferMemory);
+}
+
 void Buffer::unmap()
 {
 
