@@ -47,6 +47,9 @@ void Renderer::destroy()
 	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), uniformBuffer, nullptr);
 	vkFreeMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, nullptr);
 
+	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), instancingBuffer, nullptr);
+	vkFreeMemory(DEVICE_MANAGER->getDevice(), instancingBufferMemory, nullptr);
+
 	cleanupSwapChain();
 
 	//image
@@ -96,10 +99,16 @@ void Renderer::createDescriptorSetLayout()
 	
 }
 
+#define INSTANCING_BUFFER_SIZE 10
+
 void Renderer::createUniformBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 	Buffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffer, uniformBufferMemory);
+
+
+	VkDeviceSize instancingBufferSize = sizeof(glm::mat4) * INSTANCING_BUFFER_SIZE;
+	Buffer::createBuffer(instancingBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, instancingBuffer, instancingBufferMemory);
 }
 
 void Renderer::createDescriptorPool()
@@ -177,7 +186,7 @@ void Renderer::updateUniformBuffer()
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo = {};
-	ubo.world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	float aspect = (float)swapChainExtent.width / (float)swapChainExtent.height;
 	ubo.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
@@ -190,6 +199,7 @@ void Renderer::updateUniformBuffer()
 	vkUnmapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory);
 	//uniform_buffer_->prepareBuffer();
 
+	rect_mesh_->update();
 }
 
 void Renderer::createTextureImage()
@@ -728,7 +738,7 @@ void Renderer::createGraphicsPipeline()
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	pipelineInfo.basePipelineIndex = -1;
 
-	/* 실제로 두개의 매개변수가 더있음 basePipelineHandel, basePipelineIndex임 Vulkan을 사용하면 기존 파이프라인에서 파새앟여 새로운 그래픽 파이프라인을 만들 수 있음
+	/* 실제로 두개의 매개변수가 더있음 basePipelineHandel, basePipelineIndex임 Vulkan을 사용하면 기존 파이프라인에서 파생하여 새로운 그래픽 파이프라인을 만들 수 있음
 	파이프 ㅏㄹ인 파생물에 대한 아이디어는 기존 파이프라인과 공통된 기능을 많이 갖추고 파이프라인을 설정하는데 드는 비용이 저렴하고 동일한 부모의 파이프라인간 전환도 더 빨리 수행될 수 있다
 	basePipelineHandel로 기존 파이프라인의 핸들을 지정하거나 basePipelineIndex로 인덱스로 만들려는 다른 파이프라인을 참조할 수 있습니다. 현재는 파이프라인하나뿐이므로 null핸들과 인덱스 -1을 지정하기만 하면됨
 	Vk_PIPELINE_CREATE_DERIVATIVE_BIT플래그가 VkGraphicsPipelineCreateInfo의 플래그 필드에도 지정된 경우에만 사용됨

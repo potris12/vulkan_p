@@ -40,6 +40,9 @@ void Mesh::update()
 	}
 
 	instance_buffer_->map_tmp((void*)instanceData.data());
+	//instance_buffer_->map((void*)instanceData.data());
+	//instance_buffer_->unmap();
+	//instance_buffer_->prepareBuffer();
 }
 
 void Mesh::destroy()
@@ -78,13 +81,17 @@ void Mesh::createInstanceBuffer()
 	} stagingBuffer;
 
 	VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	auto usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+	//VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT
+	//	| VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+	//	| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	auto propertise = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
 	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	instance_buffer_->map((void*)instanceData.data());
-	instance_buffer_->unmap();
-	instance_buffer_->prepareBuffer();
+	instance_buffer_->map_tmp((void*)instanceData.data());
+	//instance_buffer_->map((void*)instanceData.data());
+	//instance_buffer_->unmap();
+	//instance_buffer_->prepareBuffer();
 }
 
 void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)

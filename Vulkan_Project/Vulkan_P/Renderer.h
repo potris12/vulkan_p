@@ -14,6 +14,11 @@ struct UniformBufferObject
 	glm::mat4 proj;
 };
 
+struct UniformBufferObjectInstance
+{
+	glm::mat4 world;
+};
+
 class Renderer : public CSingleTonBase<Renderer>
 {
 public:
@@ -165,6 +170,9 @@ private:
 	//uniform buffer
 	VkBuffer uniformBuffer;
 	VkDeviceMemory uniformBufferMemory;
+	VkBuffer instancingBuffer;
+	VkDeviceMemory instancingBufferMemory;
+
 
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorPool descriptorPool;

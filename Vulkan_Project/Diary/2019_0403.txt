@@ -1,0 +1,92 @@
+"shaders/instancing/instancing.vert.spv"
+
+올 
+일단 vertex buffer의 복사? 를 좀더 빠르게 하기위해 local bit를 이용해서 버퍼를 만들면 map을 할 수 있는 bit를 같이 못 사용함
+좀더 빠르게 하기위한 버퍼 bit는 
+VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT 임 
+
+VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT 비트는이 유형으로 할당 된 메모리가 vkMapMemory를 사용하여 호스트 액세스를 위해 매핑 될 수 있음을 지정합니다.
+VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 비트는 호스트 캐시 관리 명령 인 vkFlushMappedMemoryRanges 및 vkInvalidateMappedMemoryRanges가 장치에 대한 호스트 쓰기를 플러시하거나 호스트에 대한 장치 쓰기를 각각 볼 수 없도록 지정합니다.
+VK_MEMORY_PROPERTY_HOST_CACHED_BIT 비트는이 유형으로 할당 된 메모리가 호스트에 캐시되도록 지정합니다. 캐시되지 않은 메모리에 대한 호스트 메모리 액세스는 캐시 된 메모리보다 느리지 만 캐시되지 않은 메모리는 항상 호스트 일관성을 유지합니다.
+
+
+VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT 비트는 메모리 유형이 메모리에 대한 디바이스 액세스만을 허용하도록 지정합니다. 메모리 유형에는 
+
+
+[[[[[[[주의사항]]]]]]]
+VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT 및 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT가 설정되어 있으면 안됩니다. 덧붙여, 객체의 보조 메모리는 Lazily Allocated Memory에 지정된대로 지연 구현에 의해 제공 될 수 있습니다.
+
+VK_MEMORY_PROPERTY_PROTECTED_BIT 비트는 메모리 유형이 메모리에 대한 디바이스 액세스 만 허용하고, 보호 대기열 조작이 메모리에 액세스 할 수 있도록 지정합니다. 메모리 유형에는 VK_MEMORY_PROPERTY_PROTECTED_BIT가 설정되고 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT가 설정되거나 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT가 설정되거나 VK_MEMORY_PROPERTY_HOST_CACHED_BIT가 설정되어서는 안됩니다.
+
+
+VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+이건 uniform buffer의 bit인데 이게 상수버퍼이고 이녀석은 최적화는 개나준 cpu에서 접근 가능한 버퍼임
+
+그래서 지금 최적화해 놓은 DEVICE_LOCAL_BIT에는 Device에 map을 가능하게 해 놓은 map
+
+
+[
+
+올 벌칸에서 버퍼에 플레그로 막 접근권한들 부여하네 어제 그래픽 카드에서 최적화된 비트에서는 map이 허용되어 있지 않아서 실패했었던 거였어!
+버텍스 버퍼에 연결되 instancing buffer를 상수버퍼처럼 map이 가능한 플레그 사용하고 map으로 변경해서 쓸수는 있네 이렇게 써야겟다 
+
+]
+
+
+==========================================================================
+==========================================================================
+==========================================================================
+
+코오오드 정리를 해보자 지금 있는거 
+render pass
+shader
+graphics pipeline
+framebuffer
+command pool
+command buffers
+uniform buffer
+images& view & sampler
+세마포어
+depth iamge & view & device memory
+
+
+
+
+대충 정리 
+1. 파이프라인 이녀석은 진짜 그래픽 파이프라인임 비슷한 녀석을 부모로? 참조로? 둘 수 있음 
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineInfo.basePipelineIndex = -1;
+이 두개가 그 파이프라인들의 정보임 
+이건 연구를 좀더 해봐야 겟지만 같은 옵션의 파이프라인의 무한 증식을 좀 줄일 수 있음 
+거의 이전의 렌더컨테이너 쯤 된다고 보면 될 것 같음 
+ 구성 요소
+ - shader
+ - input layout 
+ - input assembly
+ - view port 
+ - scissor info - clipping
+ - rasterizer 
+ - multi sampling info
+ - blend op
+ - pipeline layout info - pipe line에 연결되는 리소스들 정보 - 여기에 아래 2.번의 layout 설명자와 layout 수가 들어감 
+ - depth stencil info 
+
+2. DescriptorSet 
+ - 위의 파이프라인에서 정의한 layouts들에 대한 설명자들 
+ - 이 리소스들이 그래서 뭔데? 라는거 ex) VkDescriptorBufferInfo/ VkDescriptorImageInfo
+dscriptor pool에 등록함 ?  
+이건 그림그리는 녀석들인 frameBuffer수만큼 하는데 나중에 디퍼드하면 1개로 줄을 가능성 존재함 다분.. 
+
+
+
+-----
+파이파라인 = 랜더컨테이너 == ObjectRenderer 라고하자 
+이녀석이 이전처럼 그림 그릴 때 필요한 정보를 다 가지고 있게 하자 
+ - 객체들, 메쉬, 상수버퍼들, 텍스쳐들, 샘플러들, 쉐이더들, 
+DescriptorSet, Pipeline을 가짐 매번 만들꺼임 만들고 set하고, 변경하는 녀석들만 변경함 
+그럼 처음 초기화 할 때 변경될거 안될꺼 구분필요 
+변경안되는 녀석들은 맨처음 다 set해놓도록 함 변경되는 애들은 update에서 변경 필요 update 무조건 필요하겟네 init이랑 
+
+
+여기서 주의할 것은 공통적인 요소가 존재한다는거? 이건 밖에서 주자 
+ - 

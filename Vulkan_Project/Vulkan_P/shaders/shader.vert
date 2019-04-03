@@ -8,10 +8,10 @@ layout(set = 0, binding = 0) uniform UniformBufferObject
 	mat4 proj;
 } ubo;
 
-//layout (set = 0, binding = 1) uniform UniformBufferInstance
-//{
-//	mat4 world_mtx[10];
-//}instance_data;
+layout (set = 0, binding = 1) uniform UniformBufferInstance
+{
+	mat4 world_mtx[10];
+}instance_data;
 
 
 layout(location = 0) in vec3 inPosition;
