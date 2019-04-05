@@ -46,11 +46,32 @@
     <Filter Include="소스 파일\Manager\Renderer">
       <UniqueIdentifier>{0a50bd63-b12b-4e35-b8ef-92d059007e27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\GADBased">
+      <UniqueIdentifier>{a97c1290-25dc-4550-9b78-3b4f625bfbe0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\00.World">
+      <UniqueIdentifier>{f280a7b8-b3ff-4201-a8a9-3aa4e3a29207}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity">
+      <UniqueIdentifier>{8039578c-9edc-46c6-bfb7-17d3709fc7f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component">
+      <UniqueIdentifier>{b34f6019-0a49-4a01-9395-5cbc1e0b2d6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\02.System">
+      <UniqueIdentifier>{c219109c-1f88-4153-9332-8992ce0c890c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\03. Helper">
+      <UniqueIdentifier>{50af4d88-41ab-4b4e-a6ca-2efc29dee66f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity\EntityManager">
+      <UniqueIdentifier>{3778f196-8f3b-48ea-9707-145616f13333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\02.System\SystemManager">
+      <UniqueIdentifier>{90f877ea-7251-481f-9a6a-f3f78142e2f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Framework.cpp">
       <Filter>소스 파일\Framework</Filter>
     </ClCompile>
@@ -74,6 +95,30 @@
     </ClCompile>
     <ClCompile Include="DeviceManager.cpp">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GADEntity.cpp">
+      <Filter>소스 파일\GADBased\01.Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="GADWorld.cpp">
+      <Filter>소스 파일\GADBased\00.World</Filter>
+    </ClCompile>
+    <ClCompile Include="GADSystem.cpp">
+      <Filter>소스 파일\GADBased\02.System</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponent.cpp">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component</Filter>
+    </ClCompile>
+    <ClCompile Include="GADEntityManager.cpp">
+      <Filter>소스 파일\GADBased\01.Entity\EntityManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GADSystemManager.cpp">
+      <Filter>소스 파일\GADBased\02.System\SystemManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GADBase.cpp">
+      <Filter>소스 파일\GADBased</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +154,30 @@
     </ClInclude>
     <ClInclude Include="DeviceManager.h">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GADEntity.h">
+      <Filter>소스 파일\GADBased\01.Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GADWorld.h">
+      <Filter>소스 파일\GADBased\00.World</Filter>
+    </ClInclude>
+    <ClInclude Include="GADSystem.h">
+      <Filter>소스 파일\GADBased\02.System</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponent.h">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component</Filter>
+    </ClInclude>
+    <ClInclude Include="GADHelper.h">
+      <Filter>소스 파일\GADBased\03. Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="GADEntityManager.h">
+      <Filter>소스 파일\GADBased\01.Entity\EntityManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GADSystemManager.h">
+      <Filter>소스 파일\GADBased\02.System\SystemManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GADBase.h">
+      <Filter>소스 파일\GADBased</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

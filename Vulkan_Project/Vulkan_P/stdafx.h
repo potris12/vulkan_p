@@ -12,6 +12,11 @@
 #include <cstdlib>
 #include <optional>
 #include <set>
+#include <map>
+#include <cassert>
+#include <algorithm>
+
+typedef __int64 GAD_KEY;
 
 /*
 GLM에 의해 생성 된 투시 투영 행렬은 기본적으로 OpenGL 깊이 범위가 -1.0 ~ 1.0을 사용합니다.
