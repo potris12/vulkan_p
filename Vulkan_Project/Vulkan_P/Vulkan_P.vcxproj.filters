@@ -47,28 +47,49 @@
       <UniqueIdentifier>{0a50bd63-b12b-4e35-b8ef-92d059007e27}</UniqueIdentifier>
     </Filter>
     <Filter Include="소스 파일\GADBased">
-      <UniqueIdentifier>{a97c1290-25dc-4550-9b78-3b4f625bfbe0}</UniqueIdentifier>
+      <UniqueIdentifier>{3df6cd2f-cae6-4368-bac1-4026b565c7c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\00.World">
-      <UniqueIdentifier>{f280a7b8-b3ff-4201-a8a9-3aa4e3a29207}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS">
+      <UniqueIdentifier>{4b378c67-3e69-4c3c-9d7e-5c0cfe123ca9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\01.Entity">
-      <UniqueIdentifier>{8039578c-9edc-46c6-bfb7-17d3709fc7f0}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\Entity">
+      <UniqueIdentifier>{29a3ff78-43bc-422f-953c-32dc00ed8cff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component">
-      <UniqueIdentifier>{b34f6019-0a49-4a01-9395-5cbc1e0b2d6e}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\Entity\GADEntity">
+      <UniqueIdentifier>{11c4030c-987f-4e80-80eb-06089c44ca8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\02.System">
-      <UniqueIdentifier>{c219109c-1f88-4153-9332-8992ce0c890c}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\Entity\GADEntityManager">
+      <UniqueIdentifier>{3ecd7a94-4818-4258-9328-19ada19013f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\03. Helper">
-      <UniqueIdentifier>{50af4d88-41ab-4b4e-a6ca-2efc29dee66f}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\Component">
+      <UniqueIdentifier>{35060e43-c630-43b4-b5b6-fc1969d501f6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\01.Entity\EntityManager">
-      <UniqueIdentifier>{3778f196-8f3b-48ea-9707-145616f13333}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\World">
+      <UniqueIdentifier>{a32eb510-8b46-4da4-9b3a-211488ce6907}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\GADBased\02.System\SystemManager">
-      <UniqueIdentifier>{90f877ea-7251-481f-9a6a-f3f78142e2f2}</UniqueIdentifier>
+    <Filter Include="소스 파일\GADBased\ECS\Entity\GADEntityHandle">
+      <UniqueIdentifier>{dd6d9e0d-15d3-4789-a8e8-372023cc9119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\Component\GADComponentHandle">
+      <UniqueIdentifier>{6c13435b-64ee-4728-9a5b-e28d96604a60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\Component\GADComponentManager">
+      <UniqueIdentifier>{4c8b095a-d8f5-4c3f-82a5-26c027f83ae9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\Entity\GADEntityMap">
+      <UniqueIdentifier>{842b72eb-901f-452b-a313-dd76418296ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\System">
+      <UniqueIdentifier>{1f63be72-1634-49b8-9b60-9e21c318212e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\System\GADSystem">
+      <UniqueIdentifier>{acba4d0a-0f8e-44e0-9e73-226489a00f2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\Component\GADComponent">
+      <UniqueIdentifier>{3943176a-bcdc-4346-9746-19e3ba28c539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\ECS\Component\GADComponentMask">
+      <UniqueIdentifier>{87fadcc8-44e5-4ede-b8bf-ab389a0bb46f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -100,25 +121,34 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GADEntity.cpp">
-      <Filter>소스 파일\GADBased\01.Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="GADWorld.cpp">
-      <Filter>소스 파일\GADBased\00.World</Filter>
-    </ClCompile>
-    <ClCompile Include="GADSystem.cpp">
-      <Filter>소스 파일\GADBased\02.System</Filter>
-    </ClCompile>
-    <ClCompile Include="GADComponent.cpp">
-      <Filter>소스 파일\GADBased\01.Entity\01_1.Component</Filter>
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntity</Filter>
     </ClCompile>
     <ClCompile Include="GADEntityManager.cpp">
-      <Filter>소스 파일\GADBased\01.Entity\EntityManager</Filter>
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityManager</Filter>
     </ClCompile>
-    <ClCompile Include="GADSystemManager.cpp">
-      <Filter>소스 파일\GADBased\02.System\SystemManager</Filter>
+    <ClCompile Include="GADWorld.cpp">
+      <Filter>소스 파일\GADBased\ECS\World</Filter>
     </ClCompile>
-    <ClCompile Include="GADBase.cpp">
-      <Filter>소스 파일\GADBased</Filter>
+    <ClCompile Include="GADEntityHandle.cpp">
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityHandle</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponentManager.cpp">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponentManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponentHandle.cpp">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponentHandle</Filter>
+    </ClCompile>
+    <ClCompile Include="GADSystem.cpp">
+      <Filter>소스 파일\GADBased\ECS\System\GADSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="GADEntityMap.cpp">
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityMap</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponent.cpp">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponentMask.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,28 +186,34 @@
       <Filter>소스 파일\Manager\DeviceManager</Filter>
     </ClInclude>
     <ClInclude Include="GADEntity.h">
-      <Filter>소스 파일\GADBased\01.Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="GADWorld.h">
-      <Filter>소스 파일\GADBased\00.World</Filter>
-    </ClInclude>
-    <ClInclude Include="GADSystem.h">
-      <Filter>소스 파일\GADBased\02.System</Filter>
-    </ClInclude>
-    <ClInclude Include="GADComponent.h">
-      <Filter>소스 파일\GADBased\01.Entity\01_1.Component</Filter>
-    </ClInclude>
-    <ClInclude Include="GADHelper.h">
-      <Filter>소스 파일\GADBased\03. Helper</Filter>
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntity</Filter>
     </ClInclude>
     <ClInclude Include="GADEntityManager.h">
-      <Filter>소스 파일\GADBased\01.Entity\EntityManager</Filter>
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityManager</Filter>
     </ClInclude>
-    <ClInclude Include="GADSystemManager.h">
-      <Filter>소스 파일\GADBased\02.System\SystemManager</Filter>
+    <ClInclude Include="GADWorld.h">
+      <Filter>소스 파일\GADBased\ECS\World</Filter>
     </ClInclude>
-    <ClInclude Include="GADBase.h">
-      <Filter>소스 파일\GADBased</Filter>
+    <ClInclude Include="GADEntityHandle.h">
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityHandle</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentManager.h">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponentManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentHandle.h">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponentHandle</Filter>
+    </ClInclude>
+    <ClInclude Include="GADSystem.h">
+      <Filter>소스 파일\GADBased\ECS\System\GADSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="GADEntityMap.h">
+      <Filter>소스 파일\GADBased\ECS\Entity\GADEntityMap</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponent.h">
+      <Filter>소스 파일\GADBased\ECS\Component\GADComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentMask.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

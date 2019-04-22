@@ -1,30 +1,25 @@
+#include "stdafx.h"
 #include "GADEntityManager.h"
 
-using namespace GAD;
 
-void GAD::GADEntityManager::awake()
+using namespace GADBased;
+
+GADEntity GADBased::GADEntityManager::createEntity()
+{
+	lastEntity++;
+
+	return GADEntity(lastEntity);
+}
+
+void GADBased::GADEntityManager::destroy(GADEntity entity)
+{
+	// Do nothing for now. This will be covered in a future blog post.
+}
+
+GADEntityManager::GADEntityManager()
 {
 }
 
-void GAD::GADEntityManager::start()
-{
-}
-
-void GAD::GADEntityManager::update()
-{
-	for (auto entity : entitys_)
-	{
-		entity.second->update();
-	}
-}
-
-void GAD::GADEntityManager::destroy()
-{
-}
-
-GAD::GADEntityManager::GADEntityManager(std::string & name) : GADBase(name)
-{
-}
 
 GADEntityManager::~GADEntityManager()
 {

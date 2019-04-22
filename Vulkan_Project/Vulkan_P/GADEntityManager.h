@@ -1,24 +1,35 @@
 #pragma once
 
-#include "stdafx.h"
-#include "GADBase.h"
 #include "GADEntity.h"
 
-namespace GAD {
-	class GADEntityManager : public GADBase
+namespace GADBased
+{
+
+
+	/*
+	¸ñÀû 
+	 - Entity player = entityManager.create();
+
+	 HealthCOmponent hp;
+	 hp.currentHP = 7;
+	 hp.maxHP = 10;
+
+	 helthComponentManager->addComponent(player, hp);
+	*/
+	class GADEntityManager
 	{
 	public:
-		void awake();
-		void start();
-		void update();
-		void destroy();
+		GADEntity createEntity();
+		void destroy(GADEntity entity);
 
 	private:
-		std::map<GAD_KEY, std::shared_ptr<GADEntity>> entitys_;
+		int lastEntity = 0;
 
 	public:
-		GADEntityManager(std::string& name);
+		GADEntityManager();
 		~GADEntityManager();
 	};
 
+
 }
+

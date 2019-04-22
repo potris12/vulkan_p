@@ -1,0 +1,74 @@
+디바이스 queue 는 디바이스가 폐기될 떄 암시적으로 정리됩니다 떄문에 cleanup할 필요가 없음
+vkGetDeviceQueue함수를 사용해 queue family에서 queue핸들을 찾아올 수 있습니다. 파라미터는 논리 디바이스, queue family queue 인덱스, queue 핸들을 저장할 변수의 포인터이다. 현재 우리는 이 famliy 에서 단일 queue만 생성했기 때문에 index는 간단하게 0임
+논리 디바이스와 queue핸들로 그래픽 카드를 사용한 실제 작업을 시작할 수 있음 
+
+물리, 논리 디바이스
+
+큐를 만들었음 
+큐가족 - 큐
+
+그림이 그려지는 곳 
+surface
+
+스왑체인 
+
+stl 최대한 활용 여기 필요한 자료구조뭔지 생각 후 사용!
+
+벌칸 api 사용
+1. 벌칸의 기본 flow는 디바이스에 문의 query 
+2. 문의 후 답변오ㄴ거 가지고 create
+
+제작할 떄도 지켜야 하는거
+1. support 여부 확인
+2. 사용
+
+vulkan은 플랫폼과 무관한 api이므로 vulkan자체에는 윈도우 시스템과 인터페이스를 할 기능이 없다. 
+vulkan과 윈도우 시스템간의 연결을 설정하여 프레젠테이션 결과를 스크린에 표시하려면 WSI (Window system integration) extension이 필요함 이
+
+VK_KHR_surface!!
+- 랜더링된 이미지를 표시한 surface의 추상화 타입임 VKSurfaceKHR오브젝트를 노출 우리 프로그램의 surface는 이미 GLFW로 오픈된 윈도우를 만듬
+VK_KHR_surface extension은 instance level extension임 이것은 glfwGetRequiredInstanceExtensions로 부터 반환된 리스트 안에 포함되어 있기 떄문에 실제로 이미 활성화 되어있음 이 리스트에는 다음 두 챕터에서 사용하게될 몇가지 다른 WSI ex
+
+
+//..
+
+Window surface creation
+VkSurfaceKHR오브젝트와 그 사용이 플랫폼이 종속적이지 않더라도 생성은 그렇지 않음 종속적임 생성은 윈도우 시스템 세부사항에 의존함
+
+instance 보다 surface가 먼저 파괴되도록 해야한다. 
+querying for presentation support 
+vulkan 구현이 윈도우 시스템 상호작용을 지우너할 수도 있지만 이것이 시스템의 모든 장치가 이를 지원한다는 의미느 ㄴ아님
+그래서 isDeviceSutable을 확장하여 디바이스가 우리가 만든 surface에 이미지를 표시할 수 있다느 ㄴ것을 확인해야 함
+
+시렞 문제는 우리가 만든 surface에 표시할 수 있는 queue  family를 찾는 것임
+
+실제로 드로잉 commang를 지원하는 queue family와 presentation을 지원하는 queue family가 서로 겹치지 않을 수 있음
+그러므로 QueueFamilyIndices구조체를 수정하여 별도의 presentation queue가 가능하다는 점을 고려할 수 ㅣㅇㅆ도록 해야함
+
+[c++ 17 optional  - nil과 비슷한 아이 있으면 ture없으면 flase를 return함]
+
+논리디바이스 생성절차를 수정해서 presentation queue 를 생성하고 VkQueue핸들을 얻는것 
+
+g		vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+		vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+
+
+10장 swap chain
+vulkan에는 default framebuffer라는 개념이 없음
+그러므로 우리가 스크린에 시각화 하기 전에 렌더링 할 버퍼를 소유하기 위한 인프라 구조가 필요함 이 임ㄴ프라 구조를 swap chain이라고 함 
+vulkan에서 명시적으로 생성해야함
+swap chain은 본질적으로 스크린에 출력되기 전에 기다리는 이미지 wating image의 queue임 
+우리 어플리케이션은 그와 같은 이미지를 가져와서 그 이미지를 queue에 반환함
+queue의 정확한 작동 방식과 queue에 있는 이미지를 출력하는 조건은 swap chain의 설정에 따라 다르겠지만 swap chain의 일반적인 목적은 이미지의 출력을 화면 새로고침 빈도와 동기화 하는것 .. 이건 당연한 거자너
+
+확인되지 않은 필수 extention을 지우기 위해 set<string> 사용 이렇게 하면 사용가느앟ㄴ extension을 순서대로 나열하면서 쉽게 해당 extension을 체크할 수 있음 
+
+swapChainAdequate 조건이 충족되면 swap chain이 지원에 대한 확인은 확실히 충분합니다. 그렇지만 여전히 다양한 최적화 모드가 있을 수 있습니다.  우리는 이제 가능한 최적의 swap chain의 올바른 설정을 찾기 위한 두서너개의 함수를 작성할 것입니다. 여기 결정해야 할 3가지 타입의 설정이 있습니다.
+
+Surface format (color depth)
+Presentation mode (이미지를 화면에 "스와핑" 하기 위한 조건)
+Swap extent (swap chain의 이미지의 해상도)
+
+
+ Vulkan은 currentExtent 멤버에서 width와 height을 설정하여 윈도우의 해상도를 일치시키라고 합니다
+

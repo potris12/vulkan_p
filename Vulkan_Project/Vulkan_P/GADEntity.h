@@ -1,25 +1,23 @@
 #pragma once
 
-#include "stdafx.h"
-#include "GADBase.h"
-#include "GADComponent.h"
+namespace GADBased
+{
+	class GADWorld;
 
-namespace GAD {
-	class GADEntity : public GADBase
+	class GADEntity
 	{
 	public:
-		void awake();
-		void start();
-		void update();
-		void destroy();
-
+		void setID(int id);
+		const int const getID() const;
 	private:
-		
+		int id_;
 
 	public:
-		GADEntity(std::string& name);
+		GADEntity(unsigned int id);
 		~GADEntity();
+
+		//To put it in maps
+		friend bool operator<(const GADEntity &l, const GADEntity &r);
 	};
 
 }
-

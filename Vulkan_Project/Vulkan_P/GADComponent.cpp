@@ -1,28 +1,15 @@
 #include "GADComponent.h"
 
-using namespace GAD;
+using namespace GADBased;
 
-GADComponent::GADComponent(const std::string& name) : GADBase(name)
+int ComponentCounter::familyCounter = 0;
+
+template<class ComponentType>
+GADComponent<ComponentType>::GADComponent()
 {
 }
 
-
-void GAD::GADComponent::awake()
-{
-}
-
-void GAD::GADComponent::start()
-{
-}
-
-void GAD::GADComponent::update()
-{
-}
-
-void GAD::GADComponent::destroy()
-{
-}
-
-GADComponent::~GADComponent()
+template<class ComponentType>
+GADComponent<ComponentType>::~GADComponent()
 {
 }

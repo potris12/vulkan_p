@@ -1,19 +1,26 @@
 #pragma once
 
-#include "stdafx.h"
-#include "GADBase.h"
+namespace GADBased {
 
-namespace GAD {
-	class GADComponent : public GADBase
+	struct ComponentCounter {
+		static int familyCounter;
+	};
+
+	template<class ComponentType>
+	class GADComponent
 	{
 	public:
-		void awake();
-		void start();
-		void update();
-		void destroy();
+		static inline int family() {
+			static int family = ComponentCounter::familyCounter++;
+			return family;
+		}
 
+		template <class c>
+		static int getComponentFamily() {
+			return Component<typename std::remove_const<c>::type>::family();
+		}
 	public:
-		GADComponent(const std::string& name);
+		GADComponent();
 		~GADComponent();
 	};
 

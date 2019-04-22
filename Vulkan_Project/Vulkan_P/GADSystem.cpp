@@ -1,28 +1,27 @@
+#include "stdafx.h"
 #include "GADSystem.h"
 
-using namespace GAD;
+using namespace GADBased;
 
-GADSystem::GADSystem(const std::string& name) : GADBase(name)
-{
+
+void GADSystem::registerWorld(GADWorld* world){
+	parentWorld = world;
 }
 
-
-void GAD::GADSystem::awake()
-{
+void GADSystem::registerEntity(const GADEntity &entity) {
+	registeredEntities.push_back(entity);
 }
 
-void GAD::GADSystem::start()
-{
+void GADSystem::unRegisterEntity(const GADEntity &entity) {
+	for (auto it = registeredEntities.begin(); it != registeredEntities.end(); ++it) {
+		GADEntity e = *it;
+		if (e.getID() == entity.getID()) {
+			registeredEntities.erase(it);
+		}
+	}
 }
 
-void GAD::GADSystem::update()
+GADComponentMask GADBased::GADSystem::getSignature()
 {
-}
-
-void GAD::GADSystem::destroy()
-{
-}
-
-GADSystem::~GADSystem()
-{
+	return signature;
 }

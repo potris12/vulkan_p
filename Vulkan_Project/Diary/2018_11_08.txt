@@ -1,0 +1,82 @@
+¹úÄ­ ÆÄÀÌÇÁ¶óÀÎÀº ¸· ³» ¸¾´ë·Î ÄÁÆ®·Ñ °¡´ÉÇÏ¸é¼­ µ¿½Ã¿¡ µ¿Àû º¯°æ¿¡´Â ´İÇôÀÖÀ½
+ÇÊ¿ä¾ø´Â ½¦ÀÌ´õ ¾È ¾µ ¼ö ÀÖÀ½ 
+
+±Ùµ¥ ÀÌ°Ç ´Ù·ºµµ ¸¶Âú°¡ÁöÀÓ ¹Ì¸® »ç¿ëÇÒ ÇÔ¤µ ¤Ì¾Ë·Á¼­ Á»´õ ÃÖÀûÈ­ ÇÑ°Å ÀÓ
+»ı¼ºÇÑ ½¦ÀÌ´õ´Â ÆÄÀÌÇÁ¶óÀÎ ¸¸µç ÈÄ¿¡ Á¤¸®µÇ¾ßÇÔ delete
+
+fixed functions 
+¿À·¡Àü graphics api µéÀº graphics pipelineÀÇ ´ëºÎºĞ ´Ü°è¿¡´ëÇØ ±âº» »óÅÂ Á¦°ø 
+¹úÄ­Àº °ÅÀÇ ¸ğµç°É ¸í½ÃÇØ¾ßÇÔ
+
+vertex input - Á¤Á¡ Á¤º¸ + ÀÎ½ºÅÏ½Ì ¿©ºÎ
+input assembly - vertexµéÀÇ Á¶¸³ ¹æ¹ı, ¸ğ¾ç - stribe? ¿¬¼Ó ¿©ºÎ
+viewports and scissors - view port (±×¸² ±â¸£´Â ¿µ¿ª)
+scissors - resterized ¿µ¿ª ½ÇÁ¦·Î ÇÈ¼¿ÀÌ ÀúÀåµÉ ¿µ¿ª 
+viewport state¿¡ °áÇÕµÇ¾î¾ß ÇÑ´Ù. ¸î¸î ±×·¡ÇÈ Ä«µå¿¡¼­´Â ¿©·¯°³ÀÇ viewprt ¿Í scissor»ç°¢ÇüÀ» »ç¿ëÇÏ´Â°ÍÀÌ °¡´É 
+Rasterizer - ÀÀ Å¬¸®ÇÎ, ÄÃ¸µ, µîµî ÇÔ  depth clampµµ ¼³Á¤°¡´É 
+(¿ÀÈ£ rasterizer setting¿¡¼­ depth bias µî ±×¸²ÀÚ °ü·Ã depth °ª º¯°æ °¡´É)
+MultiSampling
+Depth and stencil testing
+Color blending - ´Ù·ºÀÌ¶û ¿ÏÀü ºñ½ÁÇÑµ¥.. ¹æ¹ıÀÌ 2°¡ÁöÀÓ
+
+Dynamic state -  ÀÌÀü¿¡ ÁöÁ¤ÇÑ ±¸Á¶Ã¼ Áß Á¦ÇÑµÈ ¸î°³ÀÇ »óÅÂ´Â ½ÇÁ¦·Î pipelineÀç»ı¼º ¾øÀÌ º¯¤¡¤·ÇÒ ¼ö ÀÖ´Ù. viewport, line width, blend constant °°Àº¾Öµé ¹Ù²Ü ¼ö ÀÖÀ½ ÀÌ°É ´ÙÀÌ³ª¹ÍÇÏ°Ô ¹Ù²Ù·Á¸é VkPipelineDynamicStateCreateInfo±¸Á¶Ã¼¸¦ Ã¤¿ö¾ßÇÔ 
+¿©±â¼­ ´ÙÀÌ³ª¹Í À¸·Î º¯°æµÉ ³à¼®µéÀ» ³ÖÀ» ¼ö ÀÖÀ½ 
+    VK_DYNAMIC_STATE_VIEWPORT = 0,
+    VK_DYNAMIC_STATE_SCISSOR = 1,
+    VK_DYNAMIC_STATE_LINE_WIDTH = 2,
+    VK_DYNAMIC_STATE_DEPTH_BIAS = 3,
+    VK_DYNAMIC_STATE_BLEND_CONSTANTS = 4,
+    VK_DYNAMIC_STATE_DEPTH_BOUNDS = 5,
+    VK_DYNAMIC_STATE_STENCIL_COMPARE_MASK = 6,
+    VK_DYNAMIC_STATE_STENCIL_WRITE_MASK = 7,
+    VK_DYNAMIC_STATE_STENCIL_REFERENCE = 8,
+    VK_DYNAMIC_STATE_VIEWPORT_W_SCALING_NV = 1000087000,
+    VK_DYNAMIC_STATE_DISCARD_RECTANGLE_EXT = 1000099000,
+    VK_DYNAMIC_STATE_SAMPLE_LOCATIONS_EXT = 1000143000,
+    VK_DYNAMIC_STATE_BEGIN_RANGE = VK_DYNAMIC_STATE_VIEWPORT,
+    VK_DYNAMIC_STATE_END_RANGE = VK_DYNAMIC_STATE_STENCIL_REFERENCE,
+    VK_DYNAMIC_STATE_RANGE_SIZE = (VK_DYNAMIC_STATE_STENCIL_REFERENCE - VK_DYNAMIC_STATE_VIEWPORT + 1),
+    VK_DYNAMIC_STATE_MAX_ENUM = 0x7FFFFFFF
+
+ÀÌ·±¾Öµé 
+pipeline layout - ¿ì¸®´Â shader¾È¿¡¼­ uniform °ªÀ» »ç¿ëÇÒ ¼ö ÀÖÀ½(´Ù·º »ó¼ö¹öÆÛ °°Àº ¾Öµé ) 
+ÀÌ°ÍÀº global°ªÀ¸·Î dynamic stateº¯¼ö¿Í À¯»çÇÏ°Ô shaderÀÇ µ¿ÀÛÀ» shaderÀç»ı¼º ¾øÀÌ drawing½ÃÁ¡¿¡ ¹Ù²Ü ¼ö ÀÖÀ½ 
+ÀÌ°ÍÀº ´ë°³ vertex shader¿¡ transformation matrix¸¦ Àü´ŞÇÏ°Å³ª fragment shader¿¡¼­ texture smapler¸¦ »ı¼ºÇÏ±â À§ÇØ¼­ »ç¿ëµÊ ÀÀÀÀ »ó¼ö¹öÆÛ ¸ÂÀ½
+
+ÀÌ uniform°ªÀº VkPipelineLayout ¿ÀºêÁ§Æ® »ı¼ºÀ» ÅëÇØ pipelineÀ» »ı¼ºÇÏ´Â µ¿¾È ÁöÁ¤µÇ¾î¾ßÇÔ 
+=== 
+»ó¼ö¹öÆÛ°¡ PipelineLayout°ªÀ» ¿ÀºêÁ§Æ® »ı¼ºÀ» ÅëÇØ pipelineÀ» »ı¼ºÇÏ´Â µ¿¾È ÁöÁ¤µÇ¾î¾ßÇÔ
+¿Ã 
+
+PipelineLayoutÀ» shader¿¡ Àü´ŞÇÒ ¼ö ÀÖ´Â ¶ÇÇÏ³ªÀÇ µ¿Àû°ª push constatnt¸¦ Áö
+pipeline layout Àº ÇÁ·Î±×·¥ ¶óÀÌÇÁ »çÀÌÅ¬ ³»³» ÂüÁ¶µÉ °Í ‹š¹®¿¡ ÇÁ·Î±×·¥ Á¾·á ½ÃÁ¡¿¡ ÀÌ¸¦ Æó±âÇØ¾ßÇÔ 
+‹š¹®¿¡ ÇÁ·Î±×·¥ Á¾·á ½ÃÁ¡¿¡ ÀÌ¸¦ Æó±âÇØ¾ßÇÔ 
+
+ÀÌ uniform °ª¤·´À VkPupelineLayout ¿ÀºêÁ§Æ® »ı¼ºÀ» ÅëÇØ pipelineÀ» »ı¼ºÇÏ´Â µ¿¾È ÁöÁ¤µÇ¾î¾ßÇÔ 
+
+## Graphics pipeline basics render passes
+
+Attachment Description
+loadOp¿Í stroeOp´Â attachmentÀÇ µ¥ÀÌÅÍ°¡ ·»´õ¸µ Àü¿¡/·»´õ¸µ ÈÄ¿¡ ¹«¾ùÀ» ÇÒÁö °áÁ¤ÇÕ´Ï´Ù. ¾Æ·¡¿¡ loadOp¸¦ À§ÇÑ ¸®½ºÆ®°¡ ÀÖ½À´Ï´Ù.
+
+VK_ATTACHMENT_LOAD_OP_LOAD : ±âÁ¸¿¡ attachment¿¡ ÀÖ´ø ÄÁÅÙÃ÷¸¦ À¯ÁöÇÕ´Ï´Ù.
+VK_ATTACHMENT_LOAD_OP_CLEAR : ½ÃÀÛ½Ã °ªÀ» »ó¼ö·Î Áö¿ó´Ï´Ù.
+VK_ATTACHMNET_LOAD_OP_DONT_CARE : ±âÁ¸ ÄÁÅÙÃ÷°¡ undefined°¡ µË´Ï´Ù: ¿ì¸®´Â ÀÌ¸¦ »ó°üÇÏÁö ¾ÊÀ» °Ì´Ï´Ù.
+storeOp¸¦ À§ÇØ¼­´Â ´Ü 2°³ÀÇ ¼±ÅÃÁö¸¸ ÀÖ½À´Ï´Ù.
+
+VK_ATTACHMENT_STROE_OP_STORE : ·»´õ¸µµÈ ÄÁÅÙÃ÷°¡ ¸Ş¸ğ¸®¿¡ ÀúÀåµÇ°í ÀÌÈÄ ÀÌ°ÍÀ» ÀĞÀ» ¼ö ÀÖ½À´Ï´Ù.
+VK_ATTACHMENT_STORE_OP_DONT_CARE : ·»´õ¸µ ÀÛ¾÷ ÀÌÈÄ¿¡ framebufferÀÇ ÄÁÅÙÃ÷´Â undefined°¡ µË´Ï´Ù.
+
+ÀÌ¹ÌÁö´Â ´ÙÀ½¿¡ ¼öÇàÇÒ ÀÛ¾÷¿¡ ÀûÇÕÇÑ Æ¯Á¤ÇÑ ·¹ÀÌ¾Æ¿ôÀ¸·Î Á¤È¯µÇ¾î¾ß ÇÑ´Ù´Â °Í
+
+INITialLayoutÀº render pass¸¦ ½ÃÀÛÇÏ±â Àü »óÅÂÀÇ image layoutÀ» ÁöÁ¤ÇÕ´Ï´Ù. finallytourÀº render pass°¡ ³¡³µÀ» ¶§ ÀÚ°ğ¾ü±à·Î ÀüÈ¯µÉ alyoutÀ» ÁöÁ¤ÇÕ´Ï´Ù. initialLayout¿¡ VK)ImageLayout uNDefinedÀ» »ç¿ëÇÑ´Ù´Â ÀÇ´Â image°¡ ÀÌÀü¿¡ ¾î¶² layoutÀÌ¾úµçÁö »ó°ü¾ø´Ù´À ¤¤¶æÀÌ´Ù ŸæÆ¯º°ÇÑ °ªÀÇ ÁÖÀÇ»çÇ×Àº imageÀÇ ³»¿ëÀÌ º¸Á¸µÇ´Â °ÍÀ» º¸ÀåÇØ ÁÖÁö ¾Ê´Â´Ù´Â °Í ÇÏÁö¸¸ ¿ì¸®´Â ±×°É Áö¿ì ¤©°Å¶ó ¹®Á¦°¡ µÇÁö ¾ÊÀ½ ¿ì¸®°¡ ·»´õ¸µ ÈÄ¿¡ swap chainÀ» »ç¿ëÇÏ¿© image ÇÁ·¹Á¨Å×ÀÌ¼ÇÀ» ÁØºñÇÒ °Å¶ó finalLayoutÀ¸·Î VK_IMAGE_LAYOUT_PRESENT_SRC_KHRÀ» »ç¿ëÇÔ
+subpasses and attachment reference 
+´ÜÀÏ render pass´Â ¿©·¯°³ÀÇ subpass·Î ±¸¼ºµÊ subpass´Â ÀÌÀü paasÀÇ framebuffer³»¿ë¿¡ ÀÇÁ¸ÇÏ´Â ÈÄ¼Ó ·»´õ¸µ ÀÛ¾÷ÀÓ ¿¹¸¦ µé¸é ÀÕµû¶ó¼­ Àû¿ëµÇ´Â ÀÌ¤©·ÃÀÇ post processingÀÌÆÑÆ® °°Àº°Ô ÀÖÀ½ ÀÌ·± ·»´õ¸µ operationµéÀ» ÇÏ³ªÀÇ render pass¿¡ ±×·ìÈ­ ÇÒ °æ¿ì vulkanÀº operationµéÀ» ÀçÁ¤·ÄÇÏ°í ´õ ³ªÀº ¼º´ÉÀ» À§ÇÏ¿© ¸Ş¸ğ¸® ´ë¿ªÆøÀ» Àı¾àÇÒ ¼ö ÀÖÀ½....>!? 
+ÇÏÁö¸¸ ¿ì¸®ÀÇ ¾ÆÁÖ~ Ã¹¹ø¤Š »ï°¢ÇüÀ» À§ÇØ¼­´Â ´ÜÀÏ subpass¸¦ À¯ÁöÇÕ´Ï´Ù. 
+¸ğµç subpaass´Â ÇÏ³ª ÀÌ»óÀÇ attachment¸¦ Â÷Á¶ÇÔ
+ÀÌ attachment´Â ¿ì¸®°¡ ÀÌÀü ¼½¼Ç¿¡¼­ ±¸Á¶Ã¼¸¦ »ç¿ëÇÏ¿© ±â¼úÇßÀ½ ÀÌ ÂüÁ¶´Â VKAttachmentRefernce±¸Á¶Ã¼ ÀÚÃ¼ÀÓ 
+
+subpass desc´Â compute shaderÀÎÁö graphic shaderÀÎÁö ÆÇ´ÜÇÏ´Â ÁÖ­‡
+
+REnder pass attachment¿Í ÀÌ¸¦ ÂüÁ¶ÇÏ´Â ±âº»ÀûÀÎ subpass¸¦ ±â¼úÇßÀ¸´Ï renderpass ÀÚÃ¼¸¦ »ı¼ºÇÒ ¼ö ÀÖÀ½ VkRe
+

@@ -1,28 +1,29 @@
+#include "stdafx.h"
 #include "GADEntity.h"
 
-using namespace GAD;
 
+using namespace GADBased;
 
-void GAD::GADEntity::awake()
+void GADBased::GADEntity::setID(int id)
+{
+	id_ = id;
+}
+
+const int const GADBased::GADEntity::getID() const
+{
+	return id_;
+}
+
+GADEntity::GADEntity(unsigned int id) : id_(id)
 {
 }
 
-void GAD::GADEntity::start()
-{
-}
-
-void GAD::GADEntity::update()
-{
-}
-
-void GAD::GADEntity::destroy()
-{
-}
-
-GAD::GADEntity::GADEntity(std::string & name) : GADBase(name)
-{
-}
 
 GADEntity::~GADEntity()
 {
+}
+
+bool GADBased::operator<(const GADEntity & l, const GADEntity & r)
+{
+	return l.id_ < r.id_;
 }
