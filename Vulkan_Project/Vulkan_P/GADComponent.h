@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace GADBased {
 
 	struct ComponentCounter {
@@ -15,13 +17,12 @@ namespace GADBased {
 			return family;
 		}
 
-		template <class c>
 		static int getComponentFamily() {
-			return Component<typename std::remove_const<c>::type>::family();
+			return GADComponent<typename std::remove_const<ComponentType>::type>::family();
 		}
+
 	public:
 		GADComponent();
 		~GADComponent();
 	};
-
 }

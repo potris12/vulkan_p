@@ -2,6 +2,7 @@
 
 using namespace GADBased;
 
+
 template<class ComponentType>
 void GADBased::GADComponentHandle<ComponentType>::destroy()
 {
@@ -9,7 +10,7 @@ void GADBased::GADComponentHandle<ComponentType>::destroy()
 }
 
 template<class ComponentType>
-GADBased::GADComponentHandle<ComponentType>::GADComponentHandle(ComponentManager<ComponentType>* manager, ComponentInstance inst, Entity e)
+GADBased::GADComponentHandle<ComponentType>::GADComponentHandle(GADComponentManager<ComponentType>* manager, ComponentInstance inst, GADEntity e)
 {
 }
 

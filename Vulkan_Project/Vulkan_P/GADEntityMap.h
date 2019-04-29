@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GADEntity.h"
+#include <array>
+#include <map>
 
 namespace GADBased{
 
@@ -18,7 +20,7 @@ namespace GADBased{
 
 	private:
 		std::map<GADEntity, ComponentInstance> entityToInstance;
-		std::array<GADEntity, MAX_COMPONETMANAGER_MANAGED_COMPONENT_NUM> instanceToEntity;
+		std::array<GADEntity, 1024> instanceToEntity;
 		
 	public:
 		GADEntityMap();

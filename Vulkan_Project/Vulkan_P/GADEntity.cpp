@@ -9,7 +9,7 @@ void GADBased::GADEntity::setID(int id)
 	id_ = id;
 }
 
-const int const GADBased::GADEntity::getID() const
+const int GADBased::GADEntity::getID()  const
 {
 	return id_;
 }

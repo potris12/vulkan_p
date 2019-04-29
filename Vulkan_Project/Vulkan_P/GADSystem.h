@@ -44,8 +44,8 @@ namespace GADBased {
 		GADComponentMask signature;
 
 	public:
-		GADSystem();
-		~GADSystem();
+		//GADSystem();
+		//~GADSystem();
 	};
 
 

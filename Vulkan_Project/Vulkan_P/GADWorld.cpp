@@ -4,7 +4,7 @@
 
 using namespace GADBased;
 
-GADBased::GADWorld::GADWorld(std::unique_ptr<GADEntityManager> entityManager) : entityManager(std::move(entityManager))
+GADBased::GADWorld::GADWorld(std::unique_ptr<GADEntityManager>& entityManager) : entityManager(std::move(entityManager))
 {
 }
 
@@ -29,12 +29,12 @@ void GADBased::GADWorld::render()
 	}
 }
 
-GADEntityHandle GADBased::GADWorld::createEntity()
+GADBased::GADEntityHandle GADBased::GADWorld::createEntity()
 {
 	return { entityManager->createEntity(), this };
 }
 
-void GADBased::GADWorld::addSystem(std::unique_ptr<GADSystem> system)
+void GADBased::GADWorld::addSystem(std::unique_ptr<GADSystem>& system)
 {
 	system->registerWorld(this);
 	systems.push_back(std::move(system));
@@ -63,10 +63,10 @@ void GADBased::GADWorld::updateEntityMask(GADEntity const & entity, GADComponent
 	}
 }
 
-GADBased::GADWorld::GADWorld()
-{
-}
-
-GADBased::GADWorld::~GADWorld()
-{
-}
+//GADBased::GADWorld::GADWorld()
+//{
+//}
+//
+//GADBased::GADWorld::~GADWorld()
+//{
+//}

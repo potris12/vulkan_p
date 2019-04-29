@@ -37,7 +37,7 @@ shield.destroy();
 		}
 
 		template<class ComponentType>
-		ComponentHandle<ComponentType> getComponent() {
+		GADComponentHandle<ComponentType> getComponent() {
 			ComponentHandle<ComponentType> handle;
 			world->unPack(endtity, handle);
 			return handle;

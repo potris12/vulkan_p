@@ -8,11 +8,12 @@ namespace GADBased
 	{
 	public:
 		void setID(int id);
-		const int const getID() const;
+		const int getID() const;
 	private:
 		int id_;
 
 	public:
+		GADEntity() = default;
 		GADEntity(unsigned int id);
 		~GADEntity();
 

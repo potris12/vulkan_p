@@ -47,10 +47,15 @@ void GADBased::GADEntityMap::remove(GADEntity entity)
 	// why do not delate instanceToEntity entity
 }
 
-GADEntityMap::GADEntityMap()
-{
-}
+//GADEntityMap::GADEntityMap()
+//{
+//}
 
+
+GADBased::GADEntityMap::GADEntityMap()
+{
+	//instanceToEntity = std::array<GADEntity, MAX_COMPONETMANAGER_MANAGED_COMPONENT_NUM>();
+}
 
 GADEntityMap::~GADEntityMap()
 {

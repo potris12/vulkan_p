@@ -14,12 +14,12 @@ ComponentInstance GADBased::GADComponentManager<ComponentType>::addComponent(GAD
 }
 
 template<class ComponentType>
-ComponentHandle<ComponentType> GADBased::GADComponentManager<ComponentType>::lookup(GADEntity e)
+ComponentType GADBased::GADComponentManager<ComponentType>::lookup(GADEntity e)
 {
 	try
 	{
 		ComponentInstance inst = entityMap.at(e);
-		return ComponentHandle<ComponentType>(this, inst, e);
+		return GADComponentHandle<ComponentType>(this, inst, e);
 	}
 	catch (std::exception e)
 	{
@@ -28,7 +28,7 @@ ComponentHandle<ComponentType> GADBased::GADComponentManager<ComponentType>::loo
 }
 
 template<class ComponentType>
-Component * GADBased::GADComponentManager<ComponentType>::lookupComponent(Entity e)
+GADComponent<ComponentType> * GADBased::GADComponentManager<ComponentType>::lookupComponent(GADEntity e)
 {
 	try
 	{
@@ -57,7 +57,7 @@ void GADBased::GADComponentManager<ComponentType>::destroyComponent(GADEntity e)
 	
 	ComponentInstance lastComponent = componentData.size - 1;
 	componentData[inst] = componentData.data[lastComponent];
-	Entity lastEntity = entityMap.getEntity(lastComponent);
+	GADEntity lastEntity = entityMap.getEntity(lastComponent);
 
 	entityMap.remove(entity);
 	entityMap.update(lastEntity, instance);

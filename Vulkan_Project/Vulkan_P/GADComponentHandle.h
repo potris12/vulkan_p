@@ -8,19 +8,19 @@ namespace GADBased {
 	template<class ComponentType>
 	class GADComponentHandle
 	{
-		using ExposedComponentType = typename = ComponentManager<ComponentType>::LookypType;
+		//using ExposedComponentType = GADComponentManager<ComponentType>::LookupType;
 
 	public:
 		void destroy();
-		ExposedComponentType* operator->() const { return component; }
+		ComponentType* operator->() const { return component; }
 	private:
 		GADEntity owner;
-		ExposedComponentType * component;
-		ComponentManager<ComponentType>* mgr;
+		ComponentType * component;
+		GADComponentManager<ComponentType>* mgr;
 
 	public:
-		GADComponentHandle() {};
-		GADComponentHandle(ComponentManager<ComponentType>* manager, ComponentInstance inst, Entity e);
+		//GADComponentHandle() {};
+		GADComponentHandle(GADComponentManager<ComponentType>* manager, ComponentInstance inst, GADEntity e);
 		~GADComponentHandle();
 	};
 

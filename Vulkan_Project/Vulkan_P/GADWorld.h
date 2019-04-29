@@ -15,7 +15,7 @@ namespace GADBased
 	class GADWorld
 	{
 	public:
-		explicit GADWorld(std::unique_ptr<GADEntityManager> entityManager);
+		explicit GADWorld(std::unique_ptr<GADEntityManager>& entityManager);
 
 		//Called on engine init
 		void init();
@@ -27,13 +27,13 @@ namespace GADBased
 		void render();
 		
 		GADEntityHandle createEntity();
-		void addSystem(std::unique_ptr<GADSystem> system);
+		void addSystem(std::unique_ptr<GADSystem>& system);
 		void destroyEntity(GADEntity entity);
 
 		//This is only nessary for bridge component managers.
 		template <class ComponentType>
-		void addCustomComponentManager(std::unique_ptr<ComponentManager<ComponentType>> manager) {
-			int family = GetComponentFamily<ComponentType>();
+		void addCustomComponentManager(std::unique_ptr<GADComponentManager<ComponentType>> manager) {
+			int family = GADComponent<ComponentType>::GetComponentFamily();
 			if (family >= componentManagers.size()) {
 				componentManagers.resize(family + 1);
 			}
@@ -42,10 +42,10 @@ namespace GADBased
 
 		template<class ComponentType>
 		void addComponent(GADEntity const &entity, ComponentType &&component) {
-			ComponentManager < ComponentType * manager = getComponentManager<ComponentType>();
+			GADComponentManager<ComponentType> * manager = getComponentManager<ComponentType>();
 			manager->addComponent(entity, component);
 
-			ComponentMask oldMask = entityMasks[entity];
+			GADComponentMask oldMask = entityMasks[entity];
 			entityMasks[entity].addComponent<ComponentType>();
 
 			updateEntityMask(entity, oldMask);
@@ -53,32 +53,32 @@ namespace GADBased
 
 		template <class ComponentType>
 		void removeComponent(GADEntity const &entity) {
-			ComponentManager<ComponentType>* manager = getComponentManager<ComponentType>();
-			ComponentHandle<ComponentType> component = manager->lookup(entity);
+			GADComponentManager<ComponentType>* manager = getComponentManager<ComponentType>();
+			GADComponentHandle<ComponentType> component = manager->lookup(entity);
 			component.destroy();
 
-			ComponentMask oldMask = entityMasks[entity];
+			GADComponentMask oldMask = entityMasks[entity];
 			entityMasks[entity].removeComponent<ComponentType>();
 
 			updateEntityMask(entity, oldMask);
 		}
 
 		template<class ComponentType, class... Args>
-		void unpack(Entity e, ComponentHandle<ComponentType>& handle, ComponentHandle<Args> &... args) {
-			typedef ComponentManager<ComponentType> ComponentManagerType;
-			auto mgr = getComponentManager<ComponentTYpe>();
-			handle = ComponentHandle < ComponentType(e, mgr->lookup(e), mgr);
+		void unpack(GADEntity e, GADComponentHandle<ComponentType>& handle, GADComponentHandle<Args> &... args) {
+			typedef GADComponentManager<ComponentType> ComponentManagerType;
+			auto mgr = getComponentManager<ComponentType>();
+			handle = GADComponentHandle<ComponentType>(e, mgr->lookup(e), mgr);
 
 			//Recures
 			unpack<Args...>(e, args...);
 		}
 
-		template <class ComponentType>
-		void unpack(Entity e, ComponentHandle<ComponentType>& handle) {
-			typedef ComponentManager<ComponentType> ComponentManagerType;
-			auto mgr = getComponentManager<ComponentType>();
-			handle = ComponentHandle <ComponentType>(e, mgr->lookup(e), mgr);
-		}
+		//template <class ComponentType>
+		//void unpack(GADEntity e, ComponentHandle<ComponentType>& handle) {
+		//	typedef ComponentManager<ComponentType> ComponentManagerType;
+		//	auto mgr = getComponentManager<ComponentType>();
+		//	handle = ComponentHandle <ComponentType>(e, mgr->lookup(e), mgr);
+		//}
 
 	private:
 
@@ -90,10 +90,10 @@ namespace GADBased
 		void updateEntityMask(GADEntity const &entity, GADComponentMask oldMask);
 
 		template<class ComponentType>
-		ComponentManager<ComponentType> * GADComponentManager() {
+		GADComponentManager<ComponentType> * getComponentManager() {
 			//need to make sure we actually have a component manager.
 			//TODO (taurheim) this is a performance hit every time we add and remove a component
-			int family = GetComponentFamily<ComponentType>();
+			int family = GADComponent<ComponentType>::GetComponentFamily();
 
 			if (family >= componentManagers.size()) {
 				componentManagers.resize(family + 1);
@@ -104,15 +104,15 @@ namespace GADBased
 			}
 
 			if (!componentManagers[family]) {
-				componentManagers[family] = std::make_unique<ComponentManager<ComponentType>>();
+				componentManagers[family] = std::make_unique<GADComponentManager<ComponentType>>();
 
 			}
 
-			return static_cast<ComponentManager<ComponentType> *>(componentManagers[family].get());
+			return static_cast<GADComponentManager<ComponentType> *>(componentManagers[family].get());
 		}
 	public:
-		GADWorld();
-		~GADWorld();
+		//GADWorld();
+		//~GADWorld();
 	};
 
 }

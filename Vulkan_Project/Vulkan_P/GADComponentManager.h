@@ -2,14 +2,15 @@
 
 #include "GADEntity.h"
 #include "GADEntityMap.h"
+#include "GADComponent.h"
+#include <functional>
 
 namespace GADBased
 {
-
 	template<class ComponentType>
 	struct ComponentData {
 		unsigned int size = 1;
-		std::array<ComponentType, MAX_COMPONETMANAGER_MANAGED_COMPONENT_NUM> data;
+		std::array<ComponentType, 1024> data;
 	};
 
 	class BaseComponentManager {
@@ -34,8 +35,8 @@ namespace GADBased
 		ComponentInstance addComponent(GADEntity e, ComponentType& c);
 
 		//Look up the component related to an entity
-		ComponentHandle<ComponentType> lookup(GADEntity e);
-		Component* lookupComponent(Entity e);
+		ComponentType lookup(GADEntity e);
+		GADComponent<ComponentType>* lookupComponent(GADEntity e);
 
 		//Destroy the component related to an entity
 		void destroyComponent(GADEntity e);
