@@ -26,6 +26,17 @@ void GAD::GADWorld::destroy()
 	system_manager_->destroy();
 }
 
+template<class ComponentType>
+inline GADComponent<ComponentType> GAD::GADWorld::addComponent()
+{
+	if (component_managers_.end() == component_managers_.find(ComponentType::family()))
+	{
+		component_managers_[ComponentType::family()] = make_unique<GADComponentManager<ComponentType>>();
+	}
+	component_managers_[ComponentType::family()]->addComponent();
+	return GADComponent<ComponentType>();
+}
+
 GAD::GADWorld::GADWorld(std::string name) : GADBase(name)
 {
 }

@@ -16,6 +16,7 @@
 #include <cassert>
 #include <algorithm>
 
+
 typedef __int64 GAD_KEY;
 
 /*
@@ -29,3 +30,5 @@ GLM_FORCE_DEPTH_ZERO_TO_ONE 정의를 사용하여 Vulkan 범위를 0.0에서 1.0으로 사용하
 
 #include <array>
 #include <chrono>
+
+#include <functional>

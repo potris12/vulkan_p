@@ -70,6 +70,9 @@
     <Filter Include="소스 파일\GADBased\02.System\SystemManager">
       <UniqueIdentifier>{90f877ea-7251-481f-9a6a-f3f78142e2f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager">
+      <UniqueIdentifier>{a3ae58a9-efde-4f2e-92f5-6800f27681a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp">
@@ -119,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="GADBase.cpp">
       <Filter>소스 파일\GADBased</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponentManager.cpp">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -178,6 +184,9 @@
     </ClInclude>
     <ClInclude Include="GADBase.h">
       <Filter>소스 파일\GADBased</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentManager.h">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
