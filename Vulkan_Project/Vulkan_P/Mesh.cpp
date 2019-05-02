@@ -1,5 +1,5 @@
 #include "Mesh.h"
-#include "Renderer.h"
+//#include "Renderer.h"
 
 
 #define INSTANCE_COUNT 10
@@ -8,7 +8,7 @@ void Mesh::awake()
 {
 
 
-	createVertexBuffer();
+	
 	//createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
@@ -122,7 +122,7 @@ void Mesh::draw()
 	
 }
 
-void Mesh::createIndexBuffer()
+void Mesh::createIndexBuffer(const VkCommandPool& commandPool)
 {
 	VkDeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
 	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
@@ -131,11 +131,11 @@ void Mesh::createIndexBuffer()
 	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
 	index_buffer_->map((void*)indices_.data());
 	index_buffer_->unmap();
-	index_buffer_->prepareBuffer();
+	index_buffer_->prepareBuffer(commandPool);
 
 }
 
-void Mesh::createVertexBuffer()
+void Mesh::createVertexBuffer(const VkCommandPool& commandPool)
 {
 	VkDeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
 	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
@@ -144,7 +144,7 @@ void Mesh::createVertexBuffer()
 	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
 	vertex_buffer_->map((void*)vertices_.data());
 	vertex_buffer_->unmap();
-	vertex_buffer_->prepareBuffer();
+	vertex_buffer_->prepareBuffer(commandPool);
 
 }
 

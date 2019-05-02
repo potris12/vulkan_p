@@ -15,6 +15,10 @@ public:
 
 	void registeConstantData(VkCommandBuffer& commandBuffer);
 	void draw();
+
+
+	void createIndexBuffer(const VkCommandPool& commandPool);
+	void createVertexBuffer(const VkCommandPool& commandPool);
 private:
 	std::vector<InstanceData> instanceData;
 
@@ -112,8 +116,6 @@ private:
 	//std::vector<uint16_t> indices_;
 	std::shared_ptr<Buffer> instance_buffer_ = nullptr;
 
-	void createIndexBuffer();
-	void createVertexBuffer();
 	void createInstanceBuffer();
 public:
 	Mesh(std::string mesh_name);

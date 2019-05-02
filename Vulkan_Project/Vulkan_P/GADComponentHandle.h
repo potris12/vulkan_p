@@ -19,8 +19,8 @@ namespace GADBased {
 		GADComponentManager<ComponentType>* mgr;
 
 	public:
-		//GADComponentHandle() {};
-		GADComponentHandle(GADComponentManager<ComponentType>* manager, ComponentInstance inst, GADEntity e);
+		GADComponentHandle() {};
+		GADComponentHandle(GADEntity e, ComponentType* component, GADComponentManager<ComponentType>* manager);
 		~GADComponentHandle();
 	};
 

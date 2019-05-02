@@ -25,7 +25,7 @@ namespace GADBased
 	};
 
 	template<class ComponentType>
-	class GADComponentManager
+	class GADComponentManager : public BaseComponentManager
 	{
 	public:
 		using LookupType = ComponentType;
@@ -35,8 +35,7 @@ namespace GADBased
 		ComponentInstance addComponent(GADEntity e, ComponentType& c);
 
 		//Look up the component related to an entity
-		ComponentType lookup(GADEntity e);
-		GADComponent<ComponentType>* lookupComponent(GADEntity e);
+		ComponentType& lookup(GADEntity e);
 
 		//Destroy the component related to an entity
 		void destroyComponent(GADEntity e);

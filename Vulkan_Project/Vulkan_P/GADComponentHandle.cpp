@@ -10,8 +10,11 @@ void GADBased::GADComponentHandle<ComponentType>::destroy()
 }
 
 template<class ComponentType>
-GADBased::GADComponentHandle<ComponentType>::GADComponentHandle(GADComponentManager<ComponentType>* manager, ComponentInstance inst, GADEntity e)
+GADBased::GADComponentHandle<ComponentType>::GADComponentHandle(GADEntity e, ComponentType* component, GADComponentManager<ComponentType>* manager)
 {
+	this->owner = e;
+	this->component = component;
+	this->manager = manager;
 }
 
 

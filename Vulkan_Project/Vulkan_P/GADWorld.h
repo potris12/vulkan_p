@@ -33,7 +33,7 @@ namespace GADBased
 		//This is only nessary for bridge component managers.
 		template <class ComponentType>
 		void addCustomComponentManager(std::unique_ptr<GADComponentManager<ComponentType>> manager) {
-			int family = GADComponent<ComponentType>::GetComponentFamily();
+			int family = GADComponent<ComponentType>::family();
 			if (family >= componentManagers.size()) {
 				componentManagers.resize(family + 1);
 			}
@@ -65,7 +65,6 @@ namespace GADBased
 
 		template<class ComponentType, class... Args>
 		void unpack(GADEntity e, GADComponentHandle<ComponentType>& handle, GADComponentHandle<Args> &... args) {
-			typedef GADComponentManager<ComponentType> ComponentManagerType;
 			auto mgr = getComponentManager<ComponentType>();
 			handle = GADComponentHandle<ComponentType>(e, mgr->lookup(e), mgr);
 
@@ -73,12 +72,11 @@ namespace GADBased
 			unpack<Args...>(e, args...);
 		}
 
-		//template <class ComponentType>
-		//void unpack(GADEntity e, ComponentHandle<ComponentType>& handle) {
-		//	typedef ComponentManager<ComponentType> ComponentManagerType;
-		//	auto mgr = getComponentManager<ComponentType>();
-		//	handle = ComponentHandle <ComponentType>(e, mgr->lookup(e), mgr);
-		//}
+		template <class ComponentType>
+		void unpack(GADEntity e, GADComponentHandle<ComponentType>& handle) {
+			auto mgr = getComponentManager<ComponentType>();
+			handle = GADComponentHandle <ComponentType>(e, &mgr->lookup(e), mgr);
+		}
 
 	private:
 
@@ -93,14 +91,14 @@ namespace GADBased
 		GADComponentManager<ComponentType> * getComponentManager() {
 			//need to make sure we actually have a component manager.
 			//TODO (taurheim) this is a performance hit every time we add and remove a component
-			int family = GADComponent<ComponentType>::GetComponentFamily();
+			int family = GADComponent<ComponentType>::family();
 
 			if (family >= componentManagers.size()) {
 				componentManagers.resize(family + 1);
 			}
 
 			if (family >= componentManagers.size()) {
-				componentmanagers.resze(family + 1);
+				componentManagers.resize(family + 1);
 			}
 
 			if (!componentManagers[family]) {

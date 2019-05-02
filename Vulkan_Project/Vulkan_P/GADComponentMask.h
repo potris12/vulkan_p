@@ -12,12 +12,12 @@ namespace GADBased {
 
 		template<class ComponentType>
 		void addComponent() {
-			mask_ |= (1 << GADComponent<ComponentType>::getComponentFamily());
+			mask_ |= (1 << GADComponent<ComponentType>::family());
 		}
 
 		template<class ComponentType>
 		void removeComponent() {
-			mask_ &= ~(1 << GADComponent<ComponentType>::getComponentFamily());
+			mask_ &= ~(1 << GADComponent<ComponentType>::family());
 		}
 
 		bool isNewMatch(GADComponentMask oldMask, GADComponentMask systemMask);

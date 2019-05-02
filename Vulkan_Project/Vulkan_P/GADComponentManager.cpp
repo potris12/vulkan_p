@@ -14,26 +14,12 @@ ComponentInstance GADBased::GADComponentManager<ComponentType>::addComponent(GAD
 }
 
 template<class ComponentType>
-ComponentType GADBased::GADComponentManager<ComponentType>::lookup(GADEntity e)
-{
-	try
-	{
-		ComponentInstance inst = entityMap.at(e);
-		return GADComponentHandle<ComponentType>(this, inst, e);
-	}
-	catch (std::exception e)
-	{
-		return nullptr;
-	}
-}
-
-template<class ComponentType>
-GADComponent<ComponentType> * GADBased::GADComponentManager<ComponentType>::lookupComponent(GADEntity e)
+ComponentType& GADBased::GADComponentManager<ComponentType>::lookup(GADEntity e)
 {
 	try
 	{
 		ComponentInstance inst = entityMap.getInstance(e);
-		return &componentData.data.at(inst);
+		return componentData.data.at(inst);
 	}
 	catch (std::exception e)
 	{

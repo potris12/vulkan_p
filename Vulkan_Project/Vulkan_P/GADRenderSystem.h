@@ -4,18 +4,12 @@
 
 namespace GADEngine
 {
-	class GADRenderSystem : public GADBased::GADSystem
+	class GADRenderSystem : public nomad::System
 	{
 	public:
-		GADRenderSystem() {
-			signature.addComponent<GADRenderComponent>();
-		}
+		GADRenderSystem();
 
-		void update(int dt) {
-			for (auto & entity : registeredEntities) {
-
-			}
-		}
+		void update(int dt);
 
 	public:
 		//GADRenderSystem();

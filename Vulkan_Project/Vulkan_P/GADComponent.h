@@ -17,10 +17,6 @@ namespace GADBased {
 			return family;
 		}
 
-		static int getComponentFamily() {
-			return GADComponent<typename std::remove_const<ComponentType>::type>::family();
-		}
-
 	public:
 		GADComponent();
 		~GADComponent();

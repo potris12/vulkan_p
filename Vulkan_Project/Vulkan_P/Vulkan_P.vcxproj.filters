@@ -103,6 +103,9 @@
     <Filter Include="소스 파일\GAD\GADEngine\GADRenderComponent">
       <UniqueIdentifier>{99544ed4-b889-455a-8ecb-c597a5c6ea01}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\NonamedECS">
+      <UniqueIdentifier>{a509ea37-1070-4fd5-82c3-b3be6f10a136}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp">
@@ -159,14 +162,29 @@
     <ClCompile Include="GADComponent.cpp">
       <Filter>소스 파일\GAD\GADBased\ECS\Component\GADComponent</Filter>
     </ClCompile>
-    <ClCompile Include="GADComponentMask.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="GADRenderSystem.cpp">
       <Filter>소스 파일\GAD\GADEngine\GADRenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="GADRenderComponent.cpp">
       <Filter>소스 파일\GAD\GADEngine\GADRenderComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="GADComponentMask.cpp">
+      <Filter>소스 파일\GAD\GADBased\ECS\Component\GADComponentMask</Filter>
+    </ClCompile>
+    <ClCompile Include="NomadECS\src\component.cpp">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClCompile>
+    <ClCompile Include="NomadECS\src\componentMask.cpp">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClCompile>
+    <ClCompile Include="NomadECS\src\entityManager.cpp">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClCompile>
+    <ClCompile Include="NomadECS\src\system.cpp">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClCompile>
+    <ClCompile Include="NomadECS\src\world.cpp">
+      <Filter>소스 파일\NonamedECS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -230,9 +248,6 @@
     <ClInclude Include="GADComponent.h">
       <Filter>소스 파일\GAD\GADBased\ECS\Component\GADComponent</Filter>
     </ClInclude>
-    <ClInclude Include="GADComponentMask.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GADBasedECS.h">
       <Filter>소스 파일\GAD\GADBased\ECS</Filter>
     </ClInclude>
@@ -241,6 +256,42 @@
     </ClInclude>
     <ClInclude Include="GADRenderComponent.h">
       <Filter>소스 파일\GAD\GADEngine\GADRenderComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentMask.h">
+      <Filter>소스 파일\GAD\GADBased\ECS\Component\GADComponentMask</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\component.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\componentHandle.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\componentManager.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\componentMask.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\entity.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\entityHandle.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\entityManager.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\entityMap.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\nomad.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\system.h">
+      <Filter>소스 파일\NonamedECS</Filter>
+    </ClInclude>
+    <ClInclude Include="NomadECS\src\world.h">
+      <Filter>소스 파일\NonamedECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

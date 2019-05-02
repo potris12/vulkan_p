@@ -1,5 +1,5 @@
 #include "DeviceManager.h"
-#include "Renderer.h"
+//#include "Renderer.h"
 
 //debug validation layout function
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT callback, const VkAllocationCallbacks* pAllocator) {

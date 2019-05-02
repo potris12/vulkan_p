@@ -28,18 +28,18 @@ shield.destroy();
 
 		template<class ComponentType>
 		void addComponent(ComponentType c) {
-			world->addComponent(entity, c);
+			world_->addComponent(entity_, c);
 		}
 
 		template<class ComponentType>
 		void removeComponent() {
-			world->removeComponent<ComponentType>(entity);
+			world_->removeComponent<ComponentType>(entity);
 		}
 
 		template<class ComponentType>
 		GADComponentHandle<ComponentType> getComponent() {
-			ComponentHandle<ComponentType> handle;
-			world->unPack(endtity, handle);
+			GADComponentHandle<ComponentType> handle;
+			world_->unPack(endtity, handle);
 			return handle;
 		}
 
