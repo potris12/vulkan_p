@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GADComponent.h"
+#include "GADBase.h"
 
 namespace GAD {
 
@@ -18,25 +18,35 @@ namespace GAD {
 	class GADComponentManager : public BaseComponentManager
 	{
 	public:
-		void awake();
-		void start();
-		void update();
-		void destroy();
+		void awake() {};
+		void start() {};
+		void update() {};
+		void destroy() {};
 
 
-		void addComponent(std::shared_ptr<GADComponent<ComponentType>> component);
+		ComponentType& addComponent() {
+			return components_[component_num_++];
+		}
 
-		void removeComponent(std::shared_ptr<GADComponent<ComponentType>> component);
-		void removeComponent(std::string& name);
-
-		void forEash(std::function<void()> f);
+		//void removeComponent(ComponentType& component);
+		//void removeComponent(std::string& name);
+		//
+		//void forEash(std::function<void()> f);
 
 	private:
-		std::vector<GADComponent<ComponentType>> components_;
+		static const int64_t max_component_num_ = 1024;
+
+		std::vector<ComponentType> components_;
+		int64_t component_num_ = 0;
 
 	public:
-		GADComponentManager(const std::string& name);
-		~GADComponentManager();
+		GADComponentManager() : BaseComponentManager("component_manager") {
+			components_.resize(max_component_num_);
+		};
+		GADComponentManager(const std::string& name) : BaseComponentManager(name) {
+			components_.resize(max_component_num_);
+		};
+		~GADComponentManager() {};
 	};
 
 }

@@ -1,4 +1,5 @@
 #include "GADEntity.h"
+#include "GADWorld.h"
 
 using namespace GAD;
 
@@ -19,13 +20,12 @@ void GAD::GADEntity::destroy()
 {
 }
 
-template<class ComponentType>
-inline std::shared_ptr<GADComponent<ComponentType>> GADEntity::addComponent(std::shared_ptr<GADWorld> world)
+GAD::GADEntity::GADEntity() : GADBase("entity"), key_(-1)
 {
-	return world->addComponent<ComponentType>();
+
 }
 
-GAD::GADEntity::GADEntity(std::string & name) : GADBase(name)
+GAD::GADEntity::GADEntity(const std::string & name, const int64_t key) : GADBase(name), key_(key)
 {
 }
 

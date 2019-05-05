@@ -137,6 +137,7 @@
     <ClCompile Include="GADComponent.cpp" />
     <ClCompile Include="GADComponentManager.cpp" />
     <ClCompile Include="GADEntity.cpp" />
+    <ClCompile Include="GADEntityHandle.cpp" />
     <ClCompile Include="GADEntityManager.cpp" />
     <ClCompile Include="GADSystem.cpp" />
     <ClCompile Include="GADSystemManager.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TestComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
@@ -156,6 +158,7 @@
     <ClInclude Include="GADComponent.h" />
     <ClInclude Include="GADComponentManager.h" />
     <ClInclude Include="GADEntity.h" />
+    <ClInclude Include="GADEntityHandle.h" />
     <ClInclude Include="GADEntityManager.h" />
     <ClInclude Include="GADHelper.h" />
     <ClInclude Include="GADSystem.h" />
@@ -167,6 +170,7 @@
     <ClInclude Include="shared.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TestComponent.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>

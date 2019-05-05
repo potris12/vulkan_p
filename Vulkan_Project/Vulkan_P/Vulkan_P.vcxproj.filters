@@ -73,6 +73,15 @@
     <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager">
       <UniqueIdentifier>{a3ae58a9-efde-4f2e-92f5-6800f27681a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\GADEngine">
+      <UniqueIdentifier>{b511abcc-6ee0-4d3b-9fe2-65ee297ff7c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity\01_2. GADEntityHandle">
+      <UniqueIdentifier>{db76884c-b5b3-466c-8a8e-80e1742b34a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle">
+      <UniqueIdentifier>{d5fe64c1-e85d-4d2b-aa1b-7f3612cae4d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp">
@@ -125,6 +134,12 @@
     </ClCompile>
     <ClCompile Include="GADComponentManager.cpp">
       <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager</Filter>
+    </ClCompile>
+    <ClCompile Include="GADEntityHandle.cpp">
+      <Filter>소스 파일\GADBased\01.Entity\01_2. GADEntityHandle</Filter>
+    </ClCompile>
+    <ClCompile Include="TestComponent.cpp">
+      <Filter>소스 파일\GADEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +202,12 @@
     </ClInclude>
     <ClInclude Include="GADComponentManager.h">
       <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentManager</Filter>
+    </ClInclude>
+    <ClInclude Include="GADEntityHandle.h">
+      <Filter>소스 파일\GADBased\01.Entity\01_2. GADEntityHandle</Filter>
+    </ClInclude>
+    <ClInclude Include="TestComponent.h">
+      <Filter>소스 파일\GADEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

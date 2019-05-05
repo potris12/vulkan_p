@@ -13,11 +13,13 @@ namespace GAD {
 		void update();
 		void destroy();
 
+		GADEntity& addEntity(const std::string& name);
+		void removeEntity(const GADEntity& entity);
 	private:
-		std::map<GAD_KEY, std::shared_ptr<GADEntity>> entitys_;
-
+		int64_t entity_index_ = 0;
+		std::map<const int64_t, GADEntity> entities_;
 	public:
-		GADEntityManager(std::string& name);
+		GADEntityManager(const std::string& name);
 		~GADEntityManager();
 	};
 
