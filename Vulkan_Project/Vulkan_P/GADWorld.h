@@ -5,7 +5,14 @@
 #include "GADEntityManager.h"
 #include "GADSystemManager.h"
 #include "GADComponentManager.h"
+
 #include "GADComponent.h"
+//#include "GADComponentHandle.h"
+/*
+world 는 
+entity, component, system manager를 관리하는데
+중요한건 entity가 어떤 component를 들고있는지 이놈이? 관리하도록 함 ???
+*/
 
 namespace GAD {
 
@@ -14,6 +21,8 @@ namespace GAD {
 	class GADWorld : public GADBase
 	{
 		friend class GADEntityHandle;
+		//friend class GADComponentHandle;
+
 	public:
 		void awake();
 		void start();
@@ -40,15 +49,40 @@ namespace GAD {
 			return static_cast<GADComponentManager<ComponentType>*>(component_managers_[family].get());
 		}
 
+		//template<class ComponentType>
+		//GADComponentHandle<ComponentType> addComponent(GADEntity& entity) {
+		//	auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
+		//	auto component_manager = getComponentManager<ComponentType>();
+		//	auto& component = component_manager->addComponent();
+		//	
+		//	return GADComponentHandle<ComponentType>(thiz, &component);
+		//
+		//	//return 
+		//}
 		template<class ComponentType>
-		ComponentType& addComponent() {
+		ComponentType& addComponent(GADEntity& entity) {
+			auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
 			auto component_manager = getComponentManager<ComponentType>();
+			auto& component = component_manager->addComponent();
+			return component;
+			//return GADComponentHandle<ComponentType>(thiz, &component);
 
-			return component_manager->addComponent();
+			//return 
+		}
+		void removeComponent(GADComponentBase& component) {
+			component_managers_[component.family_]->removeComponent(component);
 		}
 
 		void removeEntity(const GADEntity& entity);
 
+
+		//void addComponent(std::shared_ptr<GADComponentHandle> component);
+		//GADComponentHandle & addComponent(std::shared_ptr<GADWorld> world, GADEntity& entity, GADComponentBase* component);
+		
+		//entity가 가지는 componet family index 
+		std::map<int64_t, std::list<int64_t>> entity_components_;
+
+		void removeEntityComponents(GADEntity& entity);
 	public:
 		GADWorld(const std::string& name);
 		~GADWorld();

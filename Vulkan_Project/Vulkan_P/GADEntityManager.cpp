@@ -21,12 +21,15 @@ void GAD::GADEntityManager::update()
 
 void GAD::GADEntityManager::destroy()
 {
+	for (auto entity : entities_) {
+		entity.second.destroy();
+	}
 	entities_.clear();
 }
 
 GADEntity & GAD::GADEntityManager::addEntity(const std::string & name)
 {
-	entities_.insert(std::make_pair(entity_index_, GADEntity(name, entity_index_)));
+	entities_.insert(std::make_pair(entity_index_, std::move(GADEntity(name, entity_index_))));
 	return entities_[entity_index_++];
 }
 

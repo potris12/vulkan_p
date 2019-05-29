@@ -43,8 +43,22 @@ GADEntityHandle GAD::GADWorld::addEntity(const std::string& name)
 
 void GAD::GADWorld::removeEntity(const GADEntity& entity)
 {
-	//component Á¤¸® 
 	entity_manager_->removeEntity(entity);
+}
+
+
+//GADComponentHandle & GAD::GADWorld::addComponent(std::shared_ptr<GADWorld> world, GADEntity& entity, GADComponentBase * component)
+//{
+//	auto component_handle = GADComponentHandle(world, component);
+//	entity_componenthandles_[entity.key_].push_back(component_handle);
+//	return component_handle;
+//}
+
+void GAD::GADWorld::removeEntityComponents(GADEntity & entity)
+{
+	//for (auto component_handle : entity_componenthandles_[entity.key_]) {
+	//	component_handle.remove();
+	//}
 }
 
 GAD::GADWorld::GADWorld(const std::string& name) : GADBase(name)

@@ -135,6 +135,7 @@
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="GADBase.cpp" />
     <ClCompile Include="GADComponent.cpp" />
+    <ClCompile Include="GADComponentHandle.cpp" />
     <ClCompile Include="GADComponentManager.cpp" />
     <ClCompile Include="GADEntity.cpp" />
     <ClCompile Include="GADEntityHandle.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Framework.h" />
     <ClInclude Include="GADBase.h" />
     <ClInclude Include="GADComponent.h" />
+    <ClInclude Include="GADComponentHandle.h" />
     <ClInclude Include="GADComponentManager.h" />
     <ClInclude Include="GADEntity.h" />
     <ClInclude Include="GADEntityHandle.h" />

@@ -11,14 +11,17 @@ int main() {
 	world->start();
 
 	auto entity_handle = world->addEntity("test");
-	auto component = entity_handle.addComponent<TestComponent>();
+	auto component_handle = entity_handle.addComponent<TestComponent>();
 	
-	world->addEntity("test1");
-	world->addEntity("test2");
-	world->addEntity("test3");
-	world->addEntity("test4");
-
-	entity_handle.removeEntity();
+	//world->addEntity("test1");
+	//world->addEntity("test2");
+	//world->addEntity("test3");
+	//world->addEntity("test4");
+	//
+	////component_handle.remove();
+	//
+	//entity_handle.removeEntity();
+	//component_handle = entity_handle.addComponent<TestComponent>();
 
 	auto app = std::make_shared<Framework>();
 
@@ -30,5 +33,6 @@ int main() {
 		return EXIT_FAILURE;
 	}
 
+	world->destroy();
 	return EXIT_SUCCESS;
 }

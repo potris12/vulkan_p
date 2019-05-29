@@ -141,6 +141,9 @@
     <ClCompile Include="TestComponent.cpp">
       <Filter>소스 파일\GADEngine</Filter>
     </ClCompile>
+    <ClCompile Include="GADComponentHandle.cpp">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.h">
@@ -208,6 +211,9 @@
     </ClInclude>
     <ClInclude Include="TestComponent.h">
       <Filter>소스 파일\GADEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="GADComponentHandle.h">
+      <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
