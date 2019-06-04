@@ -2,6 +2,7 @@
 
 #include "GADBase.h"
 #include "GADComponent.h"
+#include "GADEntity.h"
 
 namespace GAD {
 
@@ -15,6 +16,7 @@ namespace GAD {
 		BaseComponentManager &operator=(BaseComponentManager &&) = default;
 
 		virtual void removeComponent(GADComponentBase& component) {};
+		virtual void removeComponent(GADEntity& entity) {};
 	};
 
 	template<class ComponentType>
@@ -26,61 +28,50 @@ namespace GAD {
 		void update() {};
 		void destroy() {};
 
-		ComponentType& addComponent() {
-			component_body_indies_[component_num_] = component_num_;
-			components_[component_num_].setKey(component_num_);
-			return components_[component_num_++];
+		ComponentType& addComponent(GADEntity& entity) {
+			
+			entity_map_.insert({ entity.key_, ComponentType{} });
+
+			GAD_LOGD("component family : " + std::to_string(ComponentType::family()) + "ADD component ");
+
+			return entity_map_[entity.key_];
 		}
 
-		void removeComponent(ComponentType& component) {
-			auto key = component.getKey();
-			if (key < 0 || key >= component_num_) return;
-
-			auto tmp_component = component_body_indies_[key];
-			component_body_indies_[key] = component_body_indies_[component_num_ - 1];
-			component_body_indies_[component_num_ - 1] = tmp_component;
-			component_num_--;
+		ComponentType& getComponent(GADEntity& entity) {
+			return entity_map_[entity.key_];
 		}
 
-		void removeComponent(GADComponentBase& component) {
-			auto key = component.getKey();
-			if (key < 0 || key >= component_num_) return;
-
-			auto tmp_component = component_body_indies_[key];
-			component_body_indies_[key] = component_body_indies_[component_num_ - 1];
-			component_body_indies_[component_num_ - 1] = tmp_component;
-			component_num_--;
+		void removeComponent(GADEntity& entity, ComponentType& component) {
+			auto iter = entity_map_.find(entity.key_);
+			if (iter != entity_map_.end()) {
+				entity_map_.erase(iter);
+			}
 		}
-		//void removeComponent(std::string& name);
-		//
-		void forEash(std::function<void(ComponentType&)> f) {
-			for (auto i = 0; i < component_num_; ++i) {
-				f(components_[i]);
+
+		void removeComponent(GADEntity& entity) {
+			auto component = entity_map_[entity.key_];
+			removeComponent(entity, component);
+		}
+
+		void forEach(std::function<void(ComponentType&)> f) {
+
+			for (auto component : entity_map_) {
+				f(component.second);
 			}
 		}
 
 	private:
-		using component_body_index = int64_t;
-
-		static const int64_t max_component_num_ = 1024;
-
-		std::vector<ComponentType> components_;
-		std::vector<component_body_index> component_body_indies_;
-
-		using entity_key = int64_t;
-		std::map<entity_key, component_body_index> entity_map_;
-		int64_t component_num_ = 0;
-
+		/* entity에 대응되는 component!  */
+		using entity_key = const int64_t;
+		/* 재활용? x 그냥 만들고 지우자 */
+		std::map<entity_key, ComponentType> entity_map_;
+		
 	public:
 		GADComponentManager() : BaseComponentManager("component_manager") {
-			components_.resize(max_component_num_);
-			component_body_indies_.resize(max_component_num_);
-
+			
 		};
 		GADComponentManager(const std::string& name) : BaseComponentManager(name) {
-			components_.resize(max_component_num_);
-			component_body_indies_.resize(max_component_num_);
-
+			
 		};
 		~GADComponentManager() {};
 	};

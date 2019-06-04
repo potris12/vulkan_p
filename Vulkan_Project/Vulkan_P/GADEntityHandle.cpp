@@ -2,7 +2,6 @@
 
 using namespace GAD;
 
-
 void GAD::GADEntityHandle::removeEntity()
 {
 	if (false == enable_) return;

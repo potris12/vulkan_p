@@ -29,8 +29,8 @@ void GAD::GADEntityManager::destroy()
 
 GADEntity & GAD::GADEntityManager::addEntity(const std::string & name)
 {
-	entities_.insert(std::make_pair(entity_index_, std::move(GADEntity(name, entity_index_))));
-	return entities_[entity_index_++];
+	entities_.insert(std::make_pair(entity_key_value_, std::move(GADEntity(name, entity_key_value_))));
+	return entities_[entity_key_value_++];
 }
 
 void GAD::GADEntityManager::removeEntity(const GADEntity & entity)
@@ -38,6 +38,7 @@ void GAD::GADEntityManager::removeEntity(const GADEntity & entity)
 	const auto& entity_iter = entities_.find(entity.key_);
 	if (entity_iter != entities_.end()) {
 		entities_.erase(entity_iter);
+		//entity_key_value_--; key 값은 계속 증가만 하도록 함 
 	}
 }
 

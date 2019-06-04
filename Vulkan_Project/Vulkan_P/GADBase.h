@@ -13,8 +13,8 @@ namespace GAD {
 
 		const std::string& getName();
 
-	protected:
 		const std::string name_;
+	protected:
 
 	public:
 		GADBase(const std::string& name);

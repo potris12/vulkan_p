@@ -13,7 +13,9 @@ namespace GAD{
 
 	public:
 		//void remove();
-
+		GADComponent<ComponentType>* operator->() {
+			return component_;
+		}
 	private:
 		std::shared_ptr<GADWorld> world_;
 		GADComponent<ComponentType>* component_;

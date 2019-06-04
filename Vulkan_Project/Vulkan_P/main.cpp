@@ -3,6 +3,11 @@
 #include "TestComponent.h"
 #include "GADEntityHandle.h"
 
+
+/*
+TODO.
+component관리 컨테이너 직렬화 컨테이너로 변경해야함 
+*/
 #include "GADComponentManager.h"
 int main() {
 	
@@ -13,16 +18,8 @@ int main() {
 	auto entity_handle = world->addEntity("test");
 	auto component_handle = entity_handle.addComponent<TestComponent>();
 	
-	//world->addEntity("test1");
-	//world->addEntity("test2");
-	//world->addEntity("test3");
-	//world->addEntity("test4");
-	//
-	////component_handle.remove();
-	//
-	//entity_handle.removeEntity();
-	//component_handle = entity_handle.addComponent<TestComponent>();
-
+	
+	
 	auto app = std::make_shared<Framework>();
 
 	try {

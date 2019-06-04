@@ -1,0 +1,60 @@
+
+1. entity handle 
+remove Component(family key?)
+removeComponet<ComponetType>(); X
+component handle -> 연산자 오버로딩 고고
+
+2. component handle, entity handle 기능 정리
+component handle은 자기의 component정보에 접근만 가능? 
+entoty handle 은 component 를 삭제, 추가 가능 
+
+3. 생각 해야 하는거 
+entity 관리를 map으로 하고있는데? 왜죠 ? 그냥 vector나 array로 관리하는게 맞는듯함 component와 같게 
+
+
+
+/////////////////////////////////////////////////////////////////////
+문 제 
+ - entity에 component remove 함수를 만드느데 component handle을 넣는.. 식으로 하려는데? 
+지워 놓고 해당 handle에 접근하면.. ? 어떻게 되는거냐? 
+음.. 실 수 가 생 길 수 있자너? 
+
+으ㅏㅏㅏㅏㅏ ㅠ 
+그냥 이렇게 만들어 놓자 
+
+	auto entity_handle = world->addEntity("test");
+엔티티1
+	auto component_handle = entity_handle.addComponent<TestComponent>();
+컴포1
+	auto eh2 = world->addEntity("test1");
+e2
+	eh2.addComponent<TestComponent>();
+c3	eh2.addComponent<TestComponent>();
+
+	auto eh3 = world->addEntity("test2");
+e2
+	auto eh3_ch = eh3.addComponent<TestComponent>();
+c4
+	entity_handle.removeEntity();
+e1, c1 delelte
+	eh2.addComponent<TestComponent>();
+	
+	eh3.removeComponent(eh3_ch);
+
+
+	world->addEntity("test2");
+	world->addEntity("test3");
+	auto e4 = world->addEntity("test4");
+	auto ch4 = e4.addComponent<TestComponent>();
+	eh2.removeComponent<TestComponent>();
+	e4.removeComponent(ch4);
+
+
+
+
+중복된 component 추가시 오류 -> component nullptr 리턴 
+
+흠 set Key할 때 문제문제 
+ - body는 가만히 두고 
+index가지고 노는데 
+remove add에 문제 있음 

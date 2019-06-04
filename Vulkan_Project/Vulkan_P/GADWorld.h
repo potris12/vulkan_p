@@ -63,12 +63,66 @@ namespace GAD {
 		ComponentType& addComponent(GADEntity& entity) {
 			auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
 			auto component_manager = getComponentManager<ComponentType>();
-			auto& component = component_manager->addComponent();
+			auto& component = component_manager->addComponent(entity);
+
+			entity_component_familys_[entity.key_].push_back(ComponentType::family());
 			return component;
 			//return GADComponentHandle<ComponentType>(thiz, &component);
 
 			//return 
 		}
+
+		template<class ComponentType>
+		bool hasComponent(GADEntity& entity) {
+			auto family = ComponentType::family();
+
+			for (auto component_family : entity_component_familys_[entity.key_]) {
+				if (family == component_family)
+					return true;
+			}
+			return false;
+		}
+
+		template<class ComponentType>
+		void removeComponent(GADEntity& entity) {
+			auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
+
+			auto family = ComponentType::family();
+
+			auto has_component = hasComponent<ComponentType>(entity);
+
+			// 2. 있으면 지움 
+			if (has_component) {
+				entity_component_familys_[entity.key_].remove_if([family](int64_t my_family) {
+					return family == my_family;
+				});
+				auto component_manager = getComponentManager<ComponentType>();
+				component_manager->removeComponent(entity);
+			}
+		}
+
+		bool hasComponent(GADEntity& entity, int64_t family) {
+			
+			for (auto component_family : entity_component_familys_[entity.key_]) {
+				if (family == component_family)
+					return true;
+			}
+			return false;
+		}
+		void removeComponent(GADEntity& entity, int64_t component_family) {
+			auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
+
+			auto has_component = hasComponent(entity, component_family);
+
+			// 2. 있으면 지움 
+			if (has_component) {
+				entity_component_familys_[entity.key_].remove_if([component_family](int64_t my_family) {
+					return component_family == my_family;
+				});
+				component_managers_[component_family]->removeComponent(entity);
+			}
+		}
+
 		void removeComponent(GADComponentBase& component) {
 			component_managers_[component.family_]->removeComponent(component);
 		}
@@ -80,7 +134,7 @@ namespace GAD {
 		//GADComponentHandle & addComponent(std::shared_ptr<GADWorld> world, GADEntity& entity, GADComponentBase* component);
 		
 		//entity가 가지는 componet family index 
-		std::map<int64_t, std::list<int64_t>> entity_components_;
+		std::map<int64_t, std::list<int64_t>> entity_component_familys_;
 
 		void removeEntityComponents(GADEntity& entity);
 	public:

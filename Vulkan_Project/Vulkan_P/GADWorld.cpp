@@ -37,13 +37,21 @@ void GAD::GADWorld::destroy()
 
 GADEntityHandle GAD::GADWorld::addEntity(const std::string& name)
 {
+	//GAD_LOGD(shared_from_this(), "add entity : " + name);
+
 	static auto thiz = std::static_pointer_cast<GADWorld>(shared_from_this());
 	return { thiz, entity_manager_->addEntity(name) };
 }
 
 void GAD::GADWorld::removeEntity(const GADEntity& entity)
 {
-	entity_manager_->removeEntity(entity);
+	//GAD_LOGD(shared_from_this(), "remove entity : " + entity.name_);
+
+	auto iter = entity_component_familys_.find(entity.key_);
+	if (iter != entity_component_familys_.end()) {
+		entity_component_familys_.erase(iter);
+		entity_manager_->removeEntity(entity);
+	}
 }
 
 
@@ -56,9 +64,9 @@ void GAD::GADWorld::removeEntity(const GADEntity& entity)
 
 void GAD::GADWorld::removeEntityComponents(GADEntity & entity)
 {
-	//for (auto component_handle : entity_componenthandles_[entity.key_]) {
-	//	component_handle.remove();
-	//}
+	for (auto component_family : entity_component_familys_[entity.key_]) {
+		component_managers_[component_family]->removeComponent(entity);
+	}
 }
 
 GAD::GADWorld::GADWorld(const std::string& name) : GADBase(name)

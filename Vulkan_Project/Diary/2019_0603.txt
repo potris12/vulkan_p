@@ -1,0 +1,7 @@
+component remove 시에 index 관리 방법에 오점 있음 
+entity_map 에 있는 entity key 값을 가지고 대응되는 component body index가 변경되지 않으면 안되는데 
+entity key 값을 모름 ㅏㅣ ? ?? 
+
+-> <entity_key, component>타입의 map을 이용하여 component들을 관리하도록 변경함 .. ?????? 이러면 직렬관리의 의미를 잃지 않나? 
+
+TODO 직렬화 시켜야 함 

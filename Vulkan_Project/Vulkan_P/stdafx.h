@@ -1,5 +1,7 @@
 #pragma once
 
+#define DEBUG
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -15,7 +17,7 @@
 #include <map>
 #include <cassert>
 #include <algorithm>
-
+#include <string>
 
 typedef __int64 GAD_KEY;
 

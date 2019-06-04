@@ -26,9 +26,16 @@ namespace GAD {
 		return key;
 	}
 
+
+	inline void GAD_LOGD(const std::string& log) {
+#ifdef DEBUG
+		std::cout << "GAD_LOG : " << log << std::endl;
+#endif
+	}
+
 	inline void GAD_LOGD(std::shared_ptr<GADBase> base, const std::string& log) {
 #ifdef DEBUG
-		std::cout << base->getName() << "GAD_LOG : " << log << endl;
+		std::cout << base->getName() << "GAD_LOG : " << log << std::endl;
 #endif
 	}
 }

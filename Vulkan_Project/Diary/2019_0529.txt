@@ -1,0 +1,35 @@
+component의 key를 알면 해당 하는 component_manager를 가져올 수 있고? 
+??? 음 일단 
+
+이렇게 정리하도록 함 
+
+ 기본 틀
+ 
+auto entity_handle = world->addEntity();
+auto component_handle = entity_handle.addComponent<ComponentType>();
+component_handle-> 조종조종
+
+system->addEntity(entity_handle);
+
+entity_handle.removeEntity();
+entity_handle.removeComponent(component);
+entity_handle.removeComponent<ComponentType>();
+
+component는 혼자 생성될 수 없음 꼭 entity가 생성해야함 
+component는 자기 혼자 사라질 수 없다고 함
+
+component와 entity는 추가할 때 handle을 얻을 수 있고 handle을 통해서만 remove, add, 접근이 가능함 
+
+===========================
+만들어ㅑㅇ 하는거
+
+1. entity handle 
+remove Component(family key?)
+removeComponet<ComponetType>();
+
+2. component handle, entity handle 기능 정리
+component handle은 자기의 component정보에 접근만 가능? 
+entoty handle 은 component 를 삭제, 추가 가능 
+
+3. 생각 해야 하는거 
+entity 관리를 map으로 하고있는데? 왜죠 ? 그냥 vector나 array로 관리하는게 맞는듯함 component와 같게 

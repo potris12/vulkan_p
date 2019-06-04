@@ -21,7 +21,7 @@ namespace GAD {
 		GADEntity& addEntity(const std::string& name);
 		void removeEntity(const GADEntity& entity);
 	private:
-		int64_t entity_index_ = 0;
+		int64_t entity_key_value_ = 0;
 		std::map<const int64_t, GADEntity> entities_;
 		//std::map<const int64_t, std::list<std::shared_ptr<GADComponentHandle>>> component_handles_;
 
