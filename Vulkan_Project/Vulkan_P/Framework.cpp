@@ -3,14 +3,14 @@
 void Framework::awake()
 {
 	DEVICE_MANAGER->awake();
-	RENDERER->awake();
+	//RENDERER->awake();
 }
 
 void Framework::update()
 {
 	while (!glfwWindowShouldClose(DEVICE_MANAGER->getWindow())) {
 		glfwPollEvents();
-		RENDERER->drawFrame();
+		//RENDERER->drawFrame();
 	}
 	/*메모리 누수
 	유효성 검사 레이어가 활성화 된 상태에서 응용 프로그램을 실행하고 응용프로그램을 실행하고 응용프로그램의 메모리 사용량을 모니터링하면
@@ -25,6 +25,6 @@ void Framework::update()
 
 void Framework::destroy()
 {	
-	RENDERER->destroy();
+	//RENDERER->destroy();
 	DEVICE_MANAGER->destroy();
 }

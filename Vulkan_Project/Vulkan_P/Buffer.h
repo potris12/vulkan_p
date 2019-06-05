@@ -44,8 +44,9 @@ private:
 	VkBuffer buffer;
 	VkDeviceMemory bufferMemory;
 
+	VkCommandPool& commandPool;
 public:
-	Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+	Buffer(VkCommandPool& commandPool, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
 	virtual ~Buffer();
 };
 

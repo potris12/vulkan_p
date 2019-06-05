@@ -82,6 +82,12 @@
     <Filter Include="소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle">
       <UniqueIdentifier>{d5fe64c1-e85d-4d2b-aa1b-7f3612cae4d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\GADEngine\GADRenderer">
+      <UniqueIdentifier>{125f3a06-fc4f-47e1-aad9-f0bd51a9a1f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GADEngine\GADRenderer\TestRenderComponent">
+      <UniqueIdentifier>{cfcef603-a86b-4654-b4da-06c7ac6cc276}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Framework.cpp">
@@ -101,9 +107,6 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일\PCH</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>소스 파일\Manager\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="DeviceManager.cpp">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
@@ -144,6 +147,9 @@
     <ClCompile Include="GADComponentHandle.cpp">
       <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle</Filter>
     </ClCompile>
+    <ClCompile Include="TestRenderComponent.cpp">
+      <Filter>소스 파일\GADEngine\GADRenderer\TestRenderComponent</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shared.h">
@@ -172,9 +178,6 @@
     </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>소스 파일\Data</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>소스 파일\Manager\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="DeviceManager.h">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="GADComponentHandle.h">
       <Filter>소스 파일\GADBased\01.Entity\01_1.Component\ComponentHandle</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRenderComponent.h">
+      <Filter>소스 파일\GADEngine\GADRenderer\TestRenderComponent</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

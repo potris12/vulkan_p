@@ -22,7 +22,8 @@ namespace GAD {
 
 			GAD_LOGD("ADD component family : " + std::to_string(ComponentType::family()));
 
-			auto component = world_->addComponent<ComponentType>(entity_);
+			auto& component = world_->addComponent<ComponentType>(entity_);
+			
 			//entity_.addComponent(component_handle);
 			//entity_.addComponent(world_, &component);
 			return { world_, &component };

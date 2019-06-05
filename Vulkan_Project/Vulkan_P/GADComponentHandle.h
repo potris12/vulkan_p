@@ -13,15 +13,15 @@ namespace GAD{
 
 	public:
 		//void remove();
-		GADComponent<ComponentType>* operator->() {
+		ComponentType* operator->() {
 			return component_;
 		}
 	private:
 		std::shared_ptr<GADWorld> world_;
-		GADComponent<ComponentType>* component_;
+		ComponentType* component_;
 
 	public:
-		GADComponentHandle(const std::shared_ptr<GADWorld>& world, GADComponent<ComponentType>* component)
+		GADComponentHandle(const std::shared_ptr<GADWorld>& world, ComponentType* component)
 			: world_(world), component_(component)
 		{
 

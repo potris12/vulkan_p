@@ -112,11 +112,13 @@ private:
 	//std::vector<uint16_t> indices_;
 	std::shared_ptr<Buffer> instance_buffer_ = nullptr;
 
+	VkCommandPool& commandPool;
+
 	void createIndexBuffer();
 	void createVertexBuffer();
 	void createInstanceBuffer();
 public:
-	Mesh(std::string mesh_name);
+	Mesh(VkCommandPool& commandPool, std::string mesh_name);
 	~Mesh();
 };
 

@@ -87,7 +87,7 @@ void Mesh::createInstanceBuffer()
 	//	| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	auto propertise = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
+	instance_buffer_ = std::make_shared<Buffer>(commandPool, bufferSize, usage, propertise);
 	instance_buffer_->map_tmp((void*)instanceData.data());
 	//instance_buffer_->map((void*)instanceData.data());
 	//instance_buffer_->unmap();
@@ -128,7 +128,7 @@ void Mesh::createIndexBuffer()
 	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
+	index_buffer_ = std::make_shared<Buffer>(commandPool, bufferSize, usage, propertise);
 	index_buffer_->map((void*)indices_.data());
 	index_buffer_->unmap();
 	index_buffer_->prepareBuffer();
@@ -141,14 +141,14 @@ void Mesh::createVertexBuffer()
 	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
+	vertex_buffer_ = std::make_shared<Buffer>(commandPool, bufferSize, usage, propertise);
 	vertex_buffer_->map((void*)vertices_.data());
 	vertex_buffer_->unmap();
 	vertex_buffer_->prepareBuffer();
 
 }
 
-Mesh::Mesh(std::string mesh_name) : Object(mesh_name)
+Mesh::Mesh(VkCommandPool& commandPool, std::string mesh_name) : commandPool(commandPool), Object(mesh_name)
 {
 }
 

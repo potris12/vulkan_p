@@ -110,7 +110,7 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = RENDERER->getCommandPool();//아직 command pool이 하나라서 이렇게 작성
+	allocInfo.commandPool = commandPool;//아직 command pool이 하나라서 이렇게 작성
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -145,11 +145,11 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	차단 장치를 사용하면 동시에 여러 번 전송을 예약하고 한 번에 하나 씩 실행하는 대신 완료된 모든 전송을 기다릴 수 있음
 	그것은 운전자에게 더 많은 기회를 최적화 시킬 수 있음
 	*/
-	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), RENDERER->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
+	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), commandPool, 1, &commandBuffer);//전송 완료 후 정리
 }
 
-Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-: bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
+Buffer::Buffer(VkCommandPool& commandPool, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
+: commandPool(commandPool), bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
 {
 	/*
 	처음 세 매개 변수는 무엇인지 바로 알 수 있음 네 번째 매개변수는 메모리 영역 내의 오프셋임

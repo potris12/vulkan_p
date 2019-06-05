@@ -1,0 +1,5 @@
+device, buffer의 renderer 종속성 제거해야햄 
+
+renderer 제거.. 작업 필요 
+
+renderer 제거 작업 중 .. 

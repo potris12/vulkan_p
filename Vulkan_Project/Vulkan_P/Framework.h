@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "DeviceManager.h"
-#include "Renderer.h"
+//#include "Renderer.h"
 
 class Framework : public std::enable_shared_from_this<Framework>
 {
