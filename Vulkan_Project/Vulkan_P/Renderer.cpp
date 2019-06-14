@@ -16,6 +16,7 @@ void Renderer::awake()
 	createUniformBuffer();
 	createDescriptorPool();
 	//loading an image
+
 	createCommandPool();
 	createDepthResources();
 	createFramebuffers();
@@ -70,6 +71,11 @@ void Renderer::destroy()
 //동적으로 바인딩될 녀석들 
 void Renderer::createDescriptorSetLayout()
 {
+	/* 
+	binding 되어야 할 녀석들을 여기서 정의함 
+	 - 상수버퍼를 사용하려면 여기서 일단 등록해야함 
+	 sampler, 
+	*/
 	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
 	uboLayoutBinding.binding = 0;
 	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -913,7 +919,7 @@ void Renderer::createCommandBuffers()
 		int32_t                                     vertexOffset,
 		uint32_t                                    firstInstance
 		*/
-		rect_mesh_->registeConstantData(commandBuffers[i]);
+		rect_mesh_->draw(commandBuffers[i]);
 
 
 		//command buffer에 뭔가 명령을 기록하는 건 begin command buffer /end command buffer 사이에 일어나야 함 

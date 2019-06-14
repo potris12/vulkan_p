@@ -1,0 +1,5 @@
+* 지금 각 buffer, texture shader들의 기능은 
+registeCommandBuffer 함수를 공통으로 줘서 command buffer에 등록되도록 하자 
+
+버퍼 정리가 끝났고? 
+이제 shader를 해보자! 

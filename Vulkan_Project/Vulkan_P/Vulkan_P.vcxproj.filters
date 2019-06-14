@@ -46,6 +46,12 @@
     <Filter Include="소스 파일\Manager\Renderer">
       <UniqueIdentifier>{0a50bd63-b12b-4e35-b8ef-92d059007e27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\RenderContainer">
+      <UniqueIdentifier>{6ed70f08-b0bd-4824-bcf0-e72d4a5b9b48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\02.Buffer\VertexBuffer">
+      <UniqueIdentifier>{1c6ef85b-cced-4007-83ce-5e6dffef0018}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -74,6 +80,12 @@
     </ClCompile>
     <ClCompile Include="DeviceManager.cpp">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderContainer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="DeviceManager.h">
       <Filter>소스 파일\Manager\DeviceManager</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderContainer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

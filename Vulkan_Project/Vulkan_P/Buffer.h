@@ -14,13 +14,10 @@ public:
 	virtual void update();
 	virtual void destroy();
 
-	void map(void* data);
+	void mapWithUnmap(void* data);
 
-	void map_tmp(void* data);
-	void unmap();
-
-	void prepareBuffer();
-	const VkBuffer& getBuffer() { return buffer; }
+	void prepareBuffer(void* data);
+	void registeCommandBuffer(VkCommandBuffer & commandBuffer, uint32_t firstBinding, uint32_t bindingCount, VkDeviceSize offsets);
 
 	static void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
@@ -34,15 +31,15 @@ private:
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
 	/*buffer property*/
-	VkDeviceSize bufferSize;
+	VkDeviceSize buffer_size_;
 	VkBufferUsageFlags usage_;
 	VkMemoryPropertyFlags properties_;
 
 	/*vk Objects*/
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	VkBuffer buffer;
-	VkDeviceMemory bufferMemory;
+	VkBuffer staging_buffer_;
+	VkDeviceMemory staging_buffer_memory_;
+	VkBuffer buffer_;
+	VkDeviceMemory buffer_memory_;
 
 public:
 	Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);

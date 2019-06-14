@@ -39,10 +39,7 @@ void Mesh::update()
 		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
 	}
 
-	instance_buffer_->map_tmp((void*)instanceData.data());
-	//instance_buffer_->map((void*)instanceData.data());
-	//instance_buffer_->unmap();
-	//instance_buffer_->prepareBuffer();
+	instance_buffer_->mapWithUnmap((void*)instanceData.data());
 }
 
 void Mesh::destroy()
@@ -88,38 +85,18 @@ void Mesh::createInstanceBuffer()
 	auto propertise = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
 	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	instance_buffer_->map_tmp((void*)instanceData.data());
+	instance_buffer_->mapWithUnmap((void*)instanceData.data());
 	//instance_buffer_->map((void*)instanceData.data());
 	//instance_buffer_->unmap();
 	//instance_buffer_->prepareBuffer();
 }
 
-void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)
+void Mesh::draw(VkCommandBuffer & commandBuffer)
 {
-	auto vertexBuffer = vertex_buffer_->getBuffer();
-	//auto indexBuffer = index_buffer_->getBuffer();
-	VkBuffer vertexBuffers[] = { vertexBuffer };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1/*정점버퍼의의 수*/, vertexBuffers, offsets);
-	
-	// Binding point 1 : Instance data buffer
-	auto instanceBuffer = instance_buffer_->getBuffer();
-	//auto indexBuffer = index_buffer_->getBuffer();
-	VkBuffer instanceBuffers[] = { instanceBuffer };
-	VkDeviceSize offsets2[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 1, 1, instanceBuffers, offsets2);
+	vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);
+	instance_buffer_->registeCommandBuffer(commandBuffer, 1, 1, 0);
 
-	
-	//vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-	//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1/*인스턴스 수*/, 0, 0, 0);//draw는 어찌됬든 제일 마지막에 호출되야 함 
 	vkCmdDraw(commandBuffer, vertices_.size(), INSTANCE_COUNT, 0, 0);
-	//vkCmdDrawIndirect(commandBuffer, vertexBuffers, 1, 0, 0);
-}
-
-void Mesh::draw()
-{
-	//vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-	
 }
 
 void Mesh::createIndexBuffer()
@@ -129,9 +106,7 @@ void Mesh::createIndexBuffer()
 	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	index_buffer_->map((void*)indices_.data());
-	index_buffer_->unmap();
-	index_buffer_->prepareBuffer();
+	index_buffer_->prepareBuffer((void*)indices_.data());
 
 }
 
@@ -142,9 +117,7 @@ void Mesh::createVertexBuffer()
 	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
 	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	vertex_buffer_->map((void*)vertices_.data());
-	vertex_buffer_->unmap();
-	vertex_buffer_->prepareBuffer();
+	vertex_buffer_->prepareBuffer((void*)vertices_.data());
 
 }
 

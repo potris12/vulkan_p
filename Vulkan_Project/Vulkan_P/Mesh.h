@@ -13,8 +13,7 @@ public:
 	void update() override;
 	void destroy() override;
 
-	void registeConstantData(VkCommandBuffer& commandBuffer);
-	void draw();
+	void draw(VkCommandBuffer& commandBuffer);
 private:
 	std::vector<InstanceData> instanceData;
 

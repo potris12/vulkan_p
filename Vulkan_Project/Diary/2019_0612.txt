@@ -1,0 +1,78 @@
+저번에 생각난게? render쪽은 어차피 그래픽 메모리 최적화잖아? 익ㄹ 음 그러니까 그래픽 메모리의 배치처리만 잘하고 set최소화가 정말 최고의 최적화 스킬인데 이걸 ecs로 ? cpu쪽에? 최적화를 ? renderer에서? 하고있으니까 뭔가 모순임 씨발 
+
+renderer는 그냥 내비두고 정리하자 
+이건 진짜 미친짓이야! 
+!
+
+
+
+
+
+====================================
+renderer 제작 작업
+
+
+ - 따로 빼야하는 객체 
+
+uniform buffer 
+
+command pool 
+texture 
+Semaphores 
+
+
+sampler 는 전역으로 set하고 공용으로 사용하도록 함 
+
+
+render_object 
+ - world mtx .. .etc 정보 가짐
+
+////
+RENDERER
+{
+전역 renderer 설정들 
+
+
+
+
+render container 
+{
+render pipe line 
+ - descriptor set 
+ - command pool ? 
+ - commnad buffer 
+
+
+mesh 
+ - vertex buffer 
+ - index buffer
+ - instance buffer 
+
+texture 
+ - image
+ - image view
+}
+
+=======================================
+-- 목표 이전의 dx11 프레임워크 수준의 스케일 
+
+대충 저렇게 그리고
+
+ = framework 에 있는 vulkan 객체들을 하나씩 객체화 진행하고 정리한 다음에 흐름을 파악하고 
+render container를 제작하도록 함 
+
+
+일감 정리 
+1. 버퍼
+ - index buffer 
+ - vertex buffer 
+ - uniform buffer 
+
+일단 이렇게 3가지 제작 고고 
+ 
+1. vertex, indexbuffer
+ - command buffer에 등록해야함 
+command buffer에 bind [vkCmdBindVertexBuffers]
+  == BindVertexBuffer 
+  == Bind indexBuffer 
+
