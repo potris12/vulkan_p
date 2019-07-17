@@ -865,7 +865,7 @@ void Renderer::createCommandBuffers()
 	}
 	
 	//create mesh
-	rect_mesh_ = std::make_shared<Mesh>("rect_mesh");
+	rect_mesh_ = std::make_shared<Mesh>(commandPool, "rect_mesh");
 	rect_mesh_->awake();
 
 	for (auto i = 0; i<commandBuffers.size(); ++i)

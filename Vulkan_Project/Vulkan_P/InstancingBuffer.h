@@ -4,7 +4,7 @@
 #include "Object.h"
 #include "GADBuffer.h"
 
-class VertexBuffer : public Object
+class InstancingBuffer : public Object
 {
 public:
 	virtual void awake();
@@ -23,11 +23,10 @@ private:
 	VkMemoryPropertyFlags properties_;
 
 	/*vk Objects*/
-	std::shared_ptr<GADBuffer> staging_buffer_;
+	//std::shared_ptr<GADBuffer> staging_buffer_;
 	std::shared_ptr<GADBuffer> buffer_;
 
 public:
-	VertexBuffer(VkDeviceSize size);
-	~VertexBuffer();
+	InstancingBuffer(VkDeviceSize size);
+	~InstancingBuffer();
 };
-

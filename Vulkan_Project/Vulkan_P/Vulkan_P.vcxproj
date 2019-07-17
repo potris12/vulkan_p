@@ -133,6 +133,8 @@
     <ClCompile Include="Debuger.cpp" />
     <ClCompile Include="DeviceManager.cpp" />
     <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -140,12 +142,15 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="GADBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Debuger.h" />
     <ClInclude Include="DeviceManager.h" />
     <ClInclude Include="Framework.h" />
+    <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="RenderContainer.h" />
@@ -155,6 +160,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="GADBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\shader.frag" />

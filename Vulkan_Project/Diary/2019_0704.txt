@@ -1,0 +1,26 @@
+1. instancing buffer 관리 방법 
+
+ - render pipeline에서 총괄 
+
+render pipeline?
+ - 하나의 메쉬를 그리는데 필요한 정보를 모아놓은 장소
+
+메쉬, 쉐이더, 텍스쳐, 인덱스 버퍼 인스턴싱 버퍼, 버텍스 버퍼, 유니폼 버퍼, ....
+이녀석이 instancing buffer의 정보를 갱신
+
+mesh 가 instancing buffer를 set 
+
+======================
+TODO 
+지금은 buffer가 registCommand buffer 하고있지만 
+이걸 mesh가 모아서 한번에 set 하는게 좋아보임 
+
+======================
+
+
+이제 할일 
+유니폼 버퍼 
+-> 
+파이프라인 
+
+인스턴싱 버퍼 정리

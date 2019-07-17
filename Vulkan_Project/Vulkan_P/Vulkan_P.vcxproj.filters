@@ -52,6 +52,15 @@
     <Filter Include="소스 파일\02.Buffer\VertexBuffer">
       <UniqueIdentifier>{1c6ef85b-cced-4007-83ce-5e6dffef0018}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\02.Buffer\GADBuffer">
+      <UniqueIdentifier>{7b788ad7-8252-45b2-8b51-f5cdf5128414}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\02.Buffer\IndexBuffer">
+      <UniqueIdentifier>{904ae816-6861-421e-8f42-7cf37a1f4379}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\02.Buffer\InstancingBuffer">
+      <UniqueIdentifier>{2b8c63d6-cf0d-43ba-94e1-e707a8f31394}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -85,7 +94,16 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\02.Buffer\VertexBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="GADBuffer.cpp">
+      <Filter>소스 파일\02.Buffer\GADBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingBuffer.cpp">
+      <Filter>소스 파일\02.Buffer\InstancingBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>소스 파일\02.Buffer\IndexBuffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -126,7 +144,16 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="VertexBuffer.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>소스 파일\02.Buffer\VertexBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="GADBuffer.h">
+      <Filter>소스 파일\02.Buffer\GADBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingBuffer.h">
+      <Filter>소스 파일\02.Buffer\InstancingBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>소스 파일\02.Buffer\IndexBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

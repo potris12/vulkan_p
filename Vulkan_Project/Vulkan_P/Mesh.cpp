@@ -9,7 +9,7 @@ void Mesh::awake()
 
 
 	createVertexBuffer();
-	//createIndexBuffer();
+	createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
 	vkCmdBindVertexBuffers 함수는 이전 장에서 설정 한 것과 같이 바인딩에 정점 버퍼를 바인딩하는 데 사용
@@ -35,23 +35,17 @@ void Mesh::update()
 	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	// Distribute rocks randomly on two different rings
 	for (auto i = 0; i < INSTANCE_COUNT; i++) {
-
 		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
 	}
 
-	instance_buffer_->mapWithUnmap((void*)instanceData.data());
+	instancing_buffer_->prepareBuffer( command_pool_, (void*)instanceData.data());
 }
 
 void Mesh::destroy()
 {
-
-	/*
-	버퍼는 프로그램 종료까지 명령 렌더링에 사용할 수 있어야 하며 스왑체인에 의존하지 않으므로
-	cleanup함수에서 호출하여 제거
-	*/
 	vertex_buffer_->destroy();
-	//index_buffer_->destroy();
-	instance_buffer_->destroy();
+	index_buffer_->destroy();
+	instancing_buffer_->destroy();
 }
 
 void Mesh::createInstanceBuffer()
@@ -68,60 +62,46 @@ void Mesh::createInstanceBuffer()
 		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2)* 2, 0.0f, 0.0f));
 	}
 
-	// Staging
-	// Instanced data is static, copy to device local memory 
-	// This results in better performance
-
-	struct {
-		VkDeviceMemory memory;
-		VkBuffer buffer;
-	} stagingBuffer;
-
 	VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
-	auto usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	//VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT
-	//	| VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-	//	| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	instance_buffer_->mapWithUnmap((void*)instanceData.data());
-	//instance_buffer_->map((void*)instanceData.data());
-	//instance_buffer_->unmap();
-	//instance_buffer_->prepareBuffer();
+	
+	instancing_buffer_ = std::make_shared<InstancingBuffer>(bufferSize);
+	instancing_buffer_->prepareBuffer(command_pool_, (void*)instanceData.data());
 }
 
 void Mesh::draw(VkCommandBuffer & commandBuffer)
 {
 	vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);
-	instance_buffer_->registeCommandBuffer(commandBuffer, 1, 1, 0);
+	instancing_buffer_->registeCommandBuffer(commandBuffer, 1, 1, 0);
+	index_buffer_->registeCommandBuffer(commandBuffer, 0);
 
-	vkCmdDraw(commandBuffer, vertices_.size(), INSTANCE_COUNT, 0, 0);
+	if (index_buffer_) {
+		vkCmdDrawIndexed(commandBuffer, indices_.size(), INSTANCE_COUNT, 0, 0, 0);
+	}
+	else {
+		vkCmdDraw(commandBuffer, vertices_.size(), INSTANCE_COUNT, 0, 0);
+	}
+	
 }
 
 void Mesh::createIndexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	index_buffer_->prepareBuffer((void*)indices_.data());
-
+	index_buffer_ = std::make_shared<IndexBuffer>(bufferSize, VK_INDEX_TYPE_UINT16);
+	index_buffer_->prepareBuffer(command_pool_, (void*)indices_.data());
 }
 
 void Mesh::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	vertex_buffer_->prepareBuffer((void*)vertices_.data());
+	
+	vertex_buffer_ = std::make_shared<VertexBuffer>(bufferSize);
+	vertex_buffer_->prepareBuffer(command_pool_, (void*)vertices_.data());
 
 }
 
-Mesh::Mesh(std::string mesh_name) : Object(mesh_name)
+Mesh::Mesh(VkCommandPool& command_pool, std::string mesh_name) 
+	: Object(mesh_name), command_pool_(command_pool)
 {
 }
 

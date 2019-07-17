@@ -1,0 +1,12 @@
+VKBuffer 
+ -> Create Buffer 
+Copy Buffer
+2가지 함수를 가지고 
+
+Vertex Buffer, Index Buffer, Uniform Buffer 이렇게 3가지 버퍼를 따로 만듬 
+이 3가지 버퍼가 VKBuffer를 따로 가지도록 함 
+
+
+vertex buffer 만들고 index buffer 제작중임 
+registe buffer가 다른녀석들이니까 함수 인자를 다르게 함 
+이거 나중에 통일 할 수 있는지 좀 생각좀?ㅁ

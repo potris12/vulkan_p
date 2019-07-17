@@ -61,7 +61,17 @@ void Buffer::prepareBuffer(void* data)
 
 void Buffer::registeCommandBuffer(VkCommandBuffer & commandBuffer, uint32_t firstBinding, uint32_t bindingCount, VkDeviceSize offset)
 {
-	vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount/*정점버퍼의의 수*/, &buffer_, &offset);
+	/*
+	VK_BUFFER_USAGE_INDEX_BUFFER_BIT = 0x00000040,
+	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT = 0x00000080,
+	*/
+	if (usage_ & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) {
+		vkCmdBindIndexBuffer(commandBuffer, buffer_, offset, VK_INDEX_TYPE_UINT16);
+	}
+	else if (usage_ & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) {
+		vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount/*정점버퍼의의 수*/, &buffer_, &offset);
+	}
+	
 }
 
 void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer & buffer, VkDeviceMemory & bufferMemory)

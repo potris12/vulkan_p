@@ -3,7 +3,9 @@
 #include "Object.h"
 #include "Buffer.h"
 #include "Vertex.h"
-
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "InstancingBuffer.h"
 
 class Mesh : public Object
 {
@@ -105,17 +107,21 @@ private:
 	*/
 
 	//std::vector<Vertex> vertices_;
-	std::shared_ptr<Buffer> vertex_buffer_ = nullptr;
+	std::shared_ptr<VertexBuffer> vertex_buffer_ = nullptr;
+	std::shared_ptr<IndexBuffer> index_buffer_ = nullptr;
+	std::shared_ptr<InstancingBuffer> instancing_buffer_ = nullptr;
 	//std::vector<uint16_t> indices_;
-	std::shared_ptr<Buffer> index_buffer_ = nullptr;
+	//std::shared_ptr<Buffer> index_buffer_ = nullptr;
 	//std::vector<uint16_t> indices_;
-	std::shared_ptr<Buffer> instance_buffer_ = nullptr;
+	//std::shared_ptr<Buffer> instance_buffer_ = nullptr;
+
+	VkCommandPool& command_pool_;
 
 	void createIndexBuffer();
 	void createVertexBuffer();
 	void createInstanceBuffer();
 public:
-	Mesh(std::string mesh_name);
+	Mesh(VkCommandPool& command_pool, std::string mesh_name);
 	~Mesh();
 };
 
