@@ -7,6 +7,9 @@
 #include "Buffer.h"
 #include "Vertex.h"
 
+#include "UniformBuffer.h"
+#include "Texture.h"
+
 struct UniformBufferObject
 {
 	glm::mat4 world;
@@ -27,6 +30,17 @@ public:
 	void update();
 	void destroy();
 
+	//render pipeline ÇÔ¼ö
+	std::shared_ptr<UniformBuffer> addUniformBuffer(VkDeviceSize buffer_size, VkDeviceSize buffer_offset);
+	void removeUniformBuffer(uint32_t binding_slot);
+
+	std::shared_ptr<Texture> addTexture(const std::string& file_name);
+	void removeTexture(uint32_t binding_slot);
+
+	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
+	std::vector<std::shared_ptr<Texture>> textures_;
+
+	//std::array<VkWriteDescriptorSet, 8> descriptor_writes_;//max 8 slot uniform buffers
 
 	//swap chain
 	VkSwapchainKHR& getSwapChain() { return swapChain; }
@@ -111,17 +125,15 @@ public:
 
 	void updateUniformBuffer();
 
-	//loading an image 
-	void createTextureImage();
-	//image view and sampler
-	void createTextureImageView();
-	//sampler
-	void createTextureSampler();
-
+	void createTexture();
 	//Draw
 	void drawFrame();
 
 	VkCommandBuffer& getCurCommandBuffer() { return commandBuffers[imageIndex_]; }
+
+	//helper
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 private:
 	//cur swap chain image index
 	uint32_t imageIndex_ = 0;
@@ -167,36 +179,13 @@ private:
 	//mesh info
 	std::shared_ptr<Mesh> rect_mesh_ = nullptr;
 
-	//uniform buffer
-	VkBuffer uniformBuffer;
-	VkDeviceMemory uniformBufferMemory;
-	VkBuffer instancingBuffer;
-	VkDeviceMemory instancingBufferMemory;
-
-
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkDescriptorPool descriptorPool;
 	VkDescriptorSet descriptorSet;
 
-	//load image
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
-
-	static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	//helper func
-	VkCommandBuffer beginSingleTimeCommands();
-	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	void transitionImageLayout(VkImage image, VkFormat, VkImageLayout oldLayout, VkImageLayout newLayout);
-	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-	//std::shared_ptr<Buffer> uniform_buffer_ = nullptr;
-	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-
-	VkImageView textureImageView;
-	VkSampler textureSampler;
-
+	
 
 	//depth image
 	VkImage depthImage;

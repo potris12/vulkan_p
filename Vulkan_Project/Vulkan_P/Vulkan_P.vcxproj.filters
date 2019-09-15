@@ -61,6 +61,15 @@
     <Filter Include="소스 파일\02.Buffer\InstancingBuffer">
       <UniqueIdentifier>{2b8c63d6-cf0d-43ba-94e1-e707a8f31394}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\02.Buffer\UniformBuffer">
+      <UniqueIdentifier>{06b731af-48b7-4425-adf3-f77535f4451e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\03. Texture">
+      <UniqueIdentifier>{f5e31d5d-4fd5-4acf-a2e1-660c23e75ad1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\03. Texture\Image">
+      <UniqueIdentifier>{bf4429c9-a884-4ffa-b89b-69ac862d19cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -104,6 +113,15 @@
     </ClCompile>
     <ClCompile Include="IndexBuffer.cpp">
       <Filter>소스 파일\02.Buffer\IndexBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="UniformBuffer.cpp">
+      <Filter>소스 파일\02.Buffer\UniformBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>소스 파일\03. Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>소스 파일\03. Texture\Image</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +172,15 @@
     </ClInclude>
     <ClInclude Include="IndexBuffer.h">
       <Filter>소스 파일\02.Buffer\IndexBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="UniformBuffer.h">
+      <Filter>소스 파일\02.Buffer\UniformBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>소스 파일\03. Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>소스 파일\03. Texture\Image</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

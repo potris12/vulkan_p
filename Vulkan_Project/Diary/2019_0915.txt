@@ -1,0 +1,6 @@
+texture 관련 모든 기능을 일단 texture객체에 넣음 
+
+이제 RENDERER에서 texture, uniform buffer를 컨트롤 가능해짐 
+
+이제 RenderPipeline을 제작할 일이 남음 
+

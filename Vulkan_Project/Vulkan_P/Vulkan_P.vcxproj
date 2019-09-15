@@ -133,6 +133,7 @@
     <ClCompile Include="Debuger.cpp" />
     <ClCompile Include="DeviceManager.cpp" />
     <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -141,6 +142,8 @@
     <ClCompile Include="RenderContainer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="UniformBuffer.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="GADBuffer.cpp" />
   </ItemGroup>
@@ -149,6 +152,7 @@
     <ClInclude Include="Debuger.h" />
     <ClInclude Include="DeviceManager.h" />
     <ClInclude Include="Framework.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Mesh.h" />
@@ -158,6 +162,8 @@
     <ClInclude Include="shared.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="UniformBuffer.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="GADBuffer.h" />
