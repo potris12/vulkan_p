@@ -45,7 +45,7 @@ void Mesh::destroy()
 {
 	vertex_buffer_->destroy();
 	index_buffer_->destroy();
-	instancing_buffer_->destroy();
+	instancing_buffer_->destroy();//이건 사실 render container ? render pipe line이 관리해야함 
 }
 
 void Mesh::createInstanceBuffer()

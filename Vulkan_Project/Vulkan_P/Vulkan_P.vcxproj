@@ -133,7 +133,7 @@
     <ClCompile Include="Debuger.cpp" />
     <ClCompile Include="DeviceManager.cpp" />
     <ClCompile Include="Framework.cpp" />
-    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -141,6 +141,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="RenderContainer.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderPipeline.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
@@ -152,13 +153,14 @@
     <ClInclude Include="Debuger.h" />
     <ClInclude Include="DeviceManager.h" />
     <ClInclude Include="Framework.h" />
-    <ClInclude Include="Image.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="RenderContainer.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderPipeline.h" />
     <ClInclude Include="shared.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />

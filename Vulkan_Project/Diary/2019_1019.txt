@@ -1,0 +1,21 @@
+
+할일 
+
+1. mesh 기능 전부 mesh로 오게하기 
+ - 나아아 중에 mesh를 vertex정보 입력, 파일이름 입력 등으로 나눠서 관리하도록 함
+이건.. 나중에 render pipeline/ game objcet를 만들고 나서 제작하도록 하자 
+
+
+2. shader를 제작 x 
+4.
+
+
+
+3. render pipeline을 제작
+ - 이걸.. 만들꺼야 
+음 
+일단 command pool 은 하나만 두고 제작해보자 
+
+1. render pass는 가져가고 
+처음 awake나 start시에 초기화
+

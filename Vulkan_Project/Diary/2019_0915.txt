@@ -1,6 +1,33 @@
 texture 관련 모든 기능을 일단 texture객체에 넣음 
 
 이제 RENDERER에서 texture, uniform buffer를 컨트롤 가능해짐 
+ - texture 는 나중에 depth stencil/ render target/ srv/ oav 뭐 이정도로 나뉠 수 있을 듯함 
 
 이제 RenderPipeline을 제작할 일이 남음 
 
+
+=======================================
+shader는 어떻게 만드노? 
+GameObject도 만들어야 함 
+ - 이거 만든 후 camera 제작
+
+mesh가 하는일 중 update를 gameObject가 가져가게 하고 //
+하기전에 renderer부터 제대로 확립하고 가자 
+
+shader를 만들어야 할까? 
+
+render pipeline을 만드는 일부에 지나지 않음 
+pipeline하나로 다 통합해 만드는게 나을까 ?
+
+
+mesh정보를 set하는 부분도 mesh에게 전달할 필요있고 
+..
+
+할일 
+
+1. mesh 기능 전부 mesh로 오게하기 
+ - 나아아 중에 mesh를 vertex정보 입력, 파일이름 입력 등으로 나눠서 관리하도록 함
+
+2. shader를 제작 x 
+3. render pipeline을 제작
+4. 

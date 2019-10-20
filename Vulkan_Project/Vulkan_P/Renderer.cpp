@@ -3,24 +3,24 @@
 
 void Renderer::awake()
 {
+	//
 	createSwapChain();
 	createImageViews();
 	createRenderPass();
 
-	//uniform buffer
-	createDescriptorSetLayout();
-	createUniformBuffer();
-	createDescriptorPool();
-	//loading an image
-
+	//
 	createCommandPool();
+	//render target
 	createDepthResources();
 	createFramebuffers();
+
+	createDescriptorSetLayout();
+	createDescriptorPool();
+	createUniformBuffer();
 	createTexture();
 	
 	createDescriptorSet();
-	//uniform buffer
-
+	
 	createGraphicsPipeline();
 
 	createCommandBuffers();
@@ -35,20 +35,18 @@ void Renderer::update()
 
 void Renderer::destroy()
 {
+
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), renderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), imageAvailableSemaphore, nullptr);
 
+
+	//take
 	rect_mesh_->destroy();
 	//uniform buffers
 	for (auto uniform_buffer : uniform_buffers_) {
 		uniform_buffer->destroy();
 	}
-	//vkDestroyBuffer(DEVICE_MANAGER->getDevice(), uniformBuffer, nullptr);
-	//vkFreeMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, nullptr);
-	//
-	//vkDestroyBuffer(DEVICE_MANAGER->getDevice(), instancingBuffer, nullptr);
-	//vkFreeMemory(DEVICE_MANAGER->getDevice(), instancingBufferMemory, nullptr);
-
+	
 	cleanupSwapChain();
 
 	//image
@@ -57,11 +55,15 @@ void Renderer::destroy()
 	}
 	//image
 
+
+//take
 	vkDestroyDescriptorPool(DEVICE_MANAGER->getDevice(), descriptorPool, nullptr);
 	vkDestroyDescriptorSetLayout(DEVICE_MANAGER->getDevice(), descriptorSetLayout, nullptr);
 	vkDestroyCommandPool(DEVICE_MANAGER->getDevice(), commandPool, nullptr);
 }
 
+
+//take
 std::shared_ptr<UniformBuffer> Renderer::addUniformBuffer(VkDeviceSize buffer_size, VkDeviceSize buffer_offset)
 {
 	static uint32_t binding_slot = 0;
@@ -74,6 +76,8 @@ std::shared_ptr<UniformBuffer> Renderer::addUniformBuffer(VkDeviceSize buffer_si
 	
 }
 
+
+//take
 void Renderer::removeUniformBuffer(uint32_t binding_slot)
 {
 	auto uniform_buffer_num = uniform_buffers_.size();
@@ -85,6 +89,8 @@ void Renderer::removeUniformBuffer(uint32_t binding_slot)
 	}
 }
 
+
+//take
 std::shared_ptr<Texture> Renderer::addTexture(const std::string & file_name)
 {
 	static uint32_t binding_slot = 0;
@@ -106,6 +112,7 @@ void Renderer::removeTexture(uint32_t binding_slot)
 	}
 }
 
+//take
 //동적으로 바인딩될 녀석들 
 void Renderer::createDescriptorSetLayout()
 {
@@ -559,17 +566,15 @@ void Renderer::createGraphicsPipeline()
 {
 	//shader info
 	auto vertShaderCode = readFile("shaders/vert.spv");
-	auto fragShaderCode = readFile("shaders/frag.spv");
-
 	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
-
 	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
 	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
 	vertShaderStageInfo.module = vertShaderModule;
 	vertShaderStageInfo.pName = "main";
 
+	auto fragShaderCode = readFile("shaders/frag.spv");
+	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
 	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -654,9 +659,9 @@ void Renderer::createGraphicsPipeline()
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 1;//상수버퍼 수 
+	pipelineLayoutInfo.setLayoutCount = 1;//상수버퍼 수 x 레이아웃의 수임.
 	//pipelineLayoutInfo.pushConstantRangeCount = 0;
-	pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;//상수버퍼 정보 
+	pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;//상수버퍼, 텍스쳐 등의 정보/ 이것의 수가 setLayoutCount
 
 	if (vkCreatePipelineLayout(DEVICE_MANAGER->getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create pipeline layout!");
@@ -681,20 +686,26 @@ void Renderer::createGraphicsPipeline()
 	pipelineInfo.stageCount = 2;
 	pipelineInfo.pStages = shaderStages;
 
+	//mesh
 	pipelineInfo.pVertexInputState = &vertexInputInfo;
 	pipelineInfo.pInputAssemblyState = &inputAssembly;
+	//mesh
+	//camera
 	pipelineInfo.pViewportState = &viewportState;
 	pipelineInfo.pRasterizationState = &rasterizer;
+	//camera
+	//pipeline
 	pipelineInfo.pMultisampleState = &multisampling;
 	pipelineInfo.pDepthStencilState = &depthStencil;
 	pipelineInfo.pColorBlendState = &colorBlending;
+	//pipeline
 	pipelineInfo.pDynamicState = nullptr;//optional
 	
 										 //다음 공정 기능 단계를 설명하는 모든 구조를 참조
 	pipelineInfo.layout = pipelineLayout;
 
 	//그다은 구조체 포인터가 아닌 vulkan 핸들인 파이프라인 레이아웃이 나옴
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.renderPass = renderPass;//그림의 output이 나오는 곳 
 	pipelineInfo.subpass = 0;
 
 	//마지막으로 랜더링 패스와 이 그래픽 파이프라인이 사용될 하위패스의 인덱스에 대한 참조가 있음

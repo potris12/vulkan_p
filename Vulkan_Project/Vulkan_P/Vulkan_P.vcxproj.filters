@@ -67,8 +67,11 @@
     <Filter Include="소스 파일\03. Texture">
       <UniqueIdentifier>{f5e31d5d-4fd5-4acf-a2e1-660c23e75ad1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\03. Texture\Image">
-      <UniqueIdentifier>{bf4429c9-a884-4ffa-b89b-69ac862d19cf}</UniqueIdentifier>
+    <Filter Include="소스 파일\GameObject">
+      <UniqueIdentifier>{ded8d7bb-3212-4930-9160-d1ec8c55258d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\RenderPipeline">
+      <UniqueIdentifier>{cea95f2f-752d-402a-94c2-b968d5e2b6c6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -120,8 +123,11 @@
     <ClCompile Include="Texture.cpp">
       <Filter>소스 파일\03. Texture</Filter>
     </ClCompile>
-    <ClCompile Include="Image.cpp">
-      <Filter>소스 파일\03. Texture\Image</Filter>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderPipeline.cpp">
+      <Filter>소스 파일\RenderPipeline</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,8 +185,11 @@
     <ClInclude Include="Texture.h">
       <Filter>소스 파일\03. Texture</Filter>
     </ClInclude>
-    <ClInclude Include="Image.h">
-      <Filter>소스 파일\03. Texture\Image</Filter>
+    <ClInclude Include="GameObject.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderPipeline.h">
+      <Filter>소스 파일\RenderPipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
