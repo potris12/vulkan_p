@@ -50,6 +50,21 @@ public:
 
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
+	//swap chain
+	uint32_t getImageIndex() { return imageIndex_; }
+	VkSwapchainKHR& getSwapChain() { return swapChain; }
+	VkFormat& getSwapChainImageFormat() { return swapChainImageFormat; }
+	VkExtent2D& getSwapChainExtent() { return swapChainExtent; }
+	std::vector<VkImageView>& getSwapChainImageViews() { return swapChainImageViews; }
+	std::vector<VkImage>& getSwapChainImages() { return swapChainImages; }
+
+	void cleanupSwapChain();
+	void recreateSwapChain();
+
+	//std::array<VkWriteDescriptorSet, 8> descriptor_writes_;//max 8 slot uniform buffers
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 private:
 
 	const std::vector<const char*> validationLayers = {
@@ -108,6 +123,17 @@ private:
 	//메모리 요구사항?
 	VkPhysicalDeviceMemoryProperties memProperties;
 
+	//cur swap chain image index
+	uint32_t imageIndex_ = 0;
+
+	//swap chain
+	void createSwapChain();
+	void createImageViews();
+	VkSwapchainKHR swapChain;
+	std::vector<VkImage> swapChainImages;
+	VkFormat swapChainImageFormat;
+	VkExtent2D swapChainExtent;
+	std::vector<VkImageView> swapChainImageViews;
 
 public:
 	DeviceManager();

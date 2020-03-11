@@ -40,17 +40,6 @@ public:
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
 
-	//std::array<VkWriteDescriptorSet, 8> descriptor_writes_;//max 8 slot uniform buffers
-
-	//swap chain
-	VkSwapchainKHR& getSwapChain() { return swapChain; }
-	VkFormat& getSwapChainImageFormat() { return swapChainImageFormat; }
-	VkExtent2D& getSwapChainExtent() { return swapChainExtent; }
-	std::vector<VkImageView>& getSwapChainImageViews() { return swapChainImageViews; }
-
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR & capabilities);
 
 	//render pass
 	VkRenderPass& getRenderPass() { return renderPass; }
@@ -129,23 +118,12 @@ public:
 	//Draw
 	void drawFrame();
 
-	VkCommandBuffer& getCurCommandBuffer() { return commandBuffers[imageIndex_]; }
+	VkCommandBuffer& getCurCommandBuffer();
 
 	//helper
 	VkCommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 private:
-	//cur swap chain image index
-	uint32_t imageIndex_ = 0;
-
-	//swap chain
-	void createSwapChain();
-	void createImageViews();
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
-	std::vector<VkImageView> swapChainImageViews;
 
 	//render pass
 	void createRenderPass();

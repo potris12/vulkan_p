@@ -4,8 +4,6 @@
 void Renderer::awake()
 {
 	//
-	createSwapChain();
-	createImageViews();
 	createRenderPass();
 
 	//
@@ -163,6 +161,7 @@ void Renderer::createUniformBuffer()
 
 void Renderer::createDescriptorPool()
 {
+	auto& swapChainImages = DEVICE_MANAGER->getSwapChainImages();
 	std::array<VkDescriptorPoolSize, 2> poolSizes = {};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size());
@@ -226,6 +225,7 @@ void Renderer::updateUniformBuffer()
 	UniformBufferObject ubo = {};
 	ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
 	float aspect = (float)swapChainExtent.width / (float)swapChainExtent.height;
 	ubo.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
@@ -248,10 +248,11 @@ void Renderer::createTexture()
 
 void Renderer::drawFrame()
 {
+	auto imageIndex = DEVICE_MANAGER->getImageIndex();
 	updateUniformBuffer();
 	//if (chooseSwapExtent().height == 0 || chooseSwapExtent().width) return;
 
-	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), swapChain, std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex_);
+	VkResult result = vkAcquireNextImageKHR(DEVICE_MANAGER->getDevice(), DEVICE_MANAGER->getSwapChain(), std::numeric_limits<uint64_t>::max(), imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 	/* 스왑체인이 이미지를 획득하려고 시도할 때 오래된 것으로 판명되면 더 이상 프레젠테이션 할 수 없음 따라서 우리는 즉시 스왑체인을 다시 만들고
 	다음 dawFrame호출을 다시 시도해야 함
@@ -291,7 +292,7 @@ void Renderer::drawFrame()
 	다음 두
 	*/
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[imageIndex_];
+	submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
 	/*
 	다음 두 매개변수는 실행을 위해 실제로 제출할 명령 버퍼를 지정
 	앞서 언급했듯이 방금 가져온 스왑체인이미지를 색상 첨부로 바인딩하는 명령버퍼를 제출
@@ -316,10 +317,10 @@ void Renderer::drawFrame()
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = signalSemaphores;
 
-	VkSwapchainKHR swapChains[] = { swapChain };
+	VkSwapchainKHR swapChains[] = { DEVICE_MANAGER->getSwapChain() };
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = swapChains;
-	presentInfo.pImageIndices = &imageIndex_;
+	presentInfo.pImageIndices = &imageIndex;
 	//이미지를 표시할 스왑 체인과 각 스왑 체인의 이미지 인덱스를 지정 이건 거의 하나임
 
 	presentInfo.pResults = nullptr;
@@ -363,121 +364,16 @@ void Renderer::drawFrame()
 													   */
 }
 
-void Renderer::createSwapChain()
+VkCommandBuffer& Renderer::getCurCommandBuffer()
 {
-	SwapChainSupportDetails swapChainSupport = DEVICE_MANAGER->querySwapChainSupport( DEVICE_MANAGER->getPhysicalDevice());
-
-	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
-
-	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-		imageCount = swapChainSupport.capabilities.maxImageCount;
-	}
-
-	VkSwapchainCreateInfoKHR createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-	createInfo.surface = DEVICE_MANAGER->getSurface();
-
-	createInfo.minImageCount = imageCount;
-	createInfo.imageFormat = surfaceFormat.format;
-	createInfo.imageColorSpace = surfaceFormat.colorSpace;
-	createInfo.imageExtent = extent;
-	createInfo.imageArrayLayers = 1;
-	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-	QueueFamilyIndices indices = DEVICE_MANAGER->findQueueFamilies(DEVICE_MANAGER->getPhysicalDevice());
-	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-	if (indices.graphicsFamily != indices.presentFamily) {//present랑 graphics랑 queue가 다르면 처리가 다름
-		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-		createInfo.queueFamilyIndexCount = 2;
-		createInfo.pQueueFamilyIndices = queueFamilyIndices;
-	}
-	else {
-		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-	}
-
-	createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-	createInfo.presentMode = presentMode;
-	createInfo.clipped = VK_TRUE;
-
-	createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-	if (vkCreateSwapchainKHR(DEVICE_MANAGER->getDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create swap chain!");
-	}
-
-	vkGetSwapchainImagesKHR(DEVICE_MANAGER->getDevice(), swapChain, &imageCount, nullptr);
-	swapChainImages.resize(imageCount);
-	vkGetSwapchainImagesKHR(DEVICE_MANAGER->getDevice(), swapChain, &imageCount, swapChainImages.data());
-
-	swapChainImageFormat = surfaceFormat.format;
-	swapChainExtent = extent;
-}
-
-void Renderer::createImageViews()
-{
-	swapChainImageViews.resize(swapChainImages.size());
-
-	for (size_t i = 0; i < swapChainImages.size(); i++) {
-		swapChainImageViews[i] = Texture::createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
-	}
-}
-
-VkSurfaceFormatKHR Renderer::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-{
-	if (availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED) {
-		return { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-	}
-
-	for (const auto& availableFormat : availableFormats) {
-		if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-			return availableFormat;
-		}
-	}
-
-	return availableFormats[0];
-}
-
-VkPresentModeKHR Renderer::chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes)
-{
-	VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
-
-	for (const auto& availablePresentMode : availablePresentModes) {
-		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-			return availablePresentMode;
-		}
-		else if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-			bestMode = availablePresentMode;
-		}
-	}
-
-	return bestMode;
-}
-
-VkExtent2D Renderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR & capabilities)
-{
-	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-		return capabilities.currentExtent;
-	}
-	else {
-		VkExtent2D actualExtent = { DEVICE_MANAGER->getWIDTH(), DEVICE_MANAGER->getHEIGHT() };
-
-		actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
-		actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
-
-		return actualExtent;
-	}
+	return commandBuffers[DEVICE_MANAGER->getImageIndex()];
 }
 
 void Renderer::createRenderPass()
 {
 	//render target 초기화 
 	VkAttachmentDescription colorAttachment = {};
-	colorAttachment.format = getSwapChainImageFormat();
+	colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
 	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -602,6 +498,7 @@ void Renderer::createGraphicsPipeline()
 	//mesh info
 
 	//camera info
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
 	VkViewport viewport = {};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
@@ -753,6 +650,8 @@ VkShaderModule Renderer::createShaderModule(const std::vector<char>& code)
 void Renderer::createFramebuffers()
 {
 	//모든 프레임 버퍼를 포함할 ㅅ ㅜ있도록 컨테이너의 크기를 설정하여 시작!
+	auto& swapChainImageViews = DEVICE_MANAGER->getSwapChainImageViews();
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
 	swapChainFramebuffers.resize(swapChainImageViews.size());
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		/*VkImageView attachments[] = {
@@ -849,7 +748,7 @@ void Renderer::createCommandBuffers()
 		renderPassInfo.framebuffer = swapChainFramebuffers[i];
 		//첫번쨰 매개변수는 랜더 패스 자체와 바인딩 할 어테치먼트, 각 스왑체인 이미지에 대해 color attachment로 지정하는 프레임 버퍼를 만들었
 		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = swapChainExtent;
+		renderPassInfo.renderArea.extent = DEVICE_MANAGER->getSwapChainExtent();
 		//다음 두 매개변수는 랜더링 여역의 크기를 정의 렌더링 영역은 셰이더 로드 및 저장이 수행되는 위치를 정의
 		//이 영역 밖의 픽셀에는 정의되지 않은 값이 있음 최상의 성능을 위해 어테치먼트의 크기와 일치해야함
 		std::array<VkClearValue, 2> clearValues = {};
@@ -926,10 +825,8 @@ void Renderer::cleanupSwapChain()
 	vkDestroyPipeline(DEVICE_MANAGER->getDevice(), graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(DEVICE_MANAGER->getDevice(), pipelineLayout, nullptr);
 	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), renderPass, nullptr);
-	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
-		vkDestroyImageView(DEVICE_MANAGER->getDevice(), swapChainImageViews[i], nullptr);
-	}
-	vkDestroySwapchainKHR(DEVICE_MANAGER->getDevice(), swapChain, nullptr);
+
+	DEVICE_MANAGER->cleanupSwapChain();
 }
 
 void Renderer::recreateSwapChain()
@@ -938,8 +835,7 @@ void Renderer::recreateSwapChain()
 
 	cleanupSwapChain();
 
-	createSwapChain();
-	createImageViews();
+	DEVICE_MANAGER->recreateSwapChain();
 	createRenderPass();
 	createGraphicsPipeline();
 	createDepthResources();
@@ -1006,6 +902,7 @@ void Renderer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize s
 
 void Renderer::createDepthResources()
 {
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
 	VkFormat depthFormat = findDepthFormat();
 	Texture::createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
 	depthImageView = Texture::createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT/*VK_IMAGE_ASPECT_DEPTH_BIT*/);
