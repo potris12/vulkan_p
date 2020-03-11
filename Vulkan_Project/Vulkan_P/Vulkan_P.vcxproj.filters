@@ -73,6 +73,9 @@
     <Filter Include="소스 파일\RenderPipeline">
       <UniqueIdentifier>{cea95f2f-752d-402a-94c2-b968d5e2b6c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\04.Shader">
+      <UniqueIdentifier>{cd4ce464-234d-4b61-a551-56b301b4c421}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -128,6 +131,9 @@
     </ClCompile>
     <ClCompile Include="RenderPipeline.cpp">
       <Filter>소스 파일\RenderPipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\04.Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="RenderPipeline.h">
       <Filter>소스 파일\RenderPipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>소스 파일\04.Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

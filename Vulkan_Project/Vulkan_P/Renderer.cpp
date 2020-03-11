@@ -190,29 +190,31 @@ void Renderer::createDescriptorSet()
 	allocInfo.descriptorSetCount = 1;
 	allocInfo.pSetLayouts = layouts;
 
-	//설명자 세트는 설명자 풀이 소멸될 떄 자동으로 해제되므로 따로 정리할 필요가 없음ㄴ
+	//설명자 세트는 설명자 풀이 소멸될 떄 자동으로 해제되므로 따로 정리할 필요가 없음
 	if (vkAllocateDescriptorSets(DEVICE_MANAGER->getDevice(), &allocInfo, &descriptorSet) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to allocate descriptor set!");
 	}
 
-	std::array< VkWriteDescriptorSet, 4> test_vec;
-	for (auto& test : test_vec) {
+	std::vector< VkWriteDescriptorSet> vec;
+	for (auto& test : vec) {
 		test = {};
 	}
 
+	vec.resize(uniform_buffers_.size() + textures_.size());
+
 	auto descriptor_writes_index = 0;
 	for (auto uniform_buffer : uniform_buffers_) {
-		uniform_buffer->setDescWrites(descriptorSet, test_vec[descriptor_writes_index++]);
+		uniform_buffer->setDescWrites(descriptorSet, vec[descriptor_writes_index++]);
 	}
 	
 	for (auto texture : textures_) {
-		texture->setDescWrites(descriptorSet, test_vec[descriptor_writes_index++]);
+		texture->setDescWrites(descriptorSet, vec[descriptor_writes_index++]);
 	}
 	//
 	//이건 renderer 함수에서 진행 
 
-	vkUpdateDescriptorSets(DEVICE_MANAGER->getDevice(), static_cast<uint32_t>(descriptor_writes_index), test_vec.data(), 0, nullptr);
+	vkUpdateDescriptorSets(DEVICE_MANAGER->getDevice(), static_cast<uint32_t>(descriptor_writes_index), vec.data(), 0, nullptr);
 }
 
 void Renderer::updateUniformBuffer()
@@ -460,24 +462,10 @@ void Renderer::createRenderPass()
 
 void Renderer::createGraphicsPipeline()
 {
-	//shader info
-	auto vertShaderCode = readFile("shaders/vert.spv");
-	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-	VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
-	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-	vertShaderStageInfo.module = vertShaderModule;
-	vertShaderStageInfo.pName = "main";
+	Shader vs(ShaderType::VS, "shaders/vert.spv", "main");
+	Shader ps(ShaderType::PS, "shaders/frag.spv", "main");
 
-	auto fragShaderCode = readFile("shaders/frag.spv");
-	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
-	VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
-	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-	fragShaderStageInfo.module = fragShaderModule;
-	fragShaderStageInfo.pName = "main";
-
-	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+	VkPipelineShaderStageCreateInfo shaderStages[] = { vs.getDesc(), ps.getDesc() };
 	//shader info
 
 	//mesh info
@@ -627,24 +615,6 @@ void Renderer::createGraphicsPipeline()
 	if (vkCreateGraphicsPipelines(DEVICE_MANAGER->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create graphics pipeline!");
 	}
-
-	vkDestroyShaderModule(DEVICE_MANAGER->getDevice(), fragShaderModule, nullptr);
-	vkDestroyShaderModule(DEVICE_MANAGER->getDevice(), vertShaderModule, nullptr);
-
-}
-VkShaderModule Renderer::createShaderModule(const std::vector<char>& code)
-{
-	VkShaderModuleCreateInfo createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = code.size();
-	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-	VkShaderModule shaderModule;
-	if (vkCreateShaderModule(DEVICE_MANAGER->getDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create shader module!");
-	}
-
-	return shaderModule;
 }
 
 void Renderer::createFramebuffers()

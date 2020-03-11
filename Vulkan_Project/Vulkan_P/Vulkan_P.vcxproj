@@ -142,6 +142,7 @@
     <ClCompile Include="RenderContainer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UniformBuffer.cpp" />
@@ -161,6 +162,7 @@
     <ClInclude Include="RenderContainer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="shared.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />
