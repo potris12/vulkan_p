@@ -10,6 +10,7 @@ void Framework::update()
 {
 	while (!glfwWindowShouldClose(DEVICE_MANAGER->getWindow())) {
 		glfwPollEvents();
+		RENDERER->update();//TODO UPDATE제작 후 해당 객체에 넘겨야해
 		RENDERER->drawFrame();
 	}
 	/*메모리 누수

@@ -17,7 +17,6 @@ public:
 
 	void draw(VkCommandBuffer& commandBuffer);
 private:
-	std::vector<InstanceData> instanceData;
 
 	////이게 정점 데이터 인풋레이아웃임 
 	//const std::vector<Vertex> vertices = {
@@ -109,7 +108,7 @@ private:
 	//std::vector<Vertex> vertices_;
 	std::shared_ptr<VertexBuffer> vertex_buffer_ = nullptr;
 	std::shared_ptr<IndexBuffer> index_buffer_ = nullptr;
-	std::shared_ptr<InstancingBuffer> instancing_buffer_ = nullptr;
+	
 	//std::vector<uint16_t> indices_;
 	//std::shared_ptr<Buffer> index_buffer_ = nullptr;
 	//std::vector<uint16_t> indices_;
@@ -119,7 +118,6 @@ private:
 
 	void createIndexBuffer();
 	void createVertexBuffer();
-	void createInstanceBuffer();
 public:
 	Mesh(VkCommandPool& command_pool, std::string mesh_name);
 	~Mesh();

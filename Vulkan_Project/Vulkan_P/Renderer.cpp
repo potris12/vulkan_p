@@ -15,6 +15,7 @@ void Renderer::awake()
 	createDescriptorSetLayout();
 	createDescriptorPool();
 	createUniformBuffer();
+	createInstanceBuffer();
 	createTexture();
 	
 	createDescriptorSet();
@@ -28,7 +29,21 @@ void Renderer::awake()
 
 void Renderer::update()
 {
-	rect_mesh_->update();
+	//TODO 
+	//이건 각 객체에서 해야함
+	static auto startTime = std::chrono::high_resolution_clock::now();
+
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+	//UPDATE에서 각 객체를 순회하면서 instance_data_를 채움 
+	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// Distribute rocks randomly on two different rings
+	for (auto i = 0; i < INSTANCE_COUNT; i++) {
+		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
+	}
+
+	instancing_buffers_[0]->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
 
 void Renderer::destroy()
@@ -44,7 +59,11 @@ void Renderer::destroy()
 	for (auto uniform_buffer : uniform_buffers_) {
 		uniform_buffer->destroy();
 	}
-	
+	//instancing buffers
+	for (auto instancing_buffer : instancing_buffers_) {
+		instancing_buffer->destroy();
+	}
+
 	cleanupSwapChain();
 
 	//image
@@ -74,20 +93,6 @@ std::shared_ptr<UniformBuffer> Renderer::addUniformBuffer(VkDeviceSize buffer_si
 	
 }
 
-
-//take
-void Renderer::removeUniformBuffer(uint32_t binding_slot)
-{
-	auto uniform_buffer_num = uniform_buffers_.size();
-	if (uniform_buffer_num > binding_slot) return;
-
-	//TODO remove uniform buffers
-	for (auto i = 0; i < uniform_buffer_num; ++i) {
-
-	}
-}
-
-
 //take
 std::shared_ptr<Texture> Renderer::addTexture(const std::string & file_name)
 {
@@ -99,15 +104,12 @@ std::shared_ptr<Texture> Renderer::addTexture(const std::string & file_name)
 	return texture;
 }
 
-void Renderer::removeTexture(uint32_t binding_slot)
+//여기서 input layout의 정보가 갱신ㄷㄷ
+std::shared_ptr<InstancingBuffer> Renderer::addInstancingBuffer(VkDeviceSize buffer_size)
 {
-	auto texture_num = textures_.size();
-	if (texture_num > binding_slot) return;
-
-	//TODO remove uniform buffers
-	for (auto i = 0; i < texture_num; ++i) {
-
-	}
+	auto instancing_buffer = std::make_shared<InstancingBuffer>(buffer_size);
+	instancing_buffers_.push_back(instancing_buffer);
+	return instancing_buffer;
 }
 
 //take
@@ -157,6 +159,25 @@ void Renderer::createUniformBuffer()
 	//Buffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffer, uniformBufferMemory);
 	//VkDeviceSize instancingBufferSize = sizeof(glm::mat4) * INSTANCING_BUFFER_SIZE;
 	//Buffer::createBuffer(instancingBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, instancingBuffer, instancingBufferMemory);
+}
+
+void Renderer::createInstanceBuffer()
+{
+	instance_data_.resize(INSTANCE_COUNT);
+	/*
+		std::default_random_engine rndGenerator(benchmark.active ? 0 : (unsigned)time(nullptr));
+		std::uniform_real_distribution<float> uniformDist(0.0, 1.0);
+		std::uniform_int_distribution<uint32_t> rndTextureIndex(0, textures.rocks.layerCount);
+	*/
+	// Distribute rocks randomly on two different rings
+	for (auto i = 0; i < INSTANCE_COUNT; i++) {
+
+		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f));
+	}
+
+	auto instancing_buffer = addInstancingBuffer(sizeof(InstanceData) * INSTANCE_COUNT);
+
+	instancing_buffer->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
 
 void Renderer::createDescriptorPool()
@@ -707,6 +728,7 @@ void Renderer::createCommandBuffers()
 	rect_mesh_ = std::make_shared<Mesh>(commandPool, "rect_mesh");
 	rect_mesh_->awake();
 
+
 	for (auto i = 0; i<commandBuffers.size(); ++i)
 	{
 		//명령 버퍼 기록 시작
@@ -758,6 +780,8 @@ void Renderer::createCommandBuffers()
 		int32_t                                     vertexOffset,
 		uint32_t                                    firstInstance
 		*/
+
+		instancing_buffers_[0]->registeCommandBuffer(commandBuffers[i], 1, 1, 0);
 		rect_mesh_->draw(commandBuffers[i]);
 
 
