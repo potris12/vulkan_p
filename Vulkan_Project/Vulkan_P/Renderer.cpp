@@ -489,7 +489,8 @@ void Renderer::createGraphicsPipeline()
 	VkPipelineShaderStageCreateInfo shaderStages[] = { vs.getDesc(), ps.getDesc() };
 	//shader info
 
-	//mesh info
+	//TODO 0313 vertex layout 
+	//
 	auto bindingDescriptions = Vertex::getBindingDesctiption();
 	auto attributeDescriptions = Vertex::getAttributeDescriptions();
 

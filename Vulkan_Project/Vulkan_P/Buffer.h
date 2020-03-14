@@ -6,6 +6,24 @@
 
 class Framework;
 
+template <typename T>
+struct BufferData
+{
+public:
+	uint32_t stride_{ 0 };
+	uint32_t data_num_{ 0 };
+	std::vector<T> datas_;
+
+public:
+	BufferData(std::vector<T>& datas)
+	{
+		datas_.assign(datas.begin(), datas.end());
+		stride_ = sizeof(T);
+		data_num_ = datas.size();
+	}
+};
+
+
 class Buffer : public Object
 {
 public:
