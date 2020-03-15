@@ -248,7 +248,7 @@ void Renderer::updateUniformBuffer()
 
 	ubo.proj[1][1] *= -1;//glm 은 원래 opengl용으로 설계되었으므로 클립 좌표의 y좌표가 반전됩 이렇게 안하면 이미지가 위아래 만전됨
 
-	uniform_buffers_[0]->prepareBuffer(&ubo);
+	uniform_buffers_[0]->setBufferData(&ubo);
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
 	//memcpy(data, &ubo, sizeof(ubo));
