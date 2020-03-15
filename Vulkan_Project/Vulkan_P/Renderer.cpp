@@ -176,7 +176,14 @@ void Renderer::createInstanceBuffer()
 		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f));
 	}
 
-	rect_mesh_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT);
+	rect_mesh_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT, 
+		{
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT
+		}
+	);
 
 	//instancing_buffer->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
@@ -492,21 +499,11 @@ void Renderer::createGraphicsPipeline()
 
 	//TODO 0313 vertex layout 
 	//
-	auto bindingDescriptions = Vertex::getBindingDesctiption();
-	auto attributeDescriptions = Vertex::getAttributeDescriptions();
-
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
-	vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
-	vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-	vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
-	vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-	vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	rect_mesh_->setVertexInputState(vertexInputInfo);
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
-	inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;//topology
-	inputAssembly.primitiveRestartEnable = VK_FALSE;//strip
-	//mesh info
+	rect_mesh_->setInputAssemblyState(inputAssembly);
 
 	//camera info
 	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();

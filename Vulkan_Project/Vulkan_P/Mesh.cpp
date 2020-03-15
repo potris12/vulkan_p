@@ -40,7 +40,7 @@ void Mesh::draw(VkCommandBuffer & commandBuffer)
 	if(vertex_buffer_) vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);//binding slot이랑 binding count는 buffer가 알아서 알도록 하자 뭐 offset도 필요없음 ㅇ
 	for (auto instancing_buffer : instancing_buffers_)
 	{
-		instancing_buffer->registeCommandBuffer(commandBuffer, 1, 1, 0);
+		instancing_buffer->registeCommandBuffer(commandBuffer);
 	}
 	
 	if(index_buffer_) index_buffer_->registeCommandBuffer(commandBuffer, 0);
@@ -71,6 +71,22 @@ void Mesh::addBufferDataEnd()
 	}
 }
 
+void Mesh::setVertexInputState(VkPipelineVertexInputStateCreateInfo& vertex_input_state)
+{
+	vertex_input_state.vertexBindingDescriptionCount = static_cast<uint32_t>(vertex_input_bind_desc_.size());
+	vertex_input_state.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertex_input_attribute_desc_.size());
+	vertex_input_state.pVertexBindingDescriptions = vertex_input_bind_desc_.data();
+	vertex_input_state.pVertexAttributeDescriptions = vertex_input_attribute_desc_.data();
+	vertex_input_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+}
+
+void Mesh::setInputAssemblyState(VkPipelineInputAssemblyStateCreateInfo& input_assembly_state)
+{
+	input_assembly_state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;//topology
+	input_assembly_state.primitiveRestartEnable = VK_FALSE;//restart able
+}
+
 void Mesh::setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats)
 {
 	addInputLayout(VK_VERTEX_INPUT_RATE_VERTEX, vertex_formats);
@@ -85,10 +101,9 @@ void Mesh::addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector
 {
 	//vertex attribute
 	uint32_t totla_size = 0;
-	uint32_t location = 0;
 	for (const auto& format : vertex_formats)
 	{
-		vertex_input_attribute_desc_.push_back({ location++, binding_slot_, format, totla_size });
+		vertex_input_attribute_desc_.push_back({ binding_location_++, binding_slot_, format, totla_size });
 
 		totla_size += getFormatSize(format);
 	}
