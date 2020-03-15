@@ -22,7 +22,7 @@ public:
 		data_num_ = static_cast<uint32_t>(datas.size());
 	}
 	
-	BufferData(int32_t data_num)
+	BufferData(uint32_t data_num)
 	{
 		if (0 > data_num) return;
 

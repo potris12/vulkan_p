@@ -16,16 +16,12 @@ struct UniformBufferObject
 	glm::mat4 world;
 	glm::mat4 view;
 	glm::mat4 proj;
+
 	UniformBufferObject() {
 		world = glm::mat4(1.0f);
 		view = glm::mat4(1.0f);
 		proj = glm::mat4(1.0f);
 	};
-};
-
-struct UniformBufferObjectInstance
-{
-	glm::mat4 world;
 };
 
 class Renderer : public CSingleTonBase<Renderer>
@@ -37,7 +33,17 @@ public:
 	void destroy();
 
 	//render pipeline ÇÔ¼ö
-	std::shared_ptr<UniformBuffer> addUniformBuffer(VkDeviceSize buffer_size, VkDeviceSize buffer_offset);
+	template <typename T>
+	std::shared_ptr<UniformBuffer> addUniformBuffer(uint32_t data_num)
+	{
+		static uint32_t binding_slot = 0;
+
+		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot);
+		uniform_buffers_.push_back(uniform_buffer);
+		++binding_slot;
+
+		return uniform_buffer;
+	}
 	std::shared_ptr<Texture> addTexture(const std::string& file_name);
 
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;

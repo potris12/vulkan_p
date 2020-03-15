@@ -88,20 +88,6 @@ void Renderer::destroy()
 	vkDestroyCommandPool(DEVICE_MANAGER->getDevice(), commandPool, nullptr);
 }
 
-
-//take
-std::shared_ptr<UniformBuffer> Renderer::addUniformBuffer(VkDeviceSize buffer_size, VkDeviceSize buffer_offset)
-{
-	static uint32_t binding_slot = 0;
-
-	auto uniform_buffer = std::make_shared<UniformBuffer>(binding_slot, buffer_size, buffer_offset);
-	uniform_buffers_.push_back(uniform_buffer);
-	++binding_slot;
-
-	return uniform_buffer;
-	
-}
-
 //take
 std::shared_ptr<Texture> Renderer::addTexture(const std::string & file_name)
 {
@@ -155,7 +141,7 @@ void Renderer::createDescriptorSetLayout()
 
 void Renderer::createUniformBuffer()
 {
-	addUniformBuffer(sizeof(UniformBufferObject), 0);
+	addUniformBuffer<UniformBufferObject>(1);
 	//VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 	//Buffer::createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffer, uniformBufferMemory);
 	//VkDeviceSize instancingBufferSize = sizeof(glm::mat4) * INSTANCING_BUFFER_SIZE;
@@ -262,7 +248,7 @@ void Renderer::updateUniformBuffer()
 
 	ubo.proj[1][1] *= -1;//glm 은 원래 opengl용으로 설계되었으므로 클립 좌표의 y좌표가 반전됩 이렇게 안하면 이미지가 위아래 만전됨
 
-	uniform_buffers_[0]->prepareBuffer(commandPool, &ubo);
+	uniform_buffers_[0]->prepareBuffer(&ubo);
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
 	//memcpy(data, &ubo, sizeof(ubo));
