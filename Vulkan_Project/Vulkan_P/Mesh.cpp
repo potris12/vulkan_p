@@ -54,6 +54,23 @@ void Mesh::draw(VkCommandBuffer & commandBuffer)
 	
 }
 
+std::vector<std::shared_ptr<InstancingBuffer>>& Mesh::addBufferDataStart()
+{
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->addBufferDataStart();
+	}
+	return instancing_buffers_;
+}
+
+void Mesh::addBufferDataEnd()
+{
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->addBufferDataEnd();
+	}
+}
+
 void Mesh::setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats)
 {
 	addInputLayout(VK_VERTEX_INPUT_RATE_VERTEX, vertex_formats);
@@ -62,14 +79,6 @@ void Mesh::setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats)
 void Mesh::addVertexInputRateInstance(const std::vector<VkFormat>& vertex_formats)
 {
 	addInputLayout(VK_VERTEX_INPUT_RATE_INSTANCE, vertex_formats);
-}
-
-//여기서 input layout의 정보가 갱신ㄷㄷ
-std::shared_ptr<InstancingBuffer> Mesh::addInstancingBuffer(VkDeviceSize buffer_size)
-{
-	auto instancing_buffer = std::make_shared<InstancingBuffer>(buffer_size);
-	instancing_buffers_.push_back(instancing_buffer);
-	return instancing_buffer;
 }
 
 void Mesh::addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector<VkFormat>& vertex_formats)

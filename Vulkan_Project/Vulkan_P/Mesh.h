@@ -18,8 +18,17 @@ public:
 
 	void draw(VkCommandBuffer& commandBuffer);
 	/* instancing buffer data */
-	std::shared_ptr<InstancingBuffer> addInstancingBuffer(VkDeviceSize buffer_size);
-	std::vector<std::shared_ptr<InstancingBuffer>>& getInstancingBufferData() { return instancing_buffers_;  }
+	template <typename T>
+	std::shared_ptr<InstancingBuffer> addInstancingBuffer(int32_t data_num)
+	{
+		auto instancing_buffer = std::make_shared<InstancingBufferT<T>>(data_num);
+		instancing_buffers_.push_back(instancing_buffer);
+		return instancing_buffer;
+	}
+	
+	std::vector<std::shared_ptr<InstancingBuffer>>& addBufferDataStart();
+	void addBufferDataEnd();
+
 private:
 	//std::vector<Vertex> vertices_;
 	std::vector< VkVertexInputBindingDescription> vertex_input_bind_desc_;//vertex binding info 

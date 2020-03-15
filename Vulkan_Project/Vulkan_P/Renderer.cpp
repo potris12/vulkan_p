@@ -41,17 +41,22 @@ void Renderer::update()
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
+
+	
 	//UPDATE에서 각 객체를 순회하면서 instance_data_를 채움 
-	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	auto instancing_buffers = rect_mesh_->addBufferDataStart();
+
+	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));	
 	// Distribute rocks randomly on two different rings
 	for (auto i = 0; i < INSTANCE_COUNT; i++) {
-		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
+		//object가 자기가 뭘 넣어야 할지 알고있다는 가정하에 진행 
+		auto data = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;;
+		instancing_buffers[0]->addBufferData(&data);
 	}
 
 	//TODO 이부분은 나중에 Object에게 위임할꺼임 
 	//GameObject에게 instance_data를 넘겨주면 알아서 처리하도록
-	auto instancing_buffers = rect_mesh_->getInstancingBufferData();
-	instancing_buffers[0]->prepareBuffer(commandPool, (void*)instance_data_.data());
+	rect_mesh_->addBufferDataEnd();
 }
 
 void Renderer::destroy()
@@ -171,9 +176,9 @@ void Renderer::createInstanceBuffer()
 		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f));
 	}
 
-	auto instancing_buffer = rect_mesh_->addInstancingBuffer(sizeof(InstanceData) * INSTANCE_COUNT);
+	rect_mesh_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT);
 
-	instancing_buffer->prepareBuffer(commandPool, (void*)instance_data_.data());
+	//instancing_buffer->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
 
 void Renderer::createDescriptorPool()
