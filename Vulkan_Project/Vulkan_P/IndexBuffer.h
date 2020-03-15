@@ -9,7 +9,8 @@
 class IndexBuffer : public Object
 {
 public:
-	virtual uint32_t getIndexCount() = 0;
+	virtual uint32_t getDataCount() = 0;
+	virtual uint32_t getDataStride() = 0;
 	virtual void registeCommandBuffer(VkCommandBuffer& commandBuffer, VkDeviceSize offset) = 0;
 
 protected:
@@ -49,11 +50,15 @@ public:
 		}
 	}
 
-	virtual uint32_t getIndexCount()
+	virtual uint32_t getDataCount()
 	{
 		return buffer_data_.data_num_;
 	}
 
+	virtual uint32_t getDataStride()
+	{
+		return buffer_data_.stride_;
+	}
 private:
 
 	/*buffer property*/
