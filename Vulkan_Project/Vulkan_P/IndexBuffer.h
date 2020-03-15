@@ -82,6 +82,7 @@ private:
 			return VK_INDEX_TYPE_UINT32;
 
 		default:
+			return VK_INDEX_TYPE_MAX_ENUM;
 			break;
 		}
 	}

@@ -16,6 +16,11 @@ struct UniformBufferObject
 	glm::mat4 world;
 	glm::mat4 view;
 	glm::mat4 proj;
+	UniformBufferObject() {
+		world = glm::mat4(1.0f);
+		view = glm::mat4(1.0f);
+		proj = glm::mat4(1.0f);
+	};
 };
 
 struct UniformBufferObjectInstance
@@ -110,20 +115,20 @@ private:
 
 	//render pass
 	void createRenderPass();
-	VkRenderPass renderPass;
+	VkRenderPass renderPass{};
 
 	//pipeline
 	void createGraphicsPipeline();
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
+	VkPipelineLayout pipelineLayout{};
+	VkPipeline graphicsPipeline{};
 
 	//frame buffers
 	void createFramebuffers();
-	std::vector<VkFramebuffer> swapChainFramebuffers;
+	std::vector<VkFramebuffer> swapChainFramebuffers{};
 
 	/* 명령 버퍼를 만들기 전에 명령 플을 만들어야 함
 	명령 풀은 버퍼를 저장하는 데 사용되는 메모리를 관리하며 각 명령 버퍼는 자신의 버퍼를 할당 */
-	VkCommandPool commandPool;
+	VkCommandPool commandPool{};
 	void createCommandPool();
 
 	/* 이제 명령 버퍼를 할당하고 명령 버퍼를 기록할 수 있음 드로잉 명령 중 하나는 올바른 VkFramebuffer를 바인딩 하기 떄문에 실제로 스왑체인의 모든 이미지에 대한 며열ㅇ 버퍼를 다시 기록 해야함
@@ -133,25 +138,25 @@ private:
 	void createCommandBuffers();
 
 	//세마포어
-	VkSemaphore imageAvailableSemaphore;
-	VkSemaphore renderFinishedSemaphore;
+	VkSemaphore imageAvailableSemaphore{};
+	VkSemaphore renderFinishedSemaphore{};
 	void createSemaphores();
 
 	//mesh info
 	std::shared_ptr<Mesh> rect_mesh_ = nullptr;
 
-	VkDescriptorSetLayout descriptorSetLayout;
-	VkDescriptorPool descriptorPool;
-	VkDescriptorSet descriptorSet;
+	VkDescriptorSetLayout descriptorSetLayout{};
+	VkDescriptorPool descriptorPool{};
+	VkDescriptorSet descriptorSet{};
 
 	//helper func
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	
 
 	//depth image
-	VkImage depthImage;
-	VkDeviceMemory depthImageMemory;
-	VkImageView depthImageView;
+	VkImage depthImage{};
+	VkDeviceMemory depthImageMemory{};
+	VkImageView depthImageView{};
 
 	void createDepthResources();
 	VkFormat findDepthFormat();

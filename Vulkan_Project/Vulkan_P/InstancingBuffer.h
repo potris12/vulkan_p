@@ -67,7 +67,7 @@ private:
 
 	//buffer data
 	BufferData<T> buffer_data_;
-	int32_t data_index_ = 0;
+	uint32_t data_index_ = 0;
 public:
 	InstancingBufferT(int32_t data_num)
 		:InstancingBuffer("instancing_bufferT"), buffer_data_(data_num)

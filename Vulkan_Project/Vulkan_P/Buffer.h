@@ -10,16 +10,16 @@ template <typename T>
 struct BufferData
 {
 public:
-	size_t stride_{ 0 };
-	size_t data_num_{ 0 };
+	uint32_t stride_{ 0 };
+	uint32_t data_num_{ 0 };
 	std::vector<T> datas_;
 
 public:
 	BufferData(std::vector<T>& datas)
 	{
 		datas_.assign(datas.begin(), datas.end());
-		stride_ = sizeof(T);
-		data_num_ = datas.size();
+		stride_ = static_cast<uint32_t>(sizeof(T));
+		data_num_ = static_cast<uint32_t>(datas.size());
 	}
 	
 	BufferData(int32_t data_num)
@@ -27,8 +27,8 @@ public:
 		if (0 > data_num) return;
 
 		datas_.resize(data_num);
-		stride_ = sizeof(T);
-		data_num_ = data_num;
+		stride_ = static_cast<uint32_t>(sizeof(T));
+		data_num_ = static_cast<uint32_t>(datas_.size());
 	}
 };
 
