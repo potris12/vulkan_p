@@ -33,14 +33,11 @@ public:
 
 	//render pipeline 함수
 	std::shared_ptr<UniformBuffer> addUniformBuffer(VkDeviceSize buffer_size, VkDeviceSize buffer_offset);
-
 	std::shared_ptr<Texture> addTexture(const std::string& file_name);
-
-	std::shared_ptr<InstancingBuffer> addInstancingBuffer(VkDeviceSize buffer_size);
 
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
-	std::vector<std::shared_ptr<InstancingBuffer>> instancing_buffers_;
+	
 	//각 객체내에 있어야 할 데이터를 일단 여기에 꺼내 놓음 
 #define INSTANCE_COUNT 10
 	std::vector<InstanceData> instance_data_;

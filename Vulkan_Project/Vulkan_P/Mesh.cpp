@@ -28,11 +28,20 @@ void Mesh::destroy()
 {
 	if(vertex_buffer_) vertex_buffer_->destroy();
 	if(index_buffer_) index_buffer_->destroy();
+
+	//instancing buffers
+	for (auto instancing_buffer : instancing_buffers_) {
+		instancing_buffer->destroy();
+	}
 }
 
 void Mesh::draw(VkCommandBuffer & commandBuffer)
 {
-	if(vertex_buffer_) vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);
+	if(vertex_buffer_) vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);//binding slot이랑 binding count는 buffer가 알아서 알도록 하자 뭐 offset도 필요없음 ㅇ
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->registeCommandBuffer(commandBuffer, 1, 1, 0);
+	}
 	
 	if(index_buffer_) index_buffer_->registeCommandBuffer(commandBuffer, 0);
 
@@ -53,6 +62,14 @@ void Mesh::setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats)
 void Mesh::addVertexInputRateInstance(const std::vector<VkFormat>& vertex_formats)
 {
 	addInputLayout(VK_VERTEX_INPUT_RATE_INSTANCE, vertex_formats);
+}
+
+//여기서 input layout의 정보가 갱신ㄷㄷ
+std::shared_ptr<InstancingBuffer> Mesh::addInstancingBuffer(VkDeviceSize buffer_size)
+{
+	auto instancing_buffer = std::make_shared<InstancingBuffer>(buffer_size);
+	instancing_buffers_.push_back(instancing_buffer);
+	return instancing_buffer;
 }
 
 void Mesh::addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector<VkFormat>& vertex_formats)
@@ -88,6 +105,11 @@ void Mesh::createIndexBuffer()
 
 void Mesh::createVertexBuffer()
 {
+
+	const float fx = 0.5f;
+	const float fy = 0.5f;
+	const float fz = 0.5f;
+
 	std::vector<Vertex> vertices = {
 		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
 		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},

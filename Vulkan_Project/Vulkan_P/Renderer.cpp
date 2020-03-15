@@ -14,6 +14,11 @@ void Renderer::awake()
 
 	createDescriptorSetLayout();
 	createDescriptorPool();
+
+	//create mesh
+	rect_mesh_ = std::make_shared<Mesh>(commandPool, "rect_mesh");
+	rect_mesh_->awake();
+
 	createUniformBuffer();
 	createInstanceBuffer();
 	createTexture();
@@ -43,7 +48,10 @@ void Renderer::update()
 		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
 	}
 
-	instancing_buffers_[0]->prepareBuffer(commandPool, (void*)instance_data_.data());
+	//TODO 이부분은 나중에 Object에게 위임할꺼임 
+	//GameObject에게 instance_data를 넘겨주면 알아서 처리하도록
+	auto instancing_buffers = rect_mesh_->getInstancingBufferData();
+	instancing_buffers[0]->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
 
 void Renderer::destroy()
@@ -58,10 +66,6 @@ void Renderer::destroy()
 	//uniform buffers
 	for (auto uniform_buffer : uniform_buffers_) {
 		uniform_buffer->destroy();
-	}
-	//instancing buffers
-	for (auto instancing_buffer : instancing_buffers_) {
-		instancing_buffer->destroy();
 	}
 
 	cleanupSwapChain();
@@ -102,14 +106,6 @@ std::shared_ptr<Texture> Renderer::addTexture(const std::string & file_name)
 	texture->createTextureImage(binding_slot++, file_name);
 	textures_.push_back(texture);
 	return texture;
-}
-
-//여기서 input layout의 정보가 갱신ㄷㄷ
-std::shared_ptr<InstancingBuffer> Renderer::addInstancingBuffer(VkDeviceSize buffer_size)
-{
-	auto instancing_buffer = std::make_shared<InstancingBuffer>(buffer_size);
-	instancing_buffers_.push_back(instancing_buffer);
-	return instancing_buffer;
 }
 
 //take
@@ -175,7 +171,7 @@ void Renderer::createInstanceBuffer()
 		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f));
 	}
 
-	auto instancing_buffer = addInstancingBuffer(sizeof(InstanceData) * INSTANCE_COUNT);
+	auto instancing_buffer = rect_mesh_->addInstancingBuffer(sizeof(InstanceData) * INSTANCE_COUNT);
 
 	instancing_buffer->prepareBuffer(commandPool, (void*)instance_data_.data());
 }
@@ -724,10 +720,6 @@ void Renderer::createCommandBuffers()
 	if (vkAllocateCommandBuffers(DEVICE_MANAGER->getDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate command buffers!");
 	}
-	
-	//create mesh
-	rect_mesh_ = std::make_shared<Mesh>(commandPool, "rect_mesh");
-	rect_mesh_->awake();
 
 
 	for (auto i = 0; i<commandBuffers.size(); ++i)
@@ -782,7 +774,6 @@ void Renderer::createCommandBuffers()
 		uint32_t                                    firstInstance
 		*/
 
-		instancing_buffers_[0]->registeCommandBuffer(commandBuffers[i], 1, 1, 0);
 		rect_mesh_->draw(commandBuffers[i]);
 
 
