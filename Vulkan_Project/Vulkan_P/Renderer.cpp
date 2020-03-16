@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "DeviceManager.h"
+#include "Timer.h"
 
 void Renderer::awake()
 {
@@ -36,23 +37,23 @@ void Renderer::update()
 {
 	//TODO 
 	//이건 각 객체에서 해야함
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-
+	float dt = TIMER->getDeltaTime();
 	
 	//UPDATE에서 각 객체를 순회하면서 instance_data_를 채움 
 	auto instancing_buffers = rect_mesh_->addBufferDataStart();
 
-	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));	
 	// Distribute rocks randomly on two different rings
-	for (auto i = 0; i < INSTANCE_COUNT; i++) {
-		//object가 자기가 뭘 넣어야 할지 알고있다는 가정하에 진행 
-		auto data = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;;
-		instancing_buffers[0]->addBufferData(&data);
+	for (auto game_object : game_objects_)
+	{
+		game_object->update(dt);
+		game_object->setBufferData(instancing_buffers);
 	}
+
+	//for (auto i = 0; i < INSTANCE_COUNT; i++) {
+	//	//object가 자기가 뭘 넣어야 할지 알고있다는 가정하에 진행 
+	//	auto data = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;;
+	//	instancing_buffers[0]->addBufferData(&data);
+	//}
 
 	//TODO 이부분은 나중에 Object에게 위임할꺼임 
 	//GameObject에게 instance_data를 넘겨주면 알아서 처리하도록
@@ -150,16 +151,10 @@ void Renderer::createUniformBuffer()
 
 void Renderer::createInstanceBuffer()
 {
-	instance_data_.resize(INSTANCE_COUNT);
-	/*
-		std::default_random_engine rndGenerator(benchmark.active ? 0 : (unsigned)time(nullptr));
-		std::uniform_real_distribution<float> uniformDist(0.0, 1.0);
-		std::uniform_int_distribution<uint32_t> rndTextureIndex(0, textures.rocks.layerCount);
-	*/
 	// Distribute rocks randomly on two different rings
 	for (auto i = 0; i < INSTANCE_COUNT; i++) {
 
-		instance_data_[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f));
+		game_objects_.push_back(std::make_shared<GameObject>(i));
 	}
 
 	rect_mesh_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT, 

@@ -2,6 +2,7 @@
 
 void Framework::awake()
 {
+	TIMER->awake();
 	DEVICE_MANAGER->awake();
 	RENDERER->awake();
 }
@@ -10,6 +11,7 @@ void Framework::update()
 {
 	while (!glfwWindowShouldClose(DEVICE_MANAGER->getWindow())) {
 		glfwPollEvents();
+		TIMER->update();
 		RENDERER->update();//TODO UPDATE제작 후 해당 객체에 넘겨야해
 		RENDERER->drawFrame();
 	}
@@ -26,6 +28,7 @@ void Framework::update()
 
 void Framework::destroy()
 {	
+	TIMER->destroy();
 	RENDERER->destroy();
 	DEVICE_MANAGER->destroy();
 }

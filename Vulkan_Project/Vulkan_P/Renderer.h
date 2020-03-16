@@ -11,6 +11,8 @@
 #include "UniformBuffer.h"
 #include "Texture.h"
 
+#include "GameObject.h"
+
 struct UniformBufferObject
 {
 	glm::mat4 world;
@@ -52,8 +54,8 @@ public:
 	//각 객체내에 있어야 할 데이터를 일단 여기에 꺼내 놓음 
 #define INSTANCE_COUNT 10
 	std::vector<InstanceData> instance_data_;
-
-	//render pass
+	std::vector<std::shared_ptr<GameObject>> game_objects_;
+ 	//render pass
 	VkRenderPass& getRenderPass() { return renderPass; }
 
 	//graphics pipeline

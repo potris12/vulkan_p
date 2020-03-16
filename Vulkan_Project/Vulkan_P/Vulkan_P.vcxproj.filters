@@ -76,6 +76,9 @@
     <Filter Include="소스 파일\04.Shader">
       <UniqueIdentifier>{cd4ce464-234d-4b61-a551-56b301b4c421}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Manager\Timer">
+      <UniqueIdentifier>{702788bc-6908-471e-90e7-1571754658a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -126,14 +129,17 @@
     <ClCompile Include="Texture.cpp">
       <Filter>소스 파일\03. Texture</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="RenderPipeline.cpp">
       <Filter>소스 파일\RenderPipeline</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\04.Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>소스 파일\GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일\Manager\Timer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,14 +197,17 @@
     <ClInclude Include="Texture.h">
       <Filter>소스 파일\03. Texture</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="RenderPipeline.h">
       <Filter>소스 파일\RenderPipeline</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>소스 파일\04.Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>소스 파일\GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>소스 파일\Manager\Timer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

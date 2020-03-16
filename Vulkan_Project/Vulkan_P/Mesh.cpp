@@ -6,7 +6,7 @@
 void Mesh::awake()
 {
 	createVertexBuffer();
-	createIndexBuffer();
+	//createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
 	vkCmdBindVertexBuffers 함수는 이전 장에서 설정 한 것과 같이 바인딩에 정점 버퍼를 바인딩하는 데 사용
