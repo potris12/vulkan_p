@@ -1,0 +1,19 @@
+uniform_buffer에서 desc writes 채우고 
+ResourceManager 에서 descSet을 채워서, 만들어서 미리 pipeline에 set해놓도록 함 
+
+
+
+	//원래 로직 
+	//모든 buffer를 통합하는 array를 제작 혹은 pp를 제작
+	//제작한 buffer array 를 내가 가진 모든 객체를(그림 그릴 객체) 순환 하면서 정보 갱신
+	//갱신된 버퍼 map unmap
+	//map unmap 은 void * 를 즉 버퍼 정보를 반환 해야 하지만 지금은 .. 그냥 해보자 
+
+std::array<VkWriteDescriptorSet, 8> descriptor_writes_;//max 8 slot uniform buffers
+-> array 는 ㄷ러ㅏ
+?? 뭐가 문제지?
+
+
+desc write set 문제 
+ - uniform buffer로 set하는거 뺴면 터짐 
+문제 원인 파악 필요 

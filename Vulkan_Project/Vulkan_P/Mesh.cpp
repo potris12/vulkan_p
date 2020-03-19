@@ -1,14 +1,11 @@
+#include "stdafx.h"
 #include "Mesh.h"
-//#include "Renderer.h"
-
-
-#define INSTANCE_COUNT 10
+#include "Renderer.h"
+#include "shared.h"
 
 void Mesh::awake()
 {
-
-
-	
+	createVertexBuffer();
 	//createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
@@ -17,7 +14,6 @@ void Mesh::awake()
 	마지막 두 매개 변수는 바인딩 할 정점 버퍼의 배열을 지정하고 정점 데이터를 읽는 바이트 오프셋을 지정함
 	또한 vkCmdDraw에 대한 호출을 변경하여 하드 코드 된 숫자 3과 반대로 버퍼의 정점 수를 전달해야함
 	*/
-	createInstanceBuffer();
 }
 
 void Mesh::start()
@@ -26,129 +22,170 @@ void Mesh::start()
 
 void Mesh::update()
 {
-	static auto startTime = std::chrono::high_resolution_clock::now();
-
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-	
-	glm::mat4 world = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	// Distribute rocks randomly on two different rings
-	for (auto i = 0; i < INSTANCE_COUNT; i++) {
-
-		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2) * 2, 0.0f, 0.0f)) * world;
-	}
-
-	instance_buffer_->map_tmp((void*)instanceData.data());
-	//instance_buffer_->map((void*)instanceData.data());
-	//instance_buffer_->unmap();
-	//instance_buffer_->prepareBuffer();
 }
 
 void Mesh::destroy()
 {
+	if(vertex_buffer_) vertex_buffer_->destroy();
+	if(index_buffer_) index_buffer_->destroy();
+
+	//instancing buffers
+	for (auto instancing_buffer : instancing_buffers_) {
+		instancing_buffer->destroy();
+	}
+}
+
+void Mesh::draw(VkCommandBuffer & commandBuffer)
+{
+	if(vertex_buffer_) vertex_buffer_->registeCommandBuffer(commandBuffer, 0, 1, 0);//binding slot이랑 binding count는 buffer가 알아서 알도록 하자 뭐 offset도 필요없음 ㅇ
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->registeCommandBuffer(commandBuffer);
+	}
+	
+	if(index_buffer_) index_buffer_->registeCommandBuffer(commandBuffer, 0);
+
+	if (index_buffer_) {
+		vkCmdDrawIndexed(commandBuffer, index_buffer_->getDataCount(), INSTANCE_COUNT, 0, 0, 0);
+	}
+	else {
+		vkCmdDraw(commandBuffer, vertex_buffer_->getDataCount(), INSTANCE_COUNT, 0, 0);
+	}
+	
+}
+
+std::vector<std::shared_ptr<InstancingBuffer>>& Mesh::addBufferDataStart()
+{
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->addBufferDataStart();
+	}
+	return instancing_buffers_;
+}
+
+void Mesh::addBufferDataEnd()
+{
+	for (auto instancing_buffer : instancing_buffers_)
+	{
+		instancing_buffer->addBufferDataEnd();
+	}
+}
+
+void Mesh::setVertexInputState(VkPipelineVertexInputStateCreateInfo& vertex_input_state)
+{
+	vertex_input_state.vertexBindingDescriptionCount = static_cast<uint32_t>(vertex_input_bind_desc_.size());
+	vertex_input_state.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertex_input_attribute_desc_.size());
+	vertex_input_state.pVertexBindingDescriptions = vertex_input_bind_desc_.data();
+	vertex_input_state.pVertexAttributeDescriptions = vertex_input_attribute_desc_.data();
+	vertex_input_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+}
+
+void Mesh::setInputAssemblyState(VkPipelineInputAssemblyStateCreateInfo& input_assembly_state)
+{
+	input_assembly_state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;//topology
+	input_assembly_state.primitiveRestartEnable = VK_FALSE;//restart able
+}
+
+void Mesh::setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats)
+{
+	addInputLayout(VK_VERTEX_INPUT_RATE_VERTEX, vertex_formats);
+}
+
+void Mesh::addVertexInputRateInstance(const std::vector<VkFormat>& vertex_formats)
+{
+	addInputLayout(VK_VERTEX_INPUT_RATE_INSTANCE, vertex_formats);
+}
+
+void Mesh::addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector<VkFormat>& vertex_formats)
+{
+	//vertex attribute
+	uint32_t totla_size = 0;
+	for (const auto& format : vertex_formats)
+	{
+		vertex_input_attribute_desc_.push_back({ binding_location_++, binding_slot_, format, totla_size });
+
+		totla_size += getFormatSize(format);
+	}
+	vertex_input_bind_desc_.push_back({ binding_slot_, totla_size, vertex_input_rate });
+
+
+	binding_slot_++;
+}
+
+void Mesh::createIndexBuffer()
+{
+	std::vector<uint16_t> indices{
+		0, 1, 2, 2, 3, 0,
+		4, 5, 6, 6, 7, 4,
+		4,3,7,4,0,3,
+		0,4,5,5,1,0,
+		1,5,6,6,2,1,
+		3,7,6,6,2,3 
+	};
+
+	index_buffer_ = std::make_shared<IndexBufferT<uint16_t>>(command_pool_, indices);
+}
+
+void Mesh::createVertexBuffer()
+{
+
+	const float fx = 0.5f;
+	const float fy = 0.5f;
+	const float fz = 0.5f;
+
+	std::vector<Vertex> vertices = {
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}}
+	};
+
+	vertex_buffer_ = std::make_shared<VertexBufferT<Vertex>>(command_pool_, vertices);
 
 	/*
-	버퍼는 프로그램 종료까지 명령 렌더링에 사용할 수 있어야 하며 스왑체인에 의존하지 않으므로
-	cleanup함수에서 호출하여 제거
+	TODO LATER
+	나중에 메쉬 정보 파일에 
+	1. 정점의 타입이 우선 들어가고 지금같이 Vertex 구조체가 있는게 좋겠다 분리되어있으면 정점이 많아진다면 //캐시미스가// 많이날거 같음
 	*/
-	vertex_buffer_->destroy();
-	//index_buffer_->destroy();
-	instance_buffer_->destroy();
+	//vertex binding info
+	setVertexInputRateVertex({ VK_FORMAT_R32G32B32_SFLOAT , VK_FORMAT_R32G32B32_SFLOAT , VK_FORMAT_R32G32_SFLOAT });
 }
 
-void Mesh::createInstanceBuffer()
-{
-	instanceData.resize(INSTANCE_COUNT);
-/*
-	std::default_random_engine rndGenerator(benchmark.active ? 0 : (unsigned)time(nullptr));
-	std::uniform_real_distribution<float> uniformDist(0.0, 1.0);
-	std::uniform_int_distribution<uint32_t> rndTextureIndex(0, textures.rocks.layerCount);
-*/
-	// Distribute rocks randomly on two different rings
-	for (auto i = 0; i < INSTANCE_COUNT; i++) {
-		
-		instanceData[i].world_mtx = glm::translate(glm::mat4(1.0f), glm::vec3((i - INSTANCE_COUNT / 2)* 2, 0.0f, 0.0f));
-	}
-
-	// Staging
-	// Instanced data is static, copy to device local memory 
-	// This results in better performance
-
-	struct {
-		VkDeviceMemory memory;
-		VkBuffer buffer;
-	} stagingBuffer;
-
-	VkDeviceSize bufferSize = sizeof(instanceData[0]) * instanceData.size();
-	auto usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	//VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT
-	//	| VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-	//	| VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-	instance_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	instance_buffer_->map_tmp((void*)instanceData.data());
-	//instance_buffer_->map((void*)instanceData.data());
-	//instance_buffer_->unmap();
-	//instance_buffer_->prepareBuffer();
-}
-
-void Mesh::registeConstantData(VkCommandBuffer & commandBuffer)
-{
-	auto vertexBuffer = vertex_buffer_->getBuffer();
-	//auto indexBuffer = index_buffer_->getBuffer();
-	VkBuffer vertexBuffers[] = { vertexBuffer };
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1/*정점버퍼의의 수*/, vertexBuffers, offsets);
-	
-	// Binding point 1 : Instance data buffer
-	auto instanceBuffer = instance_buffer_->getBuffer();
-	//auto indexBuffer = index_buffer_->getBuffer();
-	VkBuffer instanceBuffers[] = { instanceBuffer };
-	VkDeviceSize offsets2[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 1, 1, instanceBuffers, offsets2);
-
-	
-	//vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-	//vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices_.size()), 1/*인스턴스 수*/, 0, 0, 0);//draw는 어찌됬든 제일 마지막에 호출되야 함 
-	vkCmdDraw(commandBuffer, vertices_.size(), INSTANCE_COUNT, 0, 0);
-	//vkCmdDrawIndirect(commandBuffer, vertexBuffers, 1, 0, 0);
-}
-
-void Mesh::draw()
-{
-	//vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-	
-}
-
-void Mesh::createIndexBuffer(const VkCommandPool& commandPool)
-{
-	VkDeviceSize bufferSize = sizeof(indices_[0]) * indices_.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	index_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	index_buffer_->map((void*)indices_.data());
-	index_buffer_->unmap();
-	index_buffer_->prepareBuffer(commandPool);
-
-}
-
-void Mesh::createVertexBuffer(const VkCommandPool& commandPool)
-{
-	VkDeviceSize bufferSize = sizeof(vertices_[0]) * vertices_.size();
-	auto usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-	auto propertise = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-
-	vertex_buffer_ = std::make_shared<Buffer>(bufferSize, usage, propertise);
-	vertex_buffer_->map((void*)vertices_.data());
-	vertex_buffer_->unmap();
-	vertex_buffer_->prepareBuffer(commandPool);
-
-}
-
-Mesh::Mesh(std::string mesh_name) : Object(mesh_name)
+Mesh::Mesh(VkCommandPool& command_pool, std::string mesh_name) 
+	: Object(mesh_name), command_pool_(command_pool)
 {
 }
 

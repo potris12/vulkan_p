@@ -1,0 +1,106 @@
+======================
+TODO 
+지금은 buffer가 registCommand buffer 하고있지만 
+이걸 mesh가 모아서 한번에 set 하는게 좋아보임 
+
+======================
+
+
+이제 할일 
+유니폼 버퍼 
+-> 
+파이프라인 
+
+인스턴싱 버퍼 정리
+
+유니폼 버퍼부터 제작함
+
+유니폼 버퍼는 랜더 파이프라인에서 제작해야함 
+
+현재 랜더 파이프라인이 정의가 정확히 되지 않은 입장에서 
+랜더 파이프라인은 랜더러가 대행함
+
+=> ㅇ
+랜더러가 유니폼 버퍼를 만들고 
+해당 랜더러가 그 유니폼 버퍼를 관리 
+만들고 uniform buffer를 shared_ptr로 만들어서 반환 
+해당 uniform buffer매니저가 필요한가? 
+만드르고 
+정보 갱신하고? 
+셋하고? 
+셋하는건 미리 desc에 정의하고 만들어 놓고? dynamic, static 버퍼 2가지로 분리해서 사용할 수 있을듯? 
+일단 static 버퍼를 만들어 보자 
+
+1. init 할 떄 uniform 버퍼를 만들어 두고 
+2. update 부에서 업데이트 해봄 -> staging 버퍼를 
+3. 고정 파이프라인? 뭐라해야해? 그 파이프라인에 리소스 set하는거 로직 알아서 돌아서 shader에 set
+
+끝 
+-> 설정 해야하는거 
+몇개? 
+ - 이건 아직 .. 흠 
+슬롯
+사이즈 range
+offset
+
+이 버퍼를 .. 하나의 binding 에 set할 떄 descriptorCount  이걸로 accessed in a shader as an array 
+즉 array형태로 연결할 수 있음 ..
+몇개까지 가능하지? 
+
+
+If a shader stage is not included in stageFlags, then a resource must not be accessed from that stage via this binding within any pipeline using the set layout. Other than input attachments which are limited to the fragment shader, there are no limitations on what combinations of stages can use a descriptor binding, and in particular a binding can be used by both graphics stages and the compute stage.
+
+그래서 여러가지 cnt저거는 그거같다 큐브맵할 떄 여러개 텍스쳐 set하잖니? 그건가? 아무튼 일단 binding 할 때 하나당 하나의 리소스라고 생각하고 넘어감 
+
+그럼 버퍼 관리자 무슨 슬롯 번호 관리자 같은게 필요함 
+ - 슬롯 번호 관리자!!! 
+이건 리소스 매니저 이런게 있어야 하나? 
+
+처음 생성할 때 
+리소스들 다 생성해 놓고 
+createDescriptor SEt을 시전함 
+이때 자기가 만든 uniform 버퍼들을 한꺼번에 정리해서 set하도록 함 
+
+-> 
+제작 순서
+
+1. 유니폼 버퍼 만듬 
+ - 유니폼 버퍼는 뭘 들고있지? 
+자기 번호를 들고 있어야 하나/ 
+ 일단 일반 버퍼처럼 사이즈, offset, usage?? 아 버퍼 usage, memproperty flag 
+
+아마 유니폼 버퍼 static은 스테이징 버퍼가 필요할 꺼임 
+엄밀히 말하면 뭐 스테틱도 아님 
+
+
+ -> 유니폼 버퍼가 자기를 decs set에 설정해야하나? 
+ -> 파이프라인이 desc set에 유니폼 버퍼를 설정해야하나? 
+
+
+
+
+
+
+
+
+
+///////////
+
+전체 명세 
+사용 방법 
+01 생성
+uniform_buffer01 = addUniformBUffer(size, offset );
+add uniformbuffer에서 - 해당 버퍼의 binding slot number 초기화 및 binding_slot_num++;
+이거 하면서 자기가 관리하는 버퍼 vector겟지? push_back (uniform_buffers_)
+
+02 갱신
+uniform_buffer01->prepareBuffer(,asdmal, data);
+
+03 set 
+ 1. std::array 제작 binding_slot_num 갯수만큼 descriptorWrotes
+ 2. 자기의 resources를 모두 돌면서 (texture, uniform buffers) 위에서 제작한 descriptorWrotes를 인자로 넣어서 descriptorWrotes를 준비시킴
+3. descriptorWrotes를 이용하여 이미 자원 갯수 알고? 다 아니까 vkUpdateDescriptorSets가능
+
+
+for(uniform_buffers_){
+ uniform_buffer->

@@ -1,0 +1,11 @@
+대충 완성된거 
+
+ - 메쉬 
+ - index buffer 
+ - vertex buffer 
+ 
+
+해야하는거 
+
+ - instance buffer
+ - shader 

@@ -38,8 +38,8 @@ public:
 	const VkQueue& getGraphicsQueue() { return graphicsQueue; }
 	const VkQueue& getPresentQueue() { return presentQueue; }
 
-	const int getWIDTH() { return WIDTH; }
-	const int getHEIGHT() { return HEIGHT;}
+	const uint32_t getWIDTH() { return WIDTH; }
+	const uint32_t getHEIGHT() { return HEIGHT;}
 
 	/*
 	그래픽 카드는 할당 할 수 있는 여러 유형의 메모리를 제공할 ㅅ ㅜ있음
@@ -50,6 +50,21 @@ public:
 
 	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
+	//swap chain
+	uint32_t getImageIndex() { return imageIndex_; }
+	VkSwapchainKHR& getSwapChain() { return swapChain; }
+	VkFormat& getSwapChainImageFormat() { return swapChainImageFormat; }
+	VkExtent2D& getSwapChainExtent() { return swapChainExtent; }
+	std::vector<VkImageView>& getSwapChainImageViews() { return swapChainImageViews; }
+	std::vector<VkImage>& getSwapChainImages() { return swapChainImages; }
+
+	void cleanupSwapChain();
+	void recreateSwapChain();
+
+	//std::array<VkWriteDescriptorSet, 8> descriptor_writes_;//max 8 slot uniform buffers
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 private:
 
 	const std::vector<const char*> validationLayers = {
@@ -69,19 +84,19 @@ private:
 
 
 	//window
-	const int WIDTH = 800;
-	const int HEIGHT = 600;
-	GLFWwindow* window;
+	const uint32_t WIDTH = 800;
+	const uint32_t HEIGHT = 600;
+	GLFWwindow* window{};
 	void initWindow();
 
 	//instance
-	VkInstance instance;
+	VkInstance instance{};
 	void createInstance();
 	bool checkValidationLayerSupport();
 	std::vector<const char*> getRequiredExtensions();
 
 	//validation layout
-	VkDebugUtilsMessengerEXT callback;
+	VkDebugUtilsMessengerEXT callback{};
 	void setupDebugCallback();
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
 		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
@@ -90,7 +105,7 @@ private:
 	}
 
 	//create surface
-	VkSurfaceKHR surface;
+	VkSurfaceKHR surface{};
 	void createSurface();
 	
 	//physical device
@@ -100,14 +115,25 @@ private:
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
 	//logical device
-	VkDevice device;
-	VkQueue graphicsQueue;
-	VkQueue presentQueue;
+	VkDevice device{};
+	VkQueue graphicsQueue{};
+	VkQueue presentQueue{};
 	void createLogicalDevice();
 
 	//메모리 요구사항?
-	VkPhysicalDeviceMemoryProperties memProperties;
+	VkPhysicalDeviceMemoryProperties memProperties{};
 
+	//cur swap chain image index
+	uint32_t imageIndex_ = 0;
+
+	//swap chain
+	void createSwapChain();
+	void createImageViews();
+	VkSwapchainKHR swapChain{};
+	std::vector<VkImage> swapChainImages{};
+	VkFormat swapChainImageFormat{};
+	VkExtent2D swapChainExtent{};
+	std::vector<VkImageView> swapChainImageViews{};
 
 public:
 	DeviceManager();

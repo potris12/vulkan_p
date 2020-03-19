@@ -3,6 +3,9 @@
 #include "Object.h"
 #include "Buffer.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "InstancingBuffer.h"
 
 
 class Mesh : public Object
@@ -13,31 +16,78 @@ public:
 	void update() override;
 	void destroy() override;
 
-	void registeConstantData(VkCommandBuffer& commandBuffer);
-	void draw();
+	void draw(VkCommandBuffer& commandBuffer);
+	/* instancing buffer data */
+	template <typename T>
+	std::shared_ptr<InstancingBuffer> addInstancingBuffer(int32_t data_num, const std::vector<VkFormat>& formats)
+	{
+		InstancingBufferBindingData instancing_buffer_binding_data{ binding_slot_, 1, 0 };
+		auto instancing_buffer = std::make_shared<InstancingBufferT<T>>(data_num, instancing_buffer_binding_data);
+		instancing_buffers_.push_back(instancing_buffer);
 
+		addVertexInputRateInstance(formats);
 
-	void createIndexBuffer(const VkCommandPool& commandPool);
-	void createVertexBuffer(const VkCommandPool& commandPool);
+		return instancing_buffer;
+	}
+	
+	std::vector<std::shared_ptr<InstancingBuffer>>& addBufferDataStart();
+	void addBufferDataEnd();
+
+	/* pipeline data set */
+	void setVertexInputState(VkPipelineVertexInputStateCreateInfo& vertex_input_state);
+	void setInputAssemblyState(VkPipelineInputAssemblyStateCreateInfo& input_assembly_state);
 private:
-	std::vector<InstanceData> instanceData;
+	//std::vector<Vertex> vertices_;
+	std::vector< VkVertexInputBindingDescription> vertex_input_bind_desc_;//vertex binding info 
+	std::vector< VkVertexInputAttributeDescription> vertex_input_attribute_desc_;//vertex info
 
-	////이게 정점 데이터 인풋레이아웃임 
-	//const std::vector<Vertex> vertices = {
-	//	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-	//	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
-	//	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-	//};
+	void setVertexInputRateVertex(const std::vector<VkFormat>& vertex_formats);
+	void addVertexInputRateInstance(const std::vector<VkFormat>& vertex_formats);
+	void addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector<VkFormat>& vertex_formats);
 
-	/*
-	인덱스 데이터
-	*/
-	/*const std::vector<Vertex> vertices_ = {
-		{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f} },
-	{ { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
-	{ { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
-	{ { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } }
-	};*/
+	uint32_t binding_slot_ = 0;
+	uint32_t binding_location_ = 0;
+	
+	std::shared_ptr<VertexBuffer> vertex_buffer_ = nullptr;
+	std::shared_ptr<IndexBuffer> index_buffer_ = nullptr;
+	std::vector<std::shared_ptr<InstancingBuffer>> instancing_buffers_;
+
+	VkCommandPool& command_pool_;
+
+	void createIndexBuffer();
+	void createVertexBuffer();
+public:
+	Mesh(VkCommandPool& command_pool, std::string mesh_name);
+	~Mesh();
+};
+
+/*const std::vector<uint16_t> indices_ = {
+	0,1,2,2,3,0
+};*/
+
+/*
+버택스 입력을 처리하는 방법을 설명하는 두 번째 구조는 VkVertexInputAttributeDescription임
+함
+*/
+
+
+
+////이게 정점 데이터 인풋레이아웃임 
+//const std::vector<Vertex> vertices = {
+//	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+//	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f} },
+//	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+//};
+
+/*
+인덱스 데이터
+*/
+/*const std::vector<Vertex> vertices_ = {
+	{ { -0.5f, -0.5f },{ 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f} },
+{ { 0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f } },
+{ { 0.5f, 0.5f },{ 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
+{ { -0.5f, 0.5f },{ 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } }
+};*/
 /*
 { { -0.5f, -0.5f, 0.5f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } },
 { { 0.5f, -0.5f, 0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
@@ -48,77 +98,3 @@ private:
 { { 0.5f, -0.5f, -0.5f },{ 0.0f, 1.0f, 0.0f },{ 1.0f, 0.0f } },
 { { 0.5f, 0.5f, -0.5f },{ 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f } },
 { { -0.5f, 0.5f, -0.5f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f } }*/
-
-	const float fx = 0.5f;
-	const float fy = 0.5f;
-	const float fz = 0.5f;
-	
-	const std::vector<Vertex> vertices_ = {
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}}
-	};
-
-	/*const std::vector<uint16_t> indices_ = {
-		0,1,2,2,3,0
-	};*/
-
-	const std::vector<uint16_t> indices_ = {
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4,
-		4,3,7,4,0,3,
-		0,4,5,5,1,0,
-		1,5,6,6,2,1,
-		3,7,6,6,2,3
-	};
-	/*
-	버택스 입력을 처리하는 방법을 설명하는 두 번째 구조는 VkVertexInputAttributeDescription임
-	함
-	*/
-
-	//std::vector<Vertex> vertices_;
-	std::shared_ptr<Buffer> vertex_buffer_ = nullptr;
-	//std::vector<uint16_t> indices_;
-	std::shared_ptr<Buffer> index_buffer_ = nullptr;
-	//std::vector<uint16_t> indices_;
-	std::shared_ptr<Buffer> instance_buffer_ = nullptr;
-
-	void createInstanceBuffer();
-public:
-	Mesh(std::string mesh_name);
-	~Mesh();
-};
-

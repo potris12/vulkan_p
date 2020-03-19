@@ -1,0 +1,47 @@
+기존에 desc writes 가 안됬던 이유 ㅂㄷ.. 
+지역변수로 상태값 초기화 해줬음 
+
+
+결과 
+ - uniform_buffer 제작 완료 
+ 
+할일 
+ - texture 제작 필요 
+ + resource manager 제작 
+ -> resource manger 는 renderer가 들고있음 ㅇㅇ 
+ -> 나중에 render pipeline으로 빼기 쉽게 만들 수 있을듯? 
+render pipeline마다 하나씩 resource manager가 있도록 해야하나? 
+
+
+TODO 
+ instancing buffer도 지금 uniform buffer처럼 renderer가 컨트롤 하게 만들어야함 
+array<void*, buffer_count> mapped_buffer_data; 
+for(instancing_Buffers){ 
+mapped_buffer_data[i] = instancing_buffer.mapped_Data();
+}
+
+for(pObject){
+pObject->setInstancingData(mapped_buffer_data);
+}
+=====================================================
+이전처럼 sampler는 전역으로 몇개 제작해서 돌려쓰고 
+구지? 여러개 만들어서 각자 set 해주는거보다 깔끔함 
+
+깔끔한데.. 
+일단 sampler도 리소스로 제작해서 관리하즈아 
+
+
+리소스 매니저 기틀 텍스쳐랑 샘플러 제작중이었음 
+
+텍스쳐랑 샘플러 만들고 리소스 매니저 제작하고? 
+
+terrain 깔아보고? 
+깔아보기 전에 이 쉐이더 좀 어떻게 편해게 디버깅 할 수 있나 체크해 봐야함 이대로는 안딤 
+정 안돼면 이거 가져다가 버리고 dx 12 공부해야될 수도 있음
+
+일단 resource manager만들고
+ㅇgraphics pipeline 만들고 -> 현 renderer
+
+이 graphics pipeline이 이전에 render container라고 하면 
+이거 가지고 render target뭐 이런거 까지 정하고 한다면? 
+디퍼드 라이팅도 쉽게 할 수 있음 ㅇㅇ 

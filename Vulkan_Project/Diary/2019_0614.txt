@@ -1,0 +1,25 @@
+* 지금 각 buffer, texture shader들의 기능은 
+registeCommandBuffer 함수를 공통으로 줘서 command buffer에 등록되도록 하자 
+
+
+
+///////////////////////////지금 정리한건 mesh에서 사용하는 vertex buffer만임 
+
+ + vertex buffer 새로 제작 고고 
+
+index buffer는?  
+ - 이건 vertex buffer와 비슷함 그냥 set 할 떄 flag 봐서 index면 set index 어쩌구 해주면 됨 
+되지만 인자가 완전히 틀려먹음 index type이라는 아이가 존재 그냥 index buffer를 새로 만들자 
+
+uniform buffer는 ? 
+버퍼 정리가 끝났고? 
+
+
+
+이제 shader를 해보자! 
+shader는 이전에 작업해 놓은 프로젝트의 느낌을 비슷하게 살리도록 함 
+
+-> shader 를 제작할 때 file이름, flag를 넣고 이거 가지고 shader object 제작 및 registeCommandBuffer진행
+
+create buffer 같은 함수는 uniform , vertex index 버퍼 모두 사용하는데 
+어떻게 관리하징 

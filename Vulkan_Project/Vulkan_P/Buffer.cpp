@@ -16,36 +16,19 @@ void Buffer::update()
 
 void Buffer::destroy()
 {
-	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), stagingBuffer, nullptr);
-	vkFreeMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory, nullptr);
-	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), buffer, nullptr);
-	vkFreeMemory(DEVICE_MANAGER->getDevice(), bufferMemory, nullptr);
+	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), staging_buffer_, nullptr);
+	vkFreeMemory(DEVICE_MANAGER->getDevice(), staging_buffer_memory_, nullptr);
+	vkDestroyBuffer(DEVICE_MANAGER->getDevice(), buffer_, nullptr);
+	vkFreeMemory(DEVICE_MANAGER->getDevice(), buffer_memory_, nullptr);
 }
 
-void Buffer::map(void* data)
-{
-	/*
-	이 함수는 오프셋과 크기로 정의된 지정된 메모리 리소스의 영역에 액세스 할 수 있게함
-	여기서 오프셋과 크기는 각각 0과 bufferInfo.size임 특수값 VK_WHOLE_SIZE를 지정하여 모든 메모리를 매핑 할 수도 있음
-	두 번쨰 매개변수는 플래그를 지정하는데 사용할 수있지만 지금 API에는 아직 사용할 수 있는 매개변수가 없음
-	마지막 값은 매핑된 메모리에 대한 포인터의 출력을 지정
-	*/
-	void* tmp_data;
-	vkMapMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory, 0, bufferSize, 0, &tmp_data);
-	memcpy(tmp_data, data, (size_t)bufferSize);
-}
 
-void Buffer::map_tmp(void * data)
+void Buffer::mapWithUnmap(void * data)
 {
 	void* tmp_data;
-	vkMapMemory(DEVICE_MANAGER->getDevice(), bufferMemory, 0, bufferSize, 0, &tmp_data);
-	memcpy(tmp_data, data, (size_t)bufferSize);
+	vkMapMemory(DEVICE_MANAGER->getDevice(), buffer_memory_, 0, buffer_size_, 0, &tmp_data);
+	memcpy(tmp_data, data, (size_t)buffer_size_);
 
-	vkUnmapMemory(DEVICE_MANAGER->getDevice(), bufferMemory);
-}
-
-void Buffer::unmap()
-{
 
 	/*
 	이제 vkUnmapMemory 를 사용하여 버텍스 데이터를 매핑 된 메모리에 memcpy하고 다시 매핑 해제할 수 있음
@@ -57,12 +40,38 @@ void Buffer::unmap()
 	우리는 매핑된 메모리가 할당 된 메모리의 내용과 할상 일치하는지 확인하는 첫 번째 방법을 찾아갔음
 	명시적 플러싱 보다 성능이 약간 떨어질 수 있음
 	*/
-	vkUnmapMemory(DEVICE_MANAGER->getDevice(), stagingBufferMemory);
+	vkUnmapMemory(DEVICE_MANAGER->getDevice(), buffer_memory_);
 }
 
-void Buffer::prepareBuffer(const VkCommandPool& commandPool)
+void Buffer::prepareBuffer(void* data)
 {
-	copyBuffer(stagingBuffer, buffer, bufferSize, commandPool);
+	/*
+	이 함수는 오프셋과 크기로 정의된 지정된 메모리 리소스의 영역에 액세스 할 수 있게함
+	여기서 오프셋과 크기는 각각 0과 bufferInfo.size임 특수값 VK_WHOLE_SIZE를 지정하여 모든 메모리를 매핑 할 수도 있음
+	두 번쨰 매개변수는 플래그를 지정하는데 사용할 수있지만 지금 API에는 아직 사용할 수 있는 매개변수가 없음
+	마지막 값은 매핑된 메모리에 대한 포인터의 출력을 지정
+	*/
+	void* tmp_data;
+	vkMapMemory(DEVICE_MANAGER->getDevice(), staging_buffer_memory_, 0, buffer_size_, 0, &tmp_data);
+	memcpy(tmp_data, data, (size_t)buffer_size_);
+	vkUnmapMemory(DEVICE_MANAGER->getDevice(), staging_buffer_memory_);
+
+	copyBuffer(staging_buffer_, buffer_, buffer_size_);
+}
+
+void Buffer::registeCommandBuffer(VkCommandBuffer & commandBuffer, uint32_t firstBinding, uint32_t bindingCount, VkDeviceSize offset)
+{
+	/*
+	VK_BUFFER_USAGE_INDEX_BUFFER_BIT = 0x00000040,
+	VK_BUFFER_USAGE_VERTEX_BUFFER_BIT = 0x00000080,
+	*/
+	if (usage_ & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) {
+		vkCmdBindIndexBuffer(commandBuffer, buffer_, offset, VK_INDEX_TYPE_UINT16);
+	}
+	else if (usage_ & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) {
+		vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount/*정점버퍼의의 수*/, &buffer_, &offset);
+	}
+	
 }
 
 void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
@@ -92,7 +101,7 @@ void Buffer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 	vkBindBufferMemory(DEVICE_MANAGER->getDevice(), buffer, bufferMemory, 0);
 }
 
-void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, const VkCommandPool& commandPool)
+void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
 	/*
 	정점 데이터를 매핑하고 복사하기 위해 stagingBufferMemory와 함께 새로운 stagingBuffer를 사용하고 있음
@@ -110,7 +119,7 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	VkCommandBufferAllocateInfo allocInfo = {};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = commandPool;//아직 command pool이 하나라서 이렇게 작성
+	allocInfo.commandPool = RENDERER->getCommandPool();//아직 command pool이 하나라서 이렇게 작성
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -145,11 +154,11 @@ void Buffer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 	차단 장치를 사용하면 동시에 여러 번 전송을 예약하고 한 번에 하나 씩 실행하는 대신 완료된 모든 전송을 기다릴 수 있음
 	그것은 운전자에게 더 많은 기회를 최적화 시킬 수 있음
 	*/
-	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), commandPool, 1, &commandBuffer);//전송 완료 후 정리
+	vkFreeCommandBuffers(DEVICE_MANAGER->getDevice(), RENDERER->getCommandPool(), 1, &commandBuffer);//전송 완료 후 정리
 }
 
 Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties)
-: bufferSize(size), usage_(usage), properties_(properties), Object("buffer")
+: buffer_size_(size), usage_(usage), properties_(properties), Object("buffer")
 {
 	/*
 	처음 세 매개 변수는 무엇인지 바로 알 수 있음 네 번째 매개변수는 메모리 영역 내의 오프셋임
@@ -164,8 +173,8 @@ Buffer::Buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlag
 	이는 vkMapMemory를 사용해 버퍼 메모리를 CPU가 액세스 가능 하도록 메모리에 매핑하여 수행
 	*/
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-	createBuffer(bufferSize, usage_, properties_, buffer, bufferMemory);
+	createBuffer(buffer_size_, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, staging_buffer_, staging_buffer_memory_);
+	createBuffer(buffer_size_, usage_, properties_, buffer_, buffer_memory_);
 
 }
 

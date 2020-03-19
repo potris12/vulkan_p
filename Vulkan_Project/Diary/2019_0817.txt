@@ -1,0 +1,17 @@
+texture 를 만들고 
+-> image, view 2가지를 가지고 있어야 겠죠? ㅇㅇ 
+
+texture제작.. 
+Image 랑 raw image, 
+view buffer
+
+예상 명세서
+처음 시작 하면 파일 이림과 뭐 이미지 옵션을 통해서 이미지를 제작하겠지? 
+
+지금 문제는 이 raw image데이터를 버퍼에 넣고 이를 vk image에 넣는 로직이 있는데 
+이걸 하나의 객체에 넣는게 맞는건가? 
+
+좋은 방법이 생각났다 
+texture객체에 모든 help func를 정의해  놓고 ? 
+각 용도에 맞게 texture를 만드는걸 가상화, 
+이응 대에에 충 buffer랑 같게 응응 
