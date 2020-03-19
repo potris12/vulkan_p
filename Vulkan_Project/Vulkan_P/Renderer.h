@@ -13,6 +13,8 @@
 
 #include "GameObject.h"
 
+#include "RenderContainer.h"
+
 struct UniformBufferObject
 {
 	glm::mat4 world;
@@ -35,37 +37,17 @@ public:
 	void destroy();
 
 	//render pipeline 함수
-	template <typename T>
-	std::shared_ptr<UniformBuffer> addUniformBuffer(uint32_t data_num)
-	{
-		static uint32_t binding_slot = 0;
-
-		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot);
-		uniform_buffers_.push_back(uniform_buffer);
-		++binding_slot;
-
-		return uniform_buffer;
-	}
-	std::shared_ptr<Texture> addTexture(const std::string& file_name);
-
-	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
-	std::vector<std::shared_ptr<Texture>> textures_;
 	
 	//각 객체내에 있어야 할 데이터를 일단 여기에 꺼내 놓음 
 #define INSTANCE_COUNT 10
-	std::vector<InstanceData> instance_data_;
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
  	//render pass
 	VkRenderPass& getRenderPass() { return renderPass; }
 
-	//graphics pipeline
-	VkPipeline getGraphicsPipeline() { return graphicsPipeline; }
 	//frame buffer
 	std::vector<VkFramebuffer>& getSwapChainFramebuffers() { return swapChainFramebuffers; }
 	//command pool
 	const VkCommandPool& getCommandPool() { return commandPool; }
-	//command buffers
-	std::vector<VkCommandBuffer> getCommandBuffers() { return commandBuffers; };
 
 	//resize swap chain
 	void cleanupSwapChain();
@@ -100,35 +82,22 @@ public:
 
 	*/
 
-	//uniform buffer
-	void createDescriptorSetLayout();
-	void createUniformBuffer();
-	void createInstanceBuffer();
-
-	void createDescriptorPool();
-	void createDescriptorSet();
-
 	void updateUniformBuffer();
 
-	void createTexture();
 	//Draw
 	void drawFrame();
-
-	VkCommandBuffer& getCurCommandBuffer();
 
 	//helper
 	VkCommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 private:
 
+	//render container 
+	std::shared_ptr<RenderContainer> render_container_ = nullptr;
+
 	//render pass
 	void createRenderPass();
 	VkRenderPass renderPass{};
-
-	//pipeline
-	void createGraphicsPipeline();
-	VkPipelineLayout pipelineLayout{};
-	VkPipeline graphicsPipeline{};
 
 	//frame buffers
 	void createFramebuffers();
@@ -142,8 +111,6 @@ private:
 	/* 이제 명령 버퍼를 할당하고 명령 버퍼를 기록할 수 있음 드로잉 명령 중 하나는 올바른 VkFramebuffer를 바인딩 하기 떄문에 실제로 스왑체인의 모든 이미지에 대한 며열ㅇ 버퍼를 다시 기록 해야함
 	이를 위해 VkCommandBuffer객체 목록을 클래스 멤버로 만들어야함
 	명령 버퍼는 명령 풀이 삭제되면 자동으로 해제되므로 명시적인 정리가 필요하지 않음*/
-	std::vector<VkCommandBuffer> commandBuffers;
-	void createCommandBuffers();
 
 	//세마포어
 	VkSemaphore imageAvailableSemaphore{};
@@ -151,11 +118,7 @@ private:
 	void createSemaphores();
 
 	//mesh info
-	std::shared_ptr<Mesh> rect_mesh_ = nullptr;
-
-	VkDescriptorSetLayout descriptorSetLayout{};
-	VkDescriptorPool descriptorPool{};
-	VkDescriptorSet descriptorSet{};
+	//std::shared_ptr<Mesh> rect_mesh_ = nullptr;
 
 	//helper func
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
