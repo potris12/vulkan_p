@@ -60,20 +60,18 @@ depth iamge & view & device memory
 이건 연구를 좀더 해봐야 겟지만 같은 옵션의 파이프라인의 무한 증식을 좀 줄일 수 있음 
 거의 이전의 렌더컨테이너 쯤 된다고 보면 될 것 같음 
  구성 요소
- - shader - PIPELINE shader
- - input layout  - PIPELINE mesh
- - input assembly  - PIPELINE mesh
- - view port - CAMERA
- - scissor info - clipping - CAMERA
- - rasterizer - ETC
- - multi sampling info - ETC
- - blend op - ETC
- - pipeline layout info - PIPELINE mesh, texture, uniform_buffer
-     = pipe line에 연결되는 리소스들 정보 - 여기에 아래 2.번의 layout 설명자와 layout 수가 들어감 
- - depth stencil info - CAMERA
- - frame buffer - ETC? 
+ - shader
+ - input layout 
+ - input assembly
+ - view port 
+ - scissor info - clipping
+ - rasterizer 
+ - multi sampling info
+ - blend op
+ - pipeline layout info - pipe line에 연결되는 리소스들 정보 - 여기에 아래 2.번의 layout 설명자와 layout 수가 들어감 
+ - depth stencil info 
 
-2. DescriptorSet - PIPELINE 
+2. DescriptorSet 
  - 위의 파이프라인에서 정의한 layouts들에 대한 설명자들 
  - 이 리소스들이 그래서 뭔데? 라는거 ex) VkDescriptorBufferInfo/ VkDescriptorImageInfo
 dscriptor pool에 등록함 ?  
@@ -88,108 +86,7 @@ dscriptor pool에 등록함 ?
 DescriptorSet, Pipeline을 가짐 매번 만들꺼임 만들고 set하고, 변경하는 녀석들만 변경함 
 그럼 처음 초기화 할 때 변경될거 안될꺼 구분필요 
 변경안되는 녀석들은 맨처음 다 set해놓도록 함 변경되는 애들은 update에서 변경 필요 update 무조건 필요하겟네 init이랑 
- 
+
 
 여기서 주의할 것은 공통적인 요소가 존재한다는거? 이건 밖에서 주자 
- - 카메라(뷰포트, 공통 상수버퍼, 공통 샘플러)
-
-
-
-
-지금부터 해야되는거 
-
-1. 현재 상황에서 객체 제작 
-2. 메쉬 <버텍스 버퍼, index buffer, instancing buffer, input layout, input assemly>,
-3. 쉐이더
-4. 상수버퍼, 
-5. 오브젝트 
-6. 오브젝트 렌더러
-
-
------
------
------
------
-구상 나중에 멀티스레드 렌더링 구조 
-
-----------------------
-Update에서 뭐 물리엔진을 쓰든 뭐 하든 물리 돌리고? 끝나면 카메라 컬링 하고 보이는 녀석들을 랜더 준비시킴 -> 이때 랜더할 Object가 있는 ObjectRenderer를 Renderer의 Render thread queue에 등록함 
-
-0. 명령 할당 스레드가 [프레젠트 끝 대기] 프래젠트 끝 이후 작업 시작 
-1. 각 파이프라인으로 나뉘어진 그림 그리는 명령, ObjectRenderer를 Renderer의 워커스레드 명령 queue에 등록
-2. 명령 할당 thread에서 queue에 들어있는 ObjectRenderer를 수행 - pipeline, 각 shader layout descriptor 제작 및 업데이트, 할당 및 draw 
-3. draw가 끝나면 다음 ObjectRenderer를 찾아서 랜더 
-4. 모든 랜더가 끝나길 대기 - 랜더 스레드의 명령큐에있는 모든 ObjectRenderer가 다 그려짐
-5. 프레젠트 및 랜더 스레드 워크등 다 재움
-
-
------
------
------
------
-구상 쉐이더, 버퍼, 메쉬 등 구조
-
-쉐이더
-파이프라인에서 static 함수로 create shader를 만듬 이녀석이 알아서 다 등록하게 함 제작이후 건들일 필요 없게? - 쉐이더를 변경할 필요가 있을 때는 create shader 함수를 재 호출해서 shader 를 다시 설정하고 pipeline을 다시 제작!!
-1. 제작할 때 한번 어떤 쉐이더 파일을 읽을지 정함 및 어떤 쉐이더인지 확인 
-이름, 어떤 쉐이더 단계를 수행하는지 체크하여 이름 규칙에 맞는 파일들을 로드 및 쉐이더 플롭 제작 
-2. update? 따위 필요 없음 무조건 set임 set할 때 graphic pipeline에 set! 이 과정은 템플릿화 ? 
- -> 제작해야 하는건 내가 건들일 부분은 생성 부분. 끝
-
-----
-버퍼 
-1. 이건 좀 다름 
-용도에 따라 대표적으로 vertex buffer, index buffer, instancing buffer, uniform buffer 4가지가 존재함 
-처음 제작할 때 버퍼의 타입과 사이즈, 데이터 넣을려면 넣도록 함 
-2. 용도에 따라 update (map이 필요할 수 있음 타입에 따라 다르게 동작하게함)
-vertex, index 버퍼는 동작하지 않게하고 instancing, uniform buffer만 동작하게 함 map unmap으로!!! 
-이 update에는 data가 필요함 
-음 그냥 용도별로 따로 제작하는게 나아보임 
-
-
-----
-메쉬 컨트롤 = 사용자는 처음 제작할 때만 컨트롤함 나머지 작업은 mesh쪽에 전적으로 위임 
-오브젝트 컨트롤 = 사용자는 처음 제작할 때와, update를 책임져야함 나머지는 사용자(pipeline, mesh가 컨트롤)
-
-메쉬 컨트롤 
- - 버텍스 버퍼,
- - 인덱스 버퍼
-
-메쉬, 오브젝트 컨트롤
- - 인스턴싱 버퍼
-
-오브젝트 컨트롤 <object | pipeline>
- - 유니폼 버퍼 
-  = 어떤 쉐이더 단계에 set될지 처음에 넣어줘야함 VS, PS, GS, ... etc
-
-
-----
-메쉬
-처음 제작할 때 버텍스 데이터, 인덱스 데이터, 인스턴싱 데이터를 넣도록함
-이는 파일에서 데이터를 읽도록 하자 fbx나, 이전의 gjm파일을 이용 그전까진 
-메쉬 생성자에서 vertex 정보, index정보를 이용해 각각 버퍼를 제작하고 
-....
-instancing buffer는 밖에서 pipeline이? 등록하도록 함 AddInstancing buffer하면 mesh에 
-instancing buffer가 있든 없든 instancing 으로 가능하니까 instancing으로 함 
-index 가 있는지 체크해서 없으면 그냥 drawcmd 사용
-이부분은 자동 
-pipeline의 draw가 그것
-
----
-오브젝트
-오브젝트는 메트릭스와 자신을 그린 ObjectRenderer를 가지고 있도록 함 왜냐면 내가 보이면 나의 ObjectRenderer에 나를 등록해야 하거든 
-
------ 
-오브젝트 렌더러
-위의 모든 녀석들을 관리 
-시작할 때 모든 파이프라인 정적 정보를 제작하고 <mesh shader buffer ... >
-update에서 갱신할껄 갱신해주고 
-
-object Renderer는 아래와 같은 가상함수들을 가지는 순수가상 객체임 
-mesh하나, 객체들 포인터 벡터, 그림그릴 객체 수, 버퍼, 텍스쳐, 쉐이더들, 버퍼들 이정도 정보를 가지고 
-init - 처음 제작할 때 - 이때 공통 정보들을 가져옴 - view port, rasterizer, ... 등등  
-prepareRender - Render전 resourece layout들 갱신, 업데이트 <대표적 인스턴싱 버퍼 등>
-render -  랜더 명령 실행 - 이때 공통 정보들을 가져옴 - 카메라 위치 정보 view projection 행렬 등
-
-object Renderer는 버퍼들, 쉐이더, 메쉬등을 제작하는 함수를 가짐 이는 처음 제작하고 
-나머지 수행은, <변경 제외> 절대 바뀌지 않으니까 템플릿 메쏘드 페턴으로 진행 
+ - 
