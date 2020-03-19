@@ -35,6 +35,7 @@ void Renderer::awake()
 			VK_FORMAT_R32G32B32A32_SFLOAT
 		}
 	);
+	render_container_->createDescriptorPool();
 	render_container_->createDescriptorSetLayout();
 	render_container_->createDescriptorSet();
 
