@@ -70,10 +70,8 @@ void RenderContainer::addGameObject(std::shared_ptr<GameObject> game_object)
 
 std::shared_ptr<Texture> RenderContainer::addTexture(const std::string& file_name)
 {
-	static uint32_t binding_slot = 0;
-
 	auto texture = std::make_shared<Texture>();
-	texture->createTextureImage(binding_slot++, file_name);
+	texture->createTextureImage(binding_slot_++, file_name);
 	textures_.push_back(texture);
 	return texture;
 }
@@ -124,9 +122,6 @@ void RenderContainer::createDescriptorSet()
 	}
 
 	std::vector< VkWriteDescriptorSet> vec;
-	for (auto& test : vec) {
-		test = {};
-	}
 
 	vec.resize(uniform_buffers_.size() + textures_.size());
 
@@ -147,30 +142,25 @@ void RenderContainer::createDescriptorSet()
 void RenderContainer::createDescriptorSetLayout()
 {
 	/*
-	binding 되어야 할 녀석들을 여기서 정의함
-	 - 상수버퍼를 사용하려면 여기서 일단 등록해야함
-	 sampler,
+	uniform buffer, texture 
 	*/
-	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
-	uboLayoutBinding.binding = 0;
-	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	uboLayoutBinding.descriptorCount = 1;
-	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	uboLayoutBinding.pImmutableSamplers = nullptr;//Optional
+	std::vector< VkDescriptorSetLayoutBinding> vec;
 
-	VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
-	samplerLayoutBinding.binding = 1;
-	samplerLayoutBinding.descriptorCount = 1;
-	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	samplerLayoutBinding.pImmutableSamplers = nullptr;
-	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	vec.resize(uniform_buffers_.size() + textures_.size());
 
-	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+	auto descriptor_writes_index = 0;
+	for (auto uniform_buffer : uniform_buffers_) {
+		uniform_buffer->setDescSetLayout(vec[descriptor_writes_index++]);
+	}
+
+	for (auto texture : textures_) {
+		texture->setDescSetLayout(vec[descriptor_writes_index++]);
+	}
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-	layoutInfo.pBindings = bindings.data();
+	layoutInfo.bindingCount = static_cast<uint32_t>(vec.size());
+	layoutInfo.pBindings = vec.data();
 
 	if (vkCreateDescriptorSetLayout(DEVICE_MANAGER->getDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
 	{

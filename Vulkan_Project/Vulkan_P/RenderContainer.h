@@ -30,11 +30,9 @@ public:
 	template <typename T>
 	std::shared_ptr<UniformBuffer> addUniformBuffer(uint32_t data_num)
 	{
-		static uint32_t binding_slot = 0;
-
-		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot);
+		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot_);
 		uniform_buffers_.push_back(uniform_buffer);
-		++binding_slot;
+		++binding_slot_;
 
 		return uniform_buffer;
 	}
@@ -64,6 +62,8 @@ private:
 	std::shared_ptr<Mesh> mesh_ = nullptr;
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
 
+
+	uint32_t binding_slot_ = 0;
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
 

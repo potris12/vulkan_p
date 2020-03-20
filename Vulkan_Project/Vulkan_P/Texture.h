@@ -13,6 +13,8 @@ public:
 	virtual void destroy();
 
 	void setDescWrites(VkDescriptorSet& descriptor_set, VkWriteDescriptorSet& desc_write);
+	void setDescSetLayout(VkDescriptorSetLayoutBinding& desc_set_layout);
+
 	void createTextureImage(uint32_t binding_slot, const std::string& file_name);
 	
 	static bool hasStencilComponent(VkFormat format);
