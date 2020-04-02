@@ -35,7 +35,7 @@ GLM_FORCE_DEPTH_ZERO_TO_ONE 정의를 사용하여 Vulkan 범위를 0.0에서 1.0으로 사용하
 #include <chrono>
 
 
-#define MAX_COMPONETMANAGER_MANAGED_COMPONENT_NUM 1024
+//#define MAX_COMPONETMANAGER_MANAGED_COMPONENT_NUM 1024
 
 //GAD Engine start
 //#include "../NomadECS/src/nomad.h"

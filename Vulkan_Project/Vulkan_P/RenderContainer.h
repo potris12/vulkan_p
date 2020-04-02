@@ -38,6 +38,12 @@ public:
 		return uniform_buffer;
 	}
 
+	void addUniformBuffer(std::shared_ptr<UniformBuffer> uniform_buffer)
+	{
+		uniform_buffers_.push_back(uniform_buffer);
+		++binding_slot_;
+	}
+
 	std::shared_ptr<Texture> addTexture(const std::string& file_name);
 	//add render objects
 
@@ -50,7 +56,7 @@ public:
 	void createDescriptorSetLayout();
 
 	//pipeline
-	void createGraphicsPipeline(VkRenderPass& render_pass, std::weak_ptr<Camera> camera);
+	void createGraphicsPipeline(VkRenderPass& render_pass);
 	//command buffer
 	void createCommandBuffers(std::vector<VkFramebuffer>& swapchain_frame_buffer, VkRenderPass& render_pass, VkCommandPool& command_pool);
 
@@ -64,7 +70,7 @@ private:
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
 
 
-	uint32_t binding_slot_ = 0;
+	uint32_t binding_slot_ = Camera::kCameraBufferSlot;// binding slot 시작index는 Camera buffer slot (camera buffer slot 은 일단 공통으로 0임 uniform buffer의 첫번째는 무조건 이녀석 )
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
 
@@ -78,8 +84,10 @@ private:
 
 	//command buffer
 	std::vector<VkCommandBuffer> commandBuffers;
+
+	std::weak_ptr<Camera> weak_camera_;
 public:
-	RenderContainer();
+	RenderContainer(std::weak_ptr<Camera> camera);
 	~RenderContainer();
 };
 

@@ -16,8 +16,7 @@ void RenderContainer::update()
 {
 	//TODO 
 	//이건 각 객체에서 해야함
-	float dt = TIMER->getDeltaTime();
-
+	
 	//UPDATE에서 각 객체를 순회하면서 instance_data_를 채움 
 
 	auto instancing_buffers = mesh_->addBufferDataStart();
@@ -25,7 +24,6 @@ void RenderContainer::update()
 	// Distribute rocks randomly on two different rings
 	for (auto game_object : game_objects_)
 	{
-		game_object->update(dt);
 		game_object->setBufferData(instancing_buffers);
 	}
 
@@ -168,7 +166,7 @@ void RenderContainer::createDescriptorSetLayout()
 
 }
 
-void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass, std::weak_ptr<Camera> weak_camera)
+void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 {
 	Shader vs(ShaderType::VS, "shaders/vert.spv", "main");
 	Shader ps(ShaderType::PS, "shaders/frag.spv", "main");
@@ -186,7 +184,7 @@ void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass, std::wea
 
 	//camera info
 	VkPipelineViewportStateCreateInfo viewportState = {};
-	if (auto camera = weak_camera.lock())
+	if (auto camera = weak_camera_.lock())
 	{
 		camera->setViewportState(viewportState);
 	}
@@ -403,10 +401,13 @@ void RenderContainer::cleanupSwapChain(VkCommandPool& command_pool)
 	vkDestroyPipelineLayout(DEVICE_MANAGER->getDevice(), pipelineLayout, nullptr);
 }
 
-RenderContainer::RenderContainer()
-	: Object("render_container")
+RenderContainer::RenderContainer(std::weak_ptr<Camera> camera)
+	: Object("render_container"), weak_camera_(camera)
 {
-	
+	if (auto camera = weak_camera_.lock())
+	{
+		addUniformBuffer(camera->getCameraBuffer());
+	}
 }
 
 
