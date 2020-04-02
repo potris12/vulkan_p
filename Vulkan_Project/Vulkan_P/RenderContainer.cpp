@@ -14,7 +14,6 @@ void RenderContainer::start()
 
 void RenderContainer::update()
 {
-
 	//TODO 
 	//이건 각 객체에서 해야함
 	float dt = TIMER->getDeltaTime();
@@ -80,7 +79,7 @@ void RenderContainer::setUniformBufferData(uint32_t index, void* data)
 {
 	if (index < uniform_buffers_.size())
 	{
-		uniform_buffers_[0]->setBufferData(data);
+		uniform_buffers_[index]->setBufferData(data);
 	}
 }
 
@@ -169,7 +168,7 @@ void RenderContainer::createDescriptorSetLayout()
 
 }
 
-void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
+void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass, std::weak_ptr<Camera> weak_camera)
 {
 	Shader vs(ShaderType::VS, "shaders/vert.spv", "main");
 	Shader ps(ShaderType::PS, "shaders/frag.spv", "main");
@@ -186,28 +185,12 @@ void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 	mesh_->setInputAssemblyState(inputAssembly);
 
 	//camera info
-	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
-	VkViewport viewport = {};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)swapChainExtent.width;
-	viewport.height = (float)swapChainExtent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-
-	VkRect2D scissor = {};
-	scissor.offset = { 0, 0 };
-	scissor.extent = swapChainExtent;
-	//camera info
-
-	//camera manager info
 	VkPipelineViewportStateCreateInfo viewportState = {};
-	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportState.viewportCount = 1;
-	viewportState.pViewports = &viewport;
-	viewportState.scissorCount = 1;
-	viewportState.pScissors = &scissor;
-	//camera manager info
+	if (auto camera = weak_camera.lock())
+	{
+		camera->setViewportState(viewportState);
+	}
+	//camera info
 
 	//레스터 라이저
 	VkPipelineRasterizationStateCreateInfo rasterizer = {};

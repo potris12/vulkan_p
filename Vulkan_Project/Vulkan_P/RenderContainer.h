@@ -1,4 +1,5 @@
 #pragma once
+#include "Camera.h"
 #include "Mesh.h"
 #include "Object.h"
 #include "GameObject.h"
@@ -49,7 +50,7 @@ public:
 	void createDescriptorSetLayout();
 
 	//pipeline
-	void createGraphicsPipeline(VkRenderPass& render_pass);
+	void createGraphicsPipeline(VkRenderPass& render_pass, std::weak_ptr<Camera> camera);
 	//command buffer
 	void createCommandBuffers(std::vector<VkFramebuffer>& swapchain_frame_buffer, VkRenderPass& render_pass, VkCommandPool& command_pool);
 

@@ -18,15 +18,28 @@ void Renderer::awake()
 		game_objects_.push_back(std::make_shared<GameObject>(i));
 	}
 
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
+	camera_ = std::make_shared<Camera>(
+		VkViewport{
+			0.0f,
+			0.0f,
+			(float)swapChainExtent.width,
+			(float)swapChainExtent.height,
+			0.0f,
+			1.0f
+		},
+		VkRect2D{
+			{ 0, 0 },
+			swapChainExtent
+		}
+		);
+
 	//create mesh
 	render_container_ = std::make_shared<RenderContainer>();
+
 	render_container_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
-
-
 	render_container_->addUniformBuffer<UniformBufferObject>(1);
 	render_container_->addTexture("texture/texture2.jpg");
-
-	// create instancing buffer 
 	render_container_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
 		{
 			VK_FORMAT_R32G32B32A32_SFLOAT,
@@ -39,7 +52,7 @@ void Renderer::awake()
 	render_container_->createDescriptorSetLayout();
 	render_container_->createDescriptorSet();
 
-	render_container_->createGraphicsPipeline(renderPass);
+	render_container_->createGraphicsPipeline(renderPass, camera_);
 	render_container_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
 
 	createSemaphores();
@@ -71,6 +84,8 @@ void Renderer::destroy()
 
 void Renderer::updateUniformBuffer()
 {
+	camera_-> view mtx 가 계속 변할꺼니까 update에서 해주는게 맞음 
+
 	UniformBufferObject ubo = {};
 	ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.view = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -80,7 +95,7 @@ void Renderer::updateUniformBuffer()
 
 	ubo.proj[1][1] *= -1;//glm 은 원래 opengl용으로 설계되었으므로 클립 좌표의 y좌표가 반전됩 이렇게 안하면 이미지가 위아래 만전됨
 
-	render_container_->setUniformBufferData(0, &ubo);
+	render_container_->setCameraBufferData(camera_);
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
 	//memcpy(data, &ubo, sizeof(ubo));
@@ -399,7 +414,7 @@ void Renderer::recreateSwapChain()
 	createDepthResources();
 	createFramebuffers();
 
-	render_container_->createGraphicsPipeline(renderPass);
+	render_container_->createGraphicsPipeline(renderPass, camera_);
 	render_container_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
 	/* vkDeviceWaitIdle을 호출하기 떄문에 사용중인 리소스에 접근하지 않음
 	목표 스왑체인 자체를 다시 만드는것
