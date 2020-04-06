@@ -19,11 +19,26 @@ void Renderer::awake()
 	}
 
 	//create mesh
-	render_container_ = std::make_shared<RenderContainer>();
+	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
+	camera_ = std::make_shared<Camera>(
+		//camera info
+		VkViewport{
+			0.0f,
+			0.0f,
+			(float)swapChainExtent.width,
+			(float)swapChainExtent.height,
+			0.0f,
+			1.0f
+		},
+		VkRect2D{
+			{ 0, 0 },
+			swapChainExtent
+		}
+	);
+
+	render_container_ = std::make_shared<RenderContainer>(camera_);
 	render_container_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
 
-
-	render_container_->addUniformBuffer<UniformBufferObject>(1);
 	render_container_->addTexture("texture/texture2.jpg");
 
 	// create instancing buffer 
@@ -71,16 +86,8 @@ void Renderer::destroy()
 
 void Renderer::updateUniformBuffer()
 {
-	UniformBufferObject ubo = {};
-	ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(10.0f, 10.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
-	float aspect = (float)swapChainExtent.width / (float)swapChainExtent.height;
-	ubo.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+	camera_->update();
 
-	ubo.proj[1][1] *= -1;//glm 은 원래 opengl용으로 설계되었으므로 클립 좌표의 y좌표가 반전됩 이렇게 안하면 이미지가 위아래 만전됨
-
-	render_container_->setUniformBufferData(0, &ubo);
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
 	//memcpy(data, &ubo, sizeof(ubo));

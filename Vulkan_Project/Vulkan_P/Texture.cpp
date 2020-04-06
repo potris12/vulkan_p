@@ -32,14 +32,25 @@ void Texture::destroy()
 
 void Texture::setDescWrites(VkDescriptorSet & descriptor_set, VkWriteDescriptorSet & desc_write)
 {
+	desc_write = VkWriteDescriptorSet{};
 	desc_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	desc_write.dstSet = descriptor_set;
-	desc_write.dstBinding = 1;
+	desc_write.dstBinding = binding_slot_;
 	desc_write.dstArrayElement = 0;
 	desc_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	desc_write.descriptorCount = 1;
 	desc_write.pImageInfo = &image_info_;
 
+}
+
+void Texture::setDescSetLayout(VkDescriptorSetLayoutBinding& desc_set_layout)
+{
+	desc_set_layout = VkDescriptorSetLayoutBinding{};
+	desc_set_layout.binding = binding_slot_;
+	desc_set_layout.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	desc_set_layout.descriptorCount = 1;
+	desc_set_layout.pImmutableSamplers = nullptr;
+	desc_set_layout.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 }
 
 void Texture::createTextureImage(uint32_t binding_slot, const std::string& file_name)

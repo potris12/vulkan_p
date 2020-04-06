@@ -1,0 +1,3 @@
+ecs 에서 entity가 componet를 소유한다고 착각하면 안된다 entity가 component를 소유하면 데이터의 파편화가 시작될 뿐이다 
+필요한 데이터 component를 하나로 모으려면 ComponentManager가 component를 소유해야 한다.
+그럼 entity는 뭐하는 거냐? 그냥 id를 제공하도록 하자 

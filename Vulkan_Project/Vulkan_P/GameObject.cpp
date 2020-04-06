@@ -30,7 +30,7 @@ void GameObject::rotate(glm::mat4 mtx) {
 }
 
 void GameObject::rotate(float x, float y, float z) {
-	glm::mat4 rotate_mtx;
+	glm::mat4 rotate_mtx = glm::mat4(1.f);
 	if (x != 0.0f)
 	{
 		rotate_mtx = glm::rotate(glm::mat4(1.f), glm::radians(x), getRight());
@@ -49,7 +49,7 @@ void GameObject::rotate(float x, float y, float z) {
 		//SetRotationQuaternion(XMQuaternionRotationAxis(GetLook(), z));
 	}
 
-	rotate(rotate_mtx);\
+	rotate(rotate_mtx);
 }
 
 //--------------------------------getter--------------------------------

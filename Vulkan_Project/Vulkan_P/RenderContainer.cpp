@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RenderContainer.h"
+#include "Camera.h"
 #include "Timer.h"
 
 
@@ -70,10 +71,8 @@ void RenderContainer::addGameObject(std::shared_ptr<GameObject> game_object)
 
 std::shared_ptr<Texture> RenderContainer::addTexture(const std::string& file_name)
 {
-	static uint32_t binding_slot = 0;
-
 	auto texture = std::make_shared<Texture>();
-	texture->createTextureImage(binding_slot++, file_name);
+	texture->createTextureImage(binding_slot_++, file_name);
 	textures_.push_back(texture);
 	return texture;
 }
@@ -181,6 +180,10 @@ void RenderContainer::createDescriptorSetLayout()
 
 void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 {
+	auto camera = weak_camera_.lock();
+	if (nullptr == camera) return;
+
+
 	Shader vs(ShaderType::VS, "shaders/vert.spv", "main");
 	Shader ps(ShaderType::PS, "shaders/frag.spv", "main");
 
@@ -195,28 +198,9 @@ void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 	mesh_->setInputAssemblyState(inputAssembly);
 
-	//camera info
-	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
-	VkViewport viewport = {};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)swapChainExtent.width;
-	viewport.height = (float)swapChainExtent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-
-	VkRect2D scissor = {};
-	scissor.offset = { 0, 0 };
-	scissor.extent = swapChainExtent;
-	//camera info
-
 	//camera manager info
 	VkPipelineViewportStateCreateInfo viewportState = {};
-	viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-	viewportState.viewportCount = 1;
-	viewportState.pViewports = &viewport;
-	viewportState.scissorCount = 1;
-	viewportState.pScissors = &scissor;
+	camera->setCameraDesc(viewportState);//camera 가 없을리 없음 
 	//camera manager info
 
 	//레스터 라이저
@@ -430,10 +414,13 @@ void RenderContainer::cleanupSwapChain(VkCommandPool& command_pool)
 	vkDestroyPipelineLayout(DEVICE_MANAGER->getDevice(), pipelineLayout, nullptr);
 }
 
-RenderContainer::RenderContainer()
-	: Object("render_container")
+RenderContainer::RenderContainer(std::weak_ptr<Camera> weak_camera)
+	: Object("render_container"), weak_camera_(weak_camera)
 {
-	
+	if (auto camera = weak_camera_.lock())
+	{
+		addUniformBuffer(camera->getCameraBuffer());
+	}
 }
 
 

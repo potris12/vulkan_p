@@ -1,0 +1,25 @@
+# Platform specific
+.DS_Store
+.vs
+
+# Library files
+.*.dep
+*.a
+*.so
+*.o
+
+# Cmake stuff
+Makefile
+cmake_install.cmake
+CMakeCache.txt
+install_manifest.txt
+cmake-build-debug
+src/CMakeFiles
+src/compile_commands.json
+
+#CLion
+.idea
+
+# Build folders
+example/build
+build

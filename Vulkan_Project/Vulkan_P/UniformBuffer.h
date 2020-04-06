@@ -31,7 +31,7 @@ class UniformBuffer : public Object
 public:
 	virtual void setBufferData(void* data) = 0;
 	virtual void setDescWrites(VkDescriptorSet& descriptorSet, VkWriteDescriptorSet& descWrites) = 0;
-
+	virtual void setDescSetLayout(VkDescriptorSetLayoutBinding& desc_set_layout) = 0;
 protected:
 	UniformBuffer(std::string name)
 		:Object(name) {}
@@ -61,6 +61,7 @@ public:
 
 	void setDescWrites(VkDescriptorSet& descriptor_set, VkWriteDescriptorSet& desc_write)
 	{
+		desc_write = VkWriteDescriptorSet{};
 		desc_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		desc_write.dstSet = descriptor_set;
 		desc_write.dstBinding = binding_slot_;//이건 static 변수로 관리 
@@ -70,7 +71,16 @@ public:
 		desc_write.pBufferInfo = &bufferInfo_;
 	}
 
-	
+	void setDescSetLayout(VkDescriptorSetLayoutBinding& desc_set_layout)
+	{
+		desc_set_layout  = VkDescriptorSetLayoutBinding{};
+		desc_set_layout.binding = binding_slot_;
+		desc_set_layout.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		desc_set_layout.descriptorCount = 1;
+		desc_set_layout.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		desc_set_layout.pImmutableSamplers = nullptr;//Optional
+
+	}
 private:
 	VkDescriptorBufferInfo bufferInfo_ = {};
 	uint32_t binding_slot_ = 0;
