@@ -226,5 +226,8 @@
     <None Include="shaders\shader.vert">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="shaders\shader.bat">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>
