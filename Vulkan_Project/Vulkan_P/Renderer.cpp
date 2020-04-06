@@ -18,8 +18,10 @@ void Renderer::awake()
 		game_objects_.push_back(std::make_shared<GameObject>(i));
 	}
 
+	//create mesh
 	auto& swapChainExtent = DEVICE_MANAGER->getSwapChainExtent();
 	camera_ = std::make_shared<Camera>(
+		//camera info
 		VkViewport{
 			0.0f,
 			0.0f,
@@ -32,13 +34,14 @@ void Renderer::awake()
 			{ 0, 0 },
 			swapChainExtent
 		}
-		);
+	);
 
-	//create mesh
 	render_container_ = std::make_shared<RenderContainer>(camera_);
-
 	render_container_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
+
 	render_container_->addTexture("texture/texture2.jpg");
+
+	// create instancing buffer 
 	render_container_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
 		{
 			VK_FORMAT_R32G32B32A32_SFLOAT,
@@ -59,13 +62,9 @@ void Renderer::awake()
 
 void Renderer::update()
 {
-	float dt = TIMER->getDeltaTime();
-	
-	camera_->update(dt);
 	//TODO UPDATER에서 진행해야함 그림 그릴 객체를 선별해 해당 객체가 가지고 있는 RenderContainer에게 add
 	for (auto game_object : game_objects_)
 	{
-		game_object->update(dt);
 		render_container_->addGameObject(game_object);
 	}
 	render_container_->update();
@@ -87,7 +86,8 @@ void Renderer::destroy()
 
 void Renderer::updateUniformBuffer()
 {
-	//render_container_->setCameraBufferData(camera_);
+	camera_->update();
+
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
 	//memcpy(data, &ubo, sizeof(ubo));

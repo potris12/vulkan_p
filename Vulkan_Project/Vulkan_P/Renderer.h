@@ -16,7 +16,6 @@
 
 #include "RenderContainer.h"
 
-
 class Renderer : public CSingleTonBase<Renderer>
 {
 public:
@@ -29,8 +28,8 @@ public:
 	
 	//각 객체내에 있어야 할 데이터를 일단 여기에 꺼내 놓음 
 #define INSTANCE_COUNT 10
-	std::shared_ptr<Camera> camera_ = nullptr;
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
+	std::shared_ptr<Camera> camera_{ nullptr };
  	//render pass
 	VkRenderPass& getRenderPass() { return renderPass; }
 

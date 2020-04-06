@@ -1,13 +1,14 @@
 #pragma once
-#include "Camera.h"
 #include "Mesh.h"
 #include "Object.h"
 #include "GameObject.h"
+
 #include "InstancingBuffer.h"
 #include "UniformBuffer.h"
 #include "Texture.h"
 #include "Shader.h"
 
+class Camera;
 class RenderContainer : public Object
 {
 public:
@@ -68,9 +69,8 @@ public:
 private:
 	std::shared_ptr<Mesh> mesh_ = nullptr;
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
+	std::weak_ptr<Camera> weak_camera_;
 
-
-	uint32_t binding_slot_ = Camera::kCameraBufferSlot;// binding slot 시작index는 Camera buffer slot (camera buffer slot 은 일단 공통으로 0임 uniform buffer의 첫번째는 무조건 이녀석 )
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
 
@@ -85,7 +85,7 @@ private:
 	//command buffer
 	std::vector<VkCommandBuffer> commandBuffers;
 
-	std::weak_ptr<Camera> weak_camera_;
+	int32_t binding_slot_ = 0;
 public:
 	RenderContainer(std::weak_ptr<Camera> camera);
 	~RenderContainer();

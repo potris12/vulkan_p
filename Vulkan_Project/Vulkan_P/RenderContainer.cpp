@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RenderContainer.h"
+#include "Camera.h"
 #include "Timer.h"
 
 
@@ -14,9 +15,11 @@ void RenderContainer::start()
 
 void RenderContainer::update()
 {
+
 	//TODO 
 	//이건 각 객체에서 해야함
-	
+	float dt = TIMER->getDeltaTime();
+
 	//UPDATE에서 각 객체를 순회하면서 instance_data_를 채움 
 
 	auto instancing_buffers = mesh_->addBufferDataStart();
@@ -24,6 +27,7 @@ void RenderContainer::update()
 	// Distribute rocks randomly on two different rings
 	for (auto game_object : game_objects_)
 	{
+		game_object->update(dt);
 		game_object->setBufferData(instancing_buffers);
 	}
 
@@ -77,7 +81,7 @@ void RenderContainer::setUniformBufferData(uint32_t index, void* data)
 {
 	if (index < uniform_buffers_.size())
 	{
-		uniform_buffers_[index]->setBufferData(data);
+		uniform_buffers_[0]->setBufferData(data);
 	}
 }
 
@@ -119,6 +123,9 @@ void RenderContainer::createDescriptorSet()
 	}
 
 	std::vector< VkWriteDescriptorSet> vec;
+	for (auto& test : vec) {
+		test = {};
+	}
 
 	vec.resize(uniform_buffers_.size() + textures_.size());
 
@@ -139,25 +146,30 @@ void RenderContainer::createDescriptorSet()
 void RenderContainer::createDescriptorSetLayout()
 {
 	/*
-	uniform buffer, texture 
+	binding 되어야 할 녀석들을 여기서 정의함
+	 - 상수버퍼를 사용하려면 여기서 일단 등록해야함
+	 sampler,
 	*/
-	std::vector< VkDescriptorSetLayoutBinding> vec;
+	VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+	uboLayoutBinding.binding = 0;
+	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboLayoutBinding.descriptorCount = 1;
+	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	uboLayoutBinding.pImmutableSamplers = nullptr;//Optional
 
-	vec.resize(uniform_buffers_.size() + textures_.size());
+	VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
+	samplerLayoutBinding.binding = 1;
+	samplerLayoutBinding.descriptorCount = 1;
+	samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	samplerLayoutBinding.pImmutableSamplers = nullptr;
+	samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-	auto descriptor_writes_index = 0;
-	for (auto uniform_buffer : uniform_buffers_) {
-		uniform_buffer->setDescSetLayout(vec[descriptor_writes_index++]);
-	}
-
-	for (auto texture : textures_) {
-		texture->setDescSetLayout(vec[descriptor_writes_index++]);
-	}
+	std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 
 	VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	layoutInfo.bindingCount = static_cast<uint32_t>(vec.size());
-	layoutInfo.pBindings = vec.data();
+	layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+	layoutInfo.pBindings = bindings.data();
 
 	if (vkCreateDescriptorSetLayout(DEVICE_MANAGER->getDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
 	{
@@ -168,6 +180,10 @@ void RenderContainer::createDescriptorSetLayout()
 
 void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 {
+	auto camera = weak_camera_.lock();
+	if (nullptr == camera) return;
+
+
 	Shader vs(ShaderType::VS, "shaders/vert.spv", "main");
 	Shader ps(ShaderType::PS, "shaders/frag.spv", "main");
 
@@ -182,13 +198,10 @@ void RenderContainer::createGraphicsPipeline(VkRenderPass& render_pass)
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
 	mesh_->setInputAssemblyState(inputAssembly);
 
-	//camera info
+	//camera manager info
 	VkPipelineViewportStateCreateInfo viewportState = {};
-	if (auto camera = weak_camera_.lock())
-	{
-		camera->setViewportState(viewportState);
-	}
-	//camera info
+	camera->setCameraDesc(viewportState);//camera 가 없을리 없음 
+	//camera manager info
 
 	//레스터 라이저
 	VkPipelineRasterizationStateCreateInfo rasterizer = {};
@@ -401,8 +414,8 @@ void RenderContainer::cleanupSwapChain(VkCommandPool& command_pool)
 	vkDestroyPipelineLayout(DEVICE_MANAGER->getDevice(), pipelineLayout, nullptr);
 }
 
-RenderContainer::RenderContainer(std::weak_ptr<Camera> camera)
-	: Object("render_container"), weak_camera_(camera)
+RenderContainer::RenderContainer(std::weak_ptr<Camera> weak_camera)
+	: Object("render_container"), weak_camera_(weak_camera)
 {
 	if (auto camera = weak_camera_.lock())
 	{
