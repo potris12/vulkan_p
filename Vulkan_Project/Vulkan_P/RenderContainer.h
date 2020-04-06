@@ -2,11 +2,13 @@
 #include "Mesh.h"
 #include "Object.h"
 #include "GameObject.h"
+
 #include "InstancingBuffer.h"
 #include "UniformBuffer.h"
 #include "Texture.h"
 #include "Shader.h"
 
+class Camera;
 class RenderContainer : public Object
 {
 public:
@@ -30,13 +32,17 @@ public:
 	template <typename T>
 	std::shared_ptr<UniformBuffer> addUniformBuffer(uint32_t data_num)
 	{
-		static uint32_t binding_slot = 0;
-
-		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot);
+		auto uniform_buffer = std::make_shared<UniformBufferT<T>>(data_num, binding_slot_);
 		uniform_buffers_.push_back(uniform_buffer);
-		++binding_slot;
+		++binding_slot_;
 
 		return uniform_buffer;
+	}
+
+	void addUniformBuffer(std::shared_ptr<UniformBuffer> uniform_buffer)
+	{
+		uniform_buffers_.push_back(uniform_buffer);
+		++binding_slot_;
 	}
 
 	std::shared_ptr<Texture> addTexture(const std::string& file_name);
@@ -63,6 +69,7 @@ public:
 private:
 	std::shared_ptr<Mesh> mesh_ = nullptr;
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
+	std::weak_ptr<Camera> weak_camera_;
 
 	std::vector<std::shared_ptr<UniformBuffer>> uniform_buffers_;
 	std::vector<std::shared_ptr<Texture>> textures_;
@@ -77,8 +84,10 @@ private:
 
 	//command buffer
 	std::vector<VkCommandBuffer> commandBuffers;
+
+	int32_t binding_slot_ = 0;
 public:
-	RenderContainer();
+	RenderContainer(std::weak_ptr<Camera> camera);
 	~RenderContainer();
 };
 

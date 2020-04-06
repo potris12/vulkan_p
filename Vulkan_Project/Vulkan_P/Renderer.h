@@ -12,21 +12,9 @@
 #include "Texture.h"
 
 #include "GameObject.h"
+#include "Camera.h"
 
 #include "RenderContainer.h"
-
-struct UniformBufferObject
-{
-	glm::mat4 world;
-	glm::mat4 view;
-	glm::mat4 proj;
-
-	UniformBufferObject() {
-		world = glm::mat4(1.0f);
-		view = glm::mat4(1.0f);
-		proj = glm::mat4(1.0f);
-	};
-};
 
 class Renderer : public CSingleTonBase<Renderer>
 {
@@ -41,6 +29,7 @@ public:
 	//각 객체내에 있어야 할 데이터를 일단 여기에 꺼내 놓음 
 #define INSTANCE_COUNT 10
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
+	std::shared_ptr<Camera> camera_{ nullptr };
  	//render pass
 	VkRenderPass& getRenderPass() { return renderPass; }
 
