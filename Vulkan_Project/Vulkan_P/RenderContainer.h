@@ -46,6 +46,7 @@ public:
 	void setUniformBufferData(uint32_t index, void* data);
 
 	//create resources desc
+	void createDescriptorPool();
 	void createDescriptorSet();
 	void createDescriptorSetLayout();
 
