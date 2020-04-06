@@ -1,7 +1,9 @@
 #include "Framework.h"
 
 int main() {
+#ifdef _DEBUG
 	system("call shaders/shader.bat");
+#endif
 
 	auto app = std::make_shared<Framework>();
 

@@ -2,7 +2,7 @@
 #include "Renderer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../std_image/stb_image.h"
+#include "std_image/stb_image.h"
 
 const std::string Texture::file_path_ = "texture/";
 
