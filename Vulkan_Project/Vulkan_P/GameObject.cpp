@@ -78,7 +78,7 @@ GameObject::GameObject(int index)
 
 	auto mtx = glm::rotate(glm::mat4(1.f), glm::radians(30.0f) * index, glm::vec3(0.f, 0.f, 1.f));
 	rotate(mtx);
-	move(glm::vec3(1.f, 0.f, 0.f), index * offset - x);
+	move(glm::vec3(0.f, 0.f, 1.f), index * offset - x);
 }
 
 

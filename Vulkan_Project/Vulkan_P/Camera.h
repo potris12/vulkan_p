@@ -19,11 +19,24 @@ public:
 	};
 
 
-	void update();
+	void update(float dt);
 	void setCameraDesc(VkPipelineViewportStateCreateInfo& viewportState);
-
 	std::shared_ptr<UniformBuffer> getCameraBuffer();
+
+	void move(glm::vec3 dir, float distance);
+	void setPosition(float x, float y, float z);
+	void rotate(glm::mat4 mtx);
+	void rotate(float x, float y, float z);
+
+
+	glm::vec3 getRight();
+	glm::vec3 getUp();
+	glm::vec3 getLook();
+	glm::vec3 getPosition();
+	glm::mat4 getWorldMtx();
 private:
+	CameraBufferData camera_buffer_data_;
+	glm::mat4 world_;
 	VkViewport viewport_;
 	VkRect2D scissor_rect_;
 

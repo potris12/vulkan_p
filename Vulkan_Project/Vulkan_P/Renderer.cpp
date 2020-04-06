@@ -35,6 +35,7 @@ void Renderer::awake()
 			swapChainExtent
 		}
 	);
+	camera_->setPosition(0.f, 1.3f, 0.f);
 
 	render_container_ = std::make_shared<RenderContainer>(camera_);
 	render_container_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
@@ -86,7 +87,7 @@ void Renderer::destroy()
 
 void Renderer::updateUniformBuffer()
 {
-	camera_->update();
+	camera_->update(TIMER->getDeltaTime());
 
 	//void* data;
 	//vkMapMemory(DEVICE_MANAGER->getDevice(), uniformBufferMemory, 0, sizeof(ubo), 0, &data);
