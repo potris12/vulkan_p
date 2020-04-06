@@ -1,5 +1,5 @@
-#include "DeviceManager.h"
-//#include "Renderer.h"
+ï»¿#include "DeviceManager.h"
+#include "Renderer.h"
 
 //debug validation layout function
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT callback, const VkAllocationCallbacks* pAllocator) {
@@ -27,7 +27,7 @@ void DeviceManager::awake()
 	setupDebugCallback();
 	createSurface();
 	/*
-	vkPhysicalDevices are considered to be implicitly created by the vkInstance, 
+	vkPhysicalDevices are considered to be implicitly created by the vkInstance,
 	so they get destroyed when you destroy the vkInstance - no need to do anything special.
 	*/
 	pickPhysicalDevice();
@@ -138,7 +138,7 @@ void DeviceManager::initWindow()
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 
 	glfwSetWindowUserPointer(window, this);
-	//glfwSetWindowSizeCallback(window, Framework::onWindowResized); swap chain ÀÌÈÄ Á¤¸®
+	//glfwSetWindowSizeCallback(window, Framework::onWindowResized); swap chain ì´í›„ ì •ë¦¬
 }
 
 void DeviceManager::setupDebugCallback()
@@ -206,7 +206,7 @@ void DeviceManager::createLogicalDevice()
 	}
 
 	VkPhysicalDeviceFeatures deviceFeatures = {};
-	//to use anisotropic filtering Ç¥º» ÀÌ¹æ¼º?
+	//to use anisotropic filtering í‘œë³¸ ì´ë°©ì„±?
 	deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 	VkDeviceCreateInfo createInfo = {};
@@ -333,20 +333,20 @@ SwapChainSupportDetails DeviceManager::querySwapChainSupport(VkPhysicalDevice de
 uint32_t DeviceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 	/*
-	VkPhysicalDeviceMemoryProperties ±¸Á¶Ã¼¿¡´Â µÎ °³ÀÇ ¹è¿­ memoryTypes¹× memoryHeaps°¡ ÀÖÀ½
-	¸Ş¸ğ¸® ÈüÀº VRAMÀÌ ºÎÁ·ÇÑ °æ¿ì RAMÀÇ Àü¿ë VRAM ¹× ½º¿Ò °ø°£°ú °°Àº º°°³ÀÇ ¸Ş¸ğ¸® ¸®¼Ò½ºÀÔ´Ï´Ù. ÀÌ Èü¿¡´Â ¿©·¯ À¯ÇüÀÇ ¸Ş¤Ç¹Ğ°¡ ÀÖ½À
-	Áö±İ ¿ì¸®´Â ¸Ş¸ğ¸® Ÿµ¤·¿¡ ´ëÇØ¼­¸¸ °ü½ÉÀ» °¡Áú°ÍÀÓ ±×°ÍÀÌ À§Ä¡ÇÑ ÈüÀÌ ¾Æ´Ï¶ó ¼º´É¿¡ ¿µÇâÀ» ¹ÌÄ¥ ¼ö ÀÖ´Ù°í »ó»óÇÒ ¼ö ÀÖÀ½
+	VkPhysicalDeviceMemoryProperties êµ¬ì¡°ì²´ì—ëŠ” ë‘ ê°œì˜ ë°°ì—´ memoryTypesë° memoryHeapsê°€ ìˆìŒ
+	ë©”ëª¨ë¦¬ í™ì€ VRAMì´ ë¶€ì¡±í•œ ê²½ìš° RAMì˜ ì „ìš© VRAM ë° ìŠ¤ì™‘ ê³µê°„ê³¼ ê°™ì€ ë³„ê°œì˜ ë©”ëª¨ë¦¬ ë¦¬ì†ŒìŠ¤ì…ë‹ˆë‹¤. ì´ í™ì—ëŠ” ì—¬ëŸ¬ ìœ í˜•ì˜ ë©”ã…—ë°€ê°€ ìˆìŠµ
+	ì§€ê¸ˆ ìš°ë¦¬ëŠ” ë©”ëª¨ë¦¬ ÂŸë®ë › ëŒ€í•´ì„œë§Œ ê´€ì‹¬ì„ ê°€ì§ˆê²ƒì„ ê·¸ê²ƒì´ ìœ„ì¹˜í•œ í™ì´ ì•„ë‹ˆë¼ ì„±ëŠ¥ì— ì˜í–¥ì„ ë¯¸ì¹  ìˆ˜ ìˆë‹¤ê³  ìƒìƒí•  ìˆ˜ ìˆìŒ
 	*/
 	vkGetPhysicalDeviceMemoryProperties(physicalDevice
 		, &memProperties);
 
 	/*
-	typeFilter ¸Å°³ º¯¼ö´Â ÀûÀıÇÑ ¸Ş¸ğ¸® À¯ÇüÀÇ ºñÆ® ÇÊµå¸¦ ÁöÁ¤ÇÏ´Â µ¥ »ç¿ëµË´Ï´Ù. Áï ´Ü¼øÈ÷ ¹İº¹ÇÏ¿© ÇØ´ç ºñÆ®°¡ 1·Î ¼³Á¤µÇ¾î ÀÖ´ÂÁö È®ÀÎÇÏ¿© ÀûÀıÇÑ ¸Ş¸ğ¸® À¯ÇüÀÇ ÀÎµ¦½º¸¦ Ã£À» ¼ö ÀÖÀ½
-	Á¤Á¡ µ¥ÀÌÅÍ¸¦ ÇØ´ç ¸Ş¸ğ¸®¿¡ ¾µ ¼ö ÀÖ¾î¾ßÇØ
-	memoryTypes ¹è¿­Àº °¢ ¸Ş¸ğ¸® À¯ÇüÀÇ Èü ¹× ¼Ó¼ºÀ» ÁöÁ¤ÇÏ´Â VkMemoryType ±¸Á¶Ã¼·Î ±¸¼ºµÊ
-	VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT·Î Ç¥½ÃµÇÁö¸¸
-	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ¼Ó¼ºµµ »ç¿ëÇØ¾ß ÇÔ
-	ÀÌÁ¦ ÀÌ ¼Ó¼ºÀÇ Áö¿øÀ» È®ÀÎÇÏ±â À§ÇØ ·çÇÁ¸¦ ¼öÁ¤ÇÒ ¼ö ÀÖÀ½
+	typeFilter ë§¤ê°œ ë³€ìˆ˜ëŠ” ì ì ˆí•œ ë©”ëª¨ë¦¬ ìœ í˜•ì˜ ë¹„íŠ¸ í•„ë“œë¥¼ ì§€ì •í•˜ëŠ” ë° ì‚¬ìš©ë©ë‹ˆë‹¤. ì¦‰ ë‹¨ìˆœíˆ ë°˜ë³µí•˜ì—¬ í•´ë‹¹ ë¹„íŠ¸ê°€ 1ë¡œ ì„¤ì •ë˜ì–´ ìˆëŠ”ì§€ í™•ì¸í•˜ì—¬ ì ì ˆí•œ ë©”ëª¨ë¦¬ ìœ í˜•ì˜ ì¸ë±ìŠ¤ë¥¼ ì°¾ì„ ìˆ˜ ìˆìŒ
+	ì •ì  ë°ì´í„°ë¥¼ í•´ë‹¹ ë©”ëª¨ë¦¬ì— ì“¸ ìˆ˜ ìˆì–´ì•¼í•´
+	memoryTypes ë°°ì—´ì€ ê° ë©”ëª¨ë¦¬ ìœ í˜•ì˜ í™ ë° ì†ì„±ì„ ì§€ì •í•˜ëŠ” VkMemoryType êµ¬ì¡°ì²´ë¡œ êµ¬ì„±ë¨
+	VK_MEMORY_PROPERTY_HOST_VISIBLE_BITë¡œ í‘œì‹œë˜ì§€ë§Œ
+	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ì†ì„±ë„ ì‚¬ìš©í•´ì•¼ í•¨
+	ì´ì œ ì´ ì†ì„±ì˜ ì§€ì›ì„ í™•ì¸í•˜ê¸° ìœ„í•´ ë£¨í”„ë¥¼ ìˆ˜ì •í•  ìˆ˜ ìˆìŒ
 	*/
 	for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i) {
 		if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -354,8 +354,8 @@ uint32_t DeviceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
 		}
 	}
 	/*
-	µÑ ÀÌ»óÀÇ ¼Ó¼ºÀ» °¡Áú ¼ö ÀÖÀ¸¹Ç·Î ºñÆ® ANDÀÇ °á°ú°¡ ´ÜÁö 0ÀÌ ¾Æ´Ñ ¿øÇÏ´Â ¼Ó¼º ºñÆ® ÇÊµå¿Í °°ÀºÁö È®ÀÎÇØ¾ß ÇÔ
-	ÇÊ¿ä·Î ÇÏ´Â ¸ğµç ÇÁ·ÎÆÛÆ¼¸¦ °¡Áö´Â ¹öÆÛ¿¡ ÀûÀıÇÑ ¸Ş¸ğ¸® ÇüÀÌ Á¸ÀçÇÏ¸é, ±× ÀÎµ¦½º¸¦ µ¹·ÁÁÖ¾î ±×·¸Áö ¾ÊÀº °æ¿ì ¿À·ù
+	ë‘˜ ì´ìƒì˜ ì†ì„±ì„ ê°€ì§ˆ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ë¹„íŠ¸ ANDì˜ ê²°ê³¼ê°€ ë‹¨ì§€ 0ì´ ì•„ë‹Œ ì›í•˜ëŠ” ì†ì„± ë¹„íŠ¸ í•„ë“œì™€ ê°™ì€ì§€ í™•ì¸í•´ì•¼ í•¨
+	í•„ìš”ë¡œ í•˜ëŠ” ëª¨ë“  í”„ë¡œí¼í‹°ë¥¼ ê°€ì§€ëŠ” ë²„í¼ì— ì ì ˆí•œ ë©”ëª¨ë¦¬ í˜•ì´ ì¡´ì¬í•˜ë©´, ê·¸ ì¸ë±ìŠ¤ë¥¼ ëŒë ¤ì£¼ì–´ ê·¸ë ‡ì§€ ì•Šì€ ê²½ìš° ì˜¤ë¥˜
 	*/
 	throw std::runtime_error("failed to find suitable memory type!");
 
@@ -364,10 +364,10 @@ uint32_t DeviceManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlag
 VkFormat DeviceManager::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
 	/*
-	VkFOrmatProperties 3°³ ¸¦ °¡Áü
-	linearTilingFeatures : ¼±Çü Å¸ÀÏ¸µ¿¡¼­ Áö¿øµÇ´Â »ç·Ê
-	optimalTilingFeatures : ÃÖÀûÀÇ Å¸ÀÏ¸µÀ¸·Î Áö¿øµÇ´Â »ç·Ê
-	bufferFeatures : ¹öÆÛ¿¡¼­ Áö¿øµÇ´Â »ç¿ë »ç·Ê
+	VkFOrmatProperties 3ê°œ ë¥¼ ê°€ì§
+	linearTilingFeatures : ì„ í˜• íƒ€ì¼ë§ì—ì„œ ì§€ì›ë˜ëŠ” ì‚¬ë¡€
+	optimalTilingFeatures : ìµœì ì˜ íƒ€ì¼ë§ìœ¼ë¡œ ì§€ì›ë˜ëŠ” ì‚¬ë¡€
+	bufferFeatures : ë²„í¼ì—ì„œ ì§€ì›ë˜ëŠ” ì‚¬ìš© ì‚¬ë¡€
 	*/
 	for (VkFormat format : candidates) {
 		VkFormatProperties props;
@@ -474,7 +474,7 @@ void DeviceManager::createSwapChain()
 	QueueFamilyIndices indices = DEVICE_MANAGER->findQueueFamilies(DEVICE_MANAGER->getPhysicalDevice());
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
-	if (indices.graphicsFamily != indices.presentFamily) {//present¶û graphics¶û queue°¡ ´Ù¸£¸é Ã³¸®°¡ ´Ù¸§
+	if (indices.graphicsFamily != indices.presentFamily) {//presentë‘ graphicsë‘ queueê°€ ë‹¤ë¥´ë©´ ì²˜ë¦¬ê°€ ë‹¤ë¦„
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;
