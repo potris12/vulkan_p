@@ -5,12 +5,16 @@ void Framework::awake()
 	TIMER->awake();
 	DEVICE_MANAGER->awake();
 	RENDERER->awake();
+	INPUTMANAGER->awake();
 }
 
 void Framework::update()
 {
 	while (!glfwWindowShouldClose(DEVICE_MANAGER->getWindow())) {
 		glfwPollEvents();
+
+		INPUTMANAGER->processInput(DEVICE_MANAGER->getWindow());
+
 		TIMER->update();
 		RENDERER->update();//TODO UPDATE제작 후 해당 객체에 넘겨야해
 		RENDERER->drawFrame();

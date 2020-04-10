@@ -2,6 +2,7 @@
 #include "DeviceManager.h"
 #include "Renderer.h"
 #include "Timer.h"
+#include "InputManager.h"
 
 class Framework : public std::enable_shared_from_this<Framework>
 {

@@ -1,10 +1,31 @@
 
 #include "stdafx.h"
 #include "Camera.h"
+#include "InputManager.h"
 
 void Camera::update(float dt)
 {
-	rotate(0, 0, 50.f * dt);
+	constexpr static float camera_velocity = 10.f;
+	glm::vec3 camera_dir = glm::vec3(0.f);
+	if (INPUTMANAGER->keyPressed(GLFW_KEY_W))
+	{
+		camera_dir.z += 1.f;
+	}
+	if (INPUTMANAGER->keyPressed(GLFW_KEY_A))
+	{
+		camera_dir.x += 1.f;
+	}
+	if (INPUTMANAGER->keyPressed(GLFW_KEY_S))
+	{
+		camera_dir.z -= 1.f;
+	}
+	if (INPUTMANAGER->keyPressed(GLFW_KEY_D))
+	{
+		camera_dir.x -= 1.f;
+	}
+	move(camera_dir, camera_velocity * dt);
+
+	//rotate(0, 0, 50.f * dt);
 	//ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	//camera_buffer_data_.view = glm::lookAt(getPosition(),glm::vec3(0,0,0), getUp());//pos / see pos/ up
 	camera_buffer_data_.view = glm::lookAt(getPosition(), getPosition() + getLook(), getUp());
@@ -27,6 +48,8 @@ std::shared_ptr<UniformBuffer> Camera::getCameraBuffer()
 
 void Camera::move(glm::vec3 dir, float distance)
 {
+	if (dir.x == glm::zero<float>() && dir.z == glm::zero<float>()) return;
+
 	dir = glm::normalize(dir);
 	dir *= distance;
 
