@@ -18,15 +18,22 @@ public:
 	void update();
 	void destroy() {};
 
-	void processInput(GLFWwindow* window);
+	void processInput();
 
 	bool keyDown(int32_t key_code);
 	bool keyUp(int32_t key_code);
 	bool keyPressed(int32_t key_code);
 
+	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+	float getYaw();
+	float getPitch();
 private:
 	std::map<int32_t, KeyState> key_;
-
+	
+	static float last_x_, last_y_ ;
+	static float yaw_, pitch_ ;
+	static bool first_mouse_ ;
+	static float sensitivity_;
 public:
 	InputManager();
 	~InputManager();

@@ -5,6 +5,21 @@
 
 void Camera::update(float dt)
 {
+	//mouse input
+	auto yaw = INPUTMANAGER->getYaw();
+	auto pitch = INPUTMANAGER->getPitch();
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	world_[2].x = sin(glm::radians(yaw)) * cos(glm::radians(pitch)); 
+	world_[2].y = sin(glm::radians(pitch));
+	world_[2].z = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	world_[2] = glm::normalize(world_[2]);
+
+	//key input
 	constexpr static float camera_velocity = 10.f;
 	glm::vec3 camera_dir = glm::vec3(0.f);
 	if (INPUTMANAGER->keyPressed(GLFW_KEY_W))
