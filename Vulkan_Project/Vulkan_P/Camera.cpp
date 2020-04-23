@@ -9,40 +9,40 @@ void Camera::update(float dt)
 	auto yaw = INPUTMANAGER->getYaw();
 	auto pitch = INPUTMANAGER->getPitch();
 
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	world_[2].x = sin(glm::radians(yaw)) * cos(glm::radians(pitch)); 
-	world_[2].y = sin(glm::radians(pitch));
-	world_[2].z = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	world_[2] = glm::normalize(world_[2]);
-
 	//key input
 	constexpr static float camera_velocity = 10.f;
 	glm::vec3 camera_dir = glm::vec3(0.f);
 	if (INPUTMANAGER->keyPressed(GLFW_KEY_W))
 	{
-		camera_dir.z += 1.f;
+		camera_dir += getLook();
 	}
 	if (INPUTMANAGER->keyPressed(GLFW_KEY_A))
 	{
-		camera_dir.x += 1.f;
+		camera_dir += getRight();
 	}
 	if (INPUTMANAGER->keyPressed(GLFW_KEY_S))
 	{
-		camera_dir.z -= 1.f;
+		camera_dir -= getLook();
 	}
 	if (INPUTMANAGER->keyPressed(GLFW_KEY_D))
 	{
-		camera_dir.x -= 1.f;
+		camera_dir -= getRight();
 	}
 	move(camera_dir, camera_velocity * dt);
 
-	//rotate(0, 0, 50.f * dt);
-	//ubo.world = glm::mat4(1.0f);//glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	//camera_buffer_data_.view = glm::lookAt(getPosition(),glm::vec3(0,0,0), getUp());//pos / see pos/ up
+	if (yaw != glm::zero<float>() || pitch != glm::zero<float>())
+	{
+		if (world_[1].y > 0.f)
+			rotate(0.f, yaw, 0.f);
+		else
+			rotate(0.f, -yaw, 0.f);
+
+		if (world_[2].z > 0.f)
+			rotate(-pitch, 0.f, 0.f);
+		else
+			rotate(pitch, 0.f, 0.f);
+	}
+
 	camera_buffer_data_.view = glm::lookAt(getPosition(), getPosition() + getLook(), getUp());
 	camera_buffer_->setBufferData(&camera_buffer_data_);
 }
@@ -89,22 +89,20 @@ void Camera::rotate(float x, float y, float z) {
 	if (x != 0.0f)
 	{
 		rotate_mtx = glm::rotate(glm::mat4(1.f), glm::radians(x), getRight());
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetRight(), x));
+		rotate(rotate_mtx);
 	}
 	if (y != 0.0f)
 	{
 		//플레이어의 로컬 y-축을 기준으로 회전하는 행렬을 생성한다.
 		rotate_mtx = glm::rotate(glm::mat4(1.f), glm::radians(y), getUp());
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetUp(), y));
+		rotate(rotate_mtx);
 	}
 	if (z != 0.0f)
 	{
 		//플레이어의 로컬 z-축을 기준으로 회전하는 행렬을 생성한다.
 		rotate_mtx = glm::rotate(glm::mat4(1.f), glm::radians(z), getLook());
-		//SetRotationQuaternion(XMQuaternionRotationAxis(GetLook(), z));
+		rotate(rotate_mtx);
 	}
-
-	rotate(rotate_mtx);
 }
 
 //--------------------------------getter--------------------------------

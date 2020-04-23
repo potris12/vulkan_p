@@ -25,11 +25,12 @@ void InputManager::awake()
 
 void InputManager::update()
 {
+	yaw_ = 0.f;
+	pitch_ = 0.f;
 }
 
 void InputManager::processInput()
 {
-
 	
 	for (auto& key : key_)
 	{
@@ -105,8 +106,8 @@ void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	xoffset *= sensitivity_;
 	yoffset *= sensitivity_;
 
-	yaw_ += xoffset;
-	pitch_ += yoffset;
+	yaw_ = xoffset;
+	pitch_ = yoffset;
 }
 
 float InputManager::getYaw()
