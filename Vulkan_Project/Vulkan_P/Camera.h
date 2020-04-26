@@ -27,11 +27,16 @@ public:
 	void setPosition(float x, float y, float z);
 	void rotate(glm::mat4 mtx);
 	void rotate(float x, float y, float z);
-
+	void updateViewMtx();
 
 	glm::vec3 getRight();
 	glm::vec3 getUp();
 	glm::vec3 getLook();
+
+	void setRight(glm::vec3 vec);
+	void setUp(glm::vec3 vec);
+	void setLook(glm::vec3 vec);
+
 	glm::vec3 getPosition();
 	glm::mat4 getWorldMtx();
 private:

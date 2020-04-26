@@ -30,21 +30,26 @@ void Camera::update(float dt)
 	}
 	move(camera_dir, camera_velocity * dt);
 
-	if (yaw != glm::zero<float>() || pitch != glm::zero<float>())
+
+	//std::cout << "world_[2].z : [" << world_[2].z << "]" << std::endl;
+	//std::cout << "world_[1].y : [" << world_[1].y << "]" << std::endl;
+
+	if (yaw != glm::zero<float>() /*|| pitch != glm::zero<float>()*/)
 	{
-		if (world_[1].y > 0.f)
+		rotate(0.f, yaw, 0.f);
+		/*if (world_[1].y > 0.f)
 			rotate(0.f, yaw, 0.f);
 		else
-			rotate(0.f, -yaw, 0.f);
+			rotate(0.f, -yaw, 0.f);*/
 
-		if (world_[2].z > 0.f)
+		/*if (world_[2].z >= 0.f)
 			rotate(-pitch, 0.f, 0.f);
 		else
-			rotate(pitch, 0.f, 0.f);
+			rotate(pitch, 0.f, 0.f);*/
 	}
 
-	camera_buffer_data_.view = glm::lookAt(getPosition(), getPosition() + getLook(), getUp());
-	camera_buffer_->setBufferData(&camera_buffer_data_);
+	updateViewMtx();
+
 }
 
 void Camera::setCameraDesc(VkPipelineViewportStateCreateInfo& viewportState)
@@ -105,6 +110,18 @@ void Camera::rotate(float x, float y, float z) {
 	}
 }
 
+void Camera::updateViewMtx()
+{
+	setLook(glm::normalize(getLook()));
+	setRight(glm::cross(getUp(), getLook()));
+	setRight(getRight());
+	setUp(glm::cross(getLook(), getRight()));
+	setUp(glm::normalize(getUp()));
+
+	camera_buffer_data_.view = glm::lookAt(getPosition(), getPosition() + getLook(), getUp());
+	camera_buffer_->setBufferData(&camera_buffer_data_);
+}
+
 //--------------------------------getter--------------------------------
 glm::vec3 Camera::getRight() {
 	return world_[0];
@@ -114,6 +131,24 @@ glm::vec3 Camera::getUp() {
 }
 glm::vec3 Camera::getLook() {
 	return world_[2];
+}
+void Camera::setRight(glm::vec3 vec)
+{
+	world_[0].x = vec.x;
+	world_[0].y = vec.y;
+	world_[0].z = vec.z;
+}
+void Camera::setUp(glm::vec3 vec)
+{
+	world_[1].x = vec.x;
+	world_[1].y = vec.y;
+	world_[1].z = vec.z;
+}
+void Camera::setLook(glm::vec3 vec)
+{
+	world_[2].x = vec.x;
+	world_[2].y = vec.y;
+	world_[2].z = vec.z;
 }
 glm::vec3 Camera::getPosition() {
 	return world_[3];
@@ -132,5 +167,6 @@ Camera::Camera(VkViewport viewport, VkRect2D scissor_rect)
 	camera_buffer_data_.proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 	camera_buffer_data_.proj[1][1] *= -1;//glm 은 원래 opengl용으로 설계되었으므로 클립 좌표의 y좌표가 반전됩 이렇게 안하면 이미지가 위아래 만전됨
 
+	rotate(0.f, 0.f, 0.f);
 	camera_buffer_ = std::make_shared<UniformBufferT<CameraBufferData>>(1, 0);
 }
