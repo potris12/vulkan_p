@@ -5,7 +5,7 @@
 
 void Mesh::awake()
 {
-	createVertexBuffer();
+	//createVertexBuffer();
 	//createIndexBuffer();
 
 	/*vkCmdBindVertexBuffers
@@ -113,80 +113,10 @@ void Mesh::addInputLayout(VkVertexInputRate vertex_input_rate, const std::vector
 	binding_slot_++;
 }
 
-void Mesh::createIndexBuffer()
-{
-	std::vector<uint16_t> indices{
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4,
-		4,3,7,4,0,3,
-		0,4,5,5,1,0,
-		1,5,6,6,2,1,
-		3,7,6,6,2,3 
-	};
-
-	index_buffer_ = std::make_shared<IndexBufferT<uint16_t>>(command_pool_, indices);
-}
-
-void Mesh::createVertexBuffer()
-{
-
-	const float fx = 0.5f;
-	const float fy = 0.5f;
-	const float fz = 0.5f;
-
-	std::vector<Vertex> vertices = {
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
-		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
-		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}}
-	};
-
-	vertex_buffer_ = std::make_shared<VertexBufferT<Vertex>>(command_pool_, vertices);
-
-	/*
-	TODO LATER
-	나중에 메쉬 정보 파일에 
-	1. 정점의 타입이 우선 들어가고 지금같이 Vertex 구조체가 있는게 좋겠다 분리되어있으면 정점이 많아진다면 //캐시미스가// 많이날거 같음
-	*/
-	//vertex binding info
-	setVertexInputRateVertex({ VK_FORMAT_R32G32B32_SFLOAT , VK_FORMAT_R32G32B32_SFLOAT , VK_FORMAT_R32G32_SFLOAT });
-}
-
-Mesh::Mesh(VkCommandPool& command_pool, std::string mesh_name) 
+Mesh::Mesh(VkCommandPool& command_pool, std::string mesh_name)
 	: Object(mesh_name), command_pool_(command_pool)
 {
+
 }
 
 

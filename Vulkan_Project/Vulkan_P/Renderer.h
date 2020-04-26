@@ -83,6 +83,7 @@ private:
 
 	//render container 
 	std::shared_ptr<RenderContainer> render_container_ = nullptr;
+	std::shared_ptr<RenderContainer> render_container2_ = nullptr;
 
 	//render pass
 	void createRenderPass();

@@ -38,7 +38,62 @@ void Renderer::awake()
 	camera_->setPosition(0.f, 1.3f, 0.f);
 
 	render_container_ = std::make_shared<RenderContainer>(camera_);
-	render_container_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
+
+	const float fx = 0.5f;
+	const float fy = 0.5f;
+	const float fz = 0.5f;
+
+	std::vector<Vertex> vertices = {
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{-fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{-fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{-fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, +fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{+fx, +fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, -fy, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{+fx, -fy, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}}
+	};
+
+	std::vector<uint16_t> indices{
+		0, 1, 2, 2, 3, 0,
+		4, 5, 6, 6, 7, 4,
+		4,3,7,4,0,3,
+		0,4,5,5,1,0,
+		1,5,6,6,2,1,
+		3,7,6,6,2,3
+	};
+
+	auto mesh = std::make_shared<Mesh>(commandPool, "rect_mesh");
+	mesh->createVertexBuffer<Vertex>(vertices, { VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32_SFLOAT });
+	render_container_->setMesh(mesh);
 
 	render_container_->addTexture("texture/texture2.jpg");
 
@@ -57,6 +112,41 @@ void Renderer::awake()
 
 	render_container_->createGraphicsPipeline(renderPass);
 	render_container_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
+
+
+	//µÎ¹øÂ° render container 
+	//render_container2_ = std::make_shared<RenderContainer>(camera_);
+	//render_container2_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
+
+	//render_container2_->addTexture("texture/texture2.jpg");
+
+	//// create instancing buffer 
+	//render_container2_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
+	//	{
+	//		VK_FORMAT_R32G32B32A32_SFLOAT,
+	//		VK_FORMAT_R32G32B32A32_SFLOAT,
+	//		VK_FORMAT_R32G32B32A32_SFLOAT,
+	//		VK_FORMAT_R32G32B32A32_SFLOAT
+	//	}
+	//);
+	//render_container2_->createDescriptorPool();
+	//render_container2_->createDescriptorSetLayout();
+	//render_container2_->createDescriptorSet();
+
+	//render_container2_->createGraphicsPipeline(renderPass);
+	//render_container2_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
+
+	/*m_pVertices[0] = XMFLOAT3(-fx, 0, -fz);
+	m_pVertices[1] = XMFLOAT3(-fx, 0, +fz);
+	m_pVertices[2] = XMFLOAT3(+fx, 0, -fz);
+	m_pVertices[3] = XMFLOAT3(+fx, 0, +fz);
+
+	int i = 0;
+	XMFLOAT2 pxmf2TexCoords[4];
+	pxmf2TexCoords[i++] = XMFLOAT2(0.0f, 1.0f);
+	pxmf2TexCoords[i++] = XMFLOAT2(0.0f, 0.0f);
+	pxmf2TexCoords[i++] = XMFLOAT2(1.0f, 1.0f);
+	pxmf2TexCoords[i++] = XMFLOAT2(1.0f, 0.0f);*/
 
 	createSemaphores();
 }

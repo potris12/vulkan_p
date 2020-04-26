@@ -29,6 +29,20 @@ public:
 
 		return instancing_buffer;
 	}
+	template <class T>
+	void createIndexBuffer(std::vector<T>& indices)
+	{
+		
+		index_buffer_ = std::make_shared<IndexBufferT<uint16_t>>(command_pool_, indices);
+		
+	}
+	template <class T>
+	void createVertexBuffer(std::vector<T>& vertices, const std::vector<VkFormat>& formats)
+	{
+		vertex_buffer_ = std::make_shared<VertexBufferT<T>>(command_pool_, vertices);
+		setVertexInputRateVertex(formats);
+	}
+
 	
 	std::vector<std::shared_ptr<InstancingBuffer>>& addBufferDataStart();
 	void addBufferDataEnd();
@@ -53,9 +67,6 @@ private:
 	std::vector<std::shared_ptr<InstancingBuffer>> instancing_buffers_;
 
 	VkCommandPool& command_pool_;
-
-	void createIndexBuffer();
-	void createVertexBuffer();
 public:
 	Mesh(VkCommandPool& command_pool, std::string mesh_name);
 	~Mesh();

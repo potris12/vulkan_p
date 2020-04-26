@@ -61,7 +61,6 @@ void RenderContainer::destroy()
 void RenderContainer::setMesh(std::shared_ptr<Mesh> mesh)
 {
 	mesh_ = mesh;
-	mesh_->awake();
 }
 
 void RenderContainer::addGameObject(std::shared_ptr<GameObject> game_object)
