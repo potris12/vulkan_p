@@ -31,7 +31,7 @@ public:
 	std::vector<std::shared_ptr<GameObject>> game_objects_;
 	std::shared_ptr<Camera> camera_{ nullptr };
  	//render pass
-	VkRenderPass& getRenderPass() { return renderPass; }
+	//VkRenderPass& getRenderPass() { return renderPass; }
 
 	//frame buffer
 	std::vector<VkFramebuffer>& getSwapChainFramebuffers() { return swapChainFramebuffers; }
@@ -87,7 +87,8 @@ private:
 
 	//render pass
 	void createRenderPass();
-	VkRenderPass renderPass{};
+	VkRenderPass render_pass_do_clear_;
+	VkRenderPass render_pass_do_not_clear_;
 
 	//frame buffers
 	void createFramebuffers();
@@ -102,6 +103,7 @@ private:
 	이를 위해 VkCommandBuffer객체 목록을 클래스 멤버로 만들어야함
 	명령 버퍼는 명령 풀이 삭제되면 자동으로 해제되므로 명시적인 정리가 필요하지 않음*/
 
+	VkCommandBuffer primary_cmd_buffer_;
 	//세마포어
 	VkSemaphore imageAvailableSemaphore{};
 	VkSemaphore renderFinishedSemaphore{};

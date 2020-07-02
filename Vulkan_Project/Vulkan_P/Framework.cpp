@@ -43,4 +43,5 @@ void Framework::destroy()
 	TIMER->destroy();
 	RENDERER->destroy();
 	DEVICE_MANAGER->destroy();
+	INPUTMANAGER->destroy();
 }

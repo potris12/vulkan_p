@@ -50,8 +50,9 @@ void RenderContainer::destroy()
 		texture->destroy();
 	}
 	//uniform buffers
-	for (auto uniform_buffer : uniform_buffers_) {
-		uniform_buffer->destroy();
+	for (auto i = 1; i < uniform_buffers_.size(); ++i)
+	{//0번은 camera 버퍼로 공용
+		uniform_buffers_[i]->destroy();
 	}
 
 	vkDestroyDescriptorPool(DEVICE_MANAGER->getDevice(), descriptorPool, nullptr);
@@ -359,7 +360,7 @@ void RenderContainer::createCommandBuffers(std::vector<VkFramebuffer>& swapchain
 		VkCommandBufferBeginInfo commandBufferInfo = {};
 		commandBufferInfo.pNext = nullptr;
 		commandBufferInfo.pInheritanceInfo = nullptr;
-		commandBufferInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+		commandBufferInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;//
 		commandBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		vkBeginCommandBuffer(commandBuffers[i], &commandBufferInfo);
 

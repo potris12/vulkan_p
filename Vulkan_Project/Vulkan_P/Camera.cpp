@@ -48,6 +48,7 @@ void Camera::update(float dt)
 			rotate(pitch, 0.f, 0.f);*/
 	}
 
+
 	updateViewMtx();
 
 }
@@ -169,4 +170,9 @@ Camera::Camera(VkViewport viewport, VkRect2D scissor_rect)
 
 	rotate(0.f, 0.f, 0.f);
 	camera_buffer_ = std::make_shared<UniformBufferT<CameraBufferData>>(1, 0);
+}
+
+Camera::~Camera()
+{
+	camera_buffer_->destroy();
 }

@@ -37,8 +37,10 @@ void Renderer::awake()
 	);
 	camera_->setPosition(0.f, 1.3f, 0.f);
 
+	//create render container 
 	render_container_ = std::make_shared<RenderContainer>(camera_);
 
+	//craete mesh
 	const float fx = 0.5f;
 	const float fy = 0.5f;
 	const float fz = 0.5f;
@@ -95,6 +97,7 @@ void Renderer::awake()
 	mesh->createVertexBuffer<Vertex>(vertices, { VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32_SFLOAT });
 	render_container_->setMesh(mesh);
 
+	//add texture
 	render_container_->addTexture("texture/texture2.jpg");
 
 	// create instancing buffer 
@@ -110,43 +113,42 @@ void Renderer::awake()
 	render_container_->createDescriptorSetLayout();
 	render_container_->createDescriptorSet();
 
-	render_container_->createGraphicsPipeline(renderPass);
-	render_container_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
+	render_container_->createGraphicsPipeline(render_pass_do_clear_);
+	render_container_->createCommandBuffers(swapChainFramebuffers, render_pass_do_clear_, commandPool);
 
 
 	//두번째 render container 
-	//render_container2_ = std::make_shared<RenderContainer>(camera_);
-	//render_container2_->setMesh(std::make_shared<Mesh>(commandPool, "rect_mesh"));
+	render_container2_ = std::make_shared<RenderContainer>(camera_);
 
-	//render_container2_->addTexture("texture/texture2.jpg");
+	std::vector<Vertex> vertices2 = {
+		{{-fx, 0.f, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
+		{{-fx, 0.f, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
+		{{+fx, 0.f, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
+		{{+fx, 0.f, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
+	};
 
-	//// create instancing buffer 
-	//render_container2_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
-	//	{
-	//		VK_FORMAT_R32G32B32A32_SFLOAT,
-	//		VK_FORMAT_R32G32B32A32_SFLOAT,
-	//		VK_FORMAT_R32G32B32A32_SFLOAT,
-	//		VK_FORMAT_R32G32B32A32_SFLOAT
-	//	}
-	//);
-	//render_container2_->createDescriptorPool();
-	//render_container2_->createDescriptorSetLayout();
-	//render_container2_->createDescriptorSet();
+	auto mesh2 = std::make_shared<Mesh>(commandPool, "rect_mesh");
+	mesh2->createVertexBuffer<Vertex>(vertices2, { VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32_SFLOAT });
+	render_container2_->setMesh(mesh2);
 
-	//render_container2_->createGraphicsPipeline(renderPass);
-	//render_container2_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
+	render_container2_->addTexture("texture/texture2.jpg");
 
-	/*m_pVertices[0] = XMFLOAT3(-fx, 0, -fz);
-	m_pVertices[1] = XMFLOAT3(-fx, 0, +fz);
-	m_pVertices[2] = XMFLOAT3(+fx, 0, -fz);
-	m_pVertices[3] = XMFLOAT3(+fx, 0, +fz);
+	// create instancing buffer 
+	render_container2_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
+		{
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT,
+			VK_FORMAT_R32G32B32A32_SFLOAT
+		}
+	);
+	render_container2_->createDescriptorPool();
+	render_container2_->createDescriptorSetLayout();
+	render_container2_->createDescriptorSet();
 
-	int i = 0;
-	XMFLOAT2 pxmf2TexCoords[4];
-	pxmf2TexCoords[i++] = XMFLOAT2(0.0f, 1.0f);
-	pxmf2TexCoords[i++] = XMFLOAT2(0.0f, 0.0f);
-	pxmf2TexCoords[i++] = XMFLOAT2(1.0f, 1.0f);
-	pxmf2TexCoords[i++] = XMFLOAT2(1.0f, 0.0f);*/
+	render_container2_->createGraphicsPipeline(render_pass_do_not_clear_);
+	render_container2_->createCommandBuffers(swapChainFramebuffers, render_pass_do_not_clear_, commandPool);
+
 
 	createSemaphores();
 }
@@ -154,25 +156,33 @@ void Renderer::awake()
 void Renderer::update()
 {
 	//TODO UPDATER에서 진행해야함 그림 그릴 객체를 선별해 해당 객체가 가지고 있는 RenderContainer에게 add
-	for (auto game_object : game_objects_)
+	for (auto i = 0; i < game_objects_.size() / 2; ++i)
 	{
-		render_container_->addGameObject(game_object);
+		render_container_->addGameObject(game_objects_[i]);
 	}
+	for (auto j = game_objects_.size() / 2; j < game_objects_.size(); ++j)
+	{
+		render_container2_->addGameObject(game_objects_[j]);
+	}
+	//TODO UPDATER에서 진행해야함 그림 그릴 객체를 선별해 해당 객체가 가지고 있는 RenderContainer에게 add
+
+
 	render_container_->update();
+	render_container2_->update();
 }
 
 void Renderer::destroy()
 {
-
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), renderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(DEVICE_MANAGER->getDevice(), imageAvailableSemaphore, nullptr);
 
 	render_container_->destroy();
-
+	render_container2_->destroy();
 
 	cleanupSwapChain();
 
 	vkDestroyCommandPool(DEVICE_MANAGER->getDevice(), commandPool, nullptr);
+	ReleseInstance();
 }
 
 void Renderer::updateUniformBuffer()
@@ -235,6 +245,9 @@ void Renderer::drawFrame()
 	std::vector<VkCommandBuffer> command_buffers;
 	//for(auto render_container : render_containers_)
 	command_buffers.push_back(render_container_->submissionBuffer(imageIndex));
+	command_buffers.push_back(render_container2_->submissionBuffer(imageIndex));
+	
+
 	submitInfo.commandBufferCount = command_buffers.size();
 	submitInfo.pCommandBuffers = command_buffers.data();
 	/*
@@ -310,91 +323,190 @@ void Renderer::drawFrame()
 
 void Renderer::createRenderPass()
 {
-	//render target 초기화 
-	VkAttachmentDescription colorAttachment = {};
-	colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
-	colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	{
+		//render target 초기화 
+		VkAttachmentDescription colorAttachment = {};
+		colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-	VkAttachmentReference colorAttachmentRef = {};
-	colorAttachmentRef.attachment = 0;
-	colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		VkAttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-	//depth, stencil,  
-	VkAttachmentDescription depthAttachment = {};
-	depthAttachment.format = findDepthFormat();
-	depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-	depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		//depth, stencil,  
+		VkAttachmentDescription depthAttachment = {};
+		depthAttachment.format = findDepthFormat();
+		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkAttachmentReference depthAttachmentRef = {};
-	depthAttachmentRef.attachment = 1;
-	depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		VkAttachmentReference depthAttachmentRef = {};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-	VkSubpassDescription subpass = {};
-	subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass.colorAttachmentCount = 1;
-	subpass.pColorAttachments = &colorAttachmentRef;
-	subpass.pDepthStencilAttachment = &depthAttachmentRef;
+		VkSubpassDescription subpass = {};
+		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpass.colorAttachmentCount = 1;
+		subpass.pColorAttachments = &colorAttachmentRef;
+		subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
-	/*
-	랜더 패스의 하위 패스는 이미지 레이아웃 전환을 자동으로 처리함
-	이러한 전환은 서브패스 간의 메모리및 실행 종속성을 지정하는 서브 패스 종속성에 의해 제어됨
-	지금은 하나의 서브패스 만 있지만이 서브패스 전후의 작업은 암시적 서브패스로 계산됨
-	랜더링 패스의 시작과 렌더링 패스의 끝에서 전환을 처리하는 두 가지 기본 종속성이 있지만, 적시에 발생하지 않음
-	그것은 전환이 파이프라인의 시작에서 발생한다고 가정하지만 그 시점에서 아직 이미지를 얻지 못했어서 그럼
-	이 문제를 처리하는데 두가지 방법이 있음
-	이미지를 사용할 수 있을 떄까지 렌더링 패스가 시작되지 않도록 하거나, 특정 단계가지 랜더 패스를 대기시킬 수 있음
+		/*
+		랜더 패스의 하위 패스는 이미지 레이아웃 전환을 자동으로 처리함
+		이러한 전환은 서브패스 간의 메모리및 실행 종속성을 지정하는 서브 패스 종속성에 의해 제어됨
+		지금은 하나의 서브패스 만 있지만이 서브패스 전후의 작업은 암시적 서브패스로 계산됨
+		랜더링 패스의 시작과 렌더링 패스의 끝에서 전환을 처리하는 두 가지 기본 종속성이 있지만, 적시에 발생하지 않음
+		그것은 전환이 파이프라인의 시작에서 발생한다고 가정하지만 그 시점에서 아직 이미지를 얻지 못했어서 그럼
+		이 문제를 처리하는데 두가지 방법이 있음
+		이미지를 사용할 수 있을 떄까지 렌더링 패스가 시작되지 않도록 하거나, 특정 단계가지 랜더 패스를 대기시킬 수 있음
 
-	*/
+		*/
 
-	VkSubpassDependency dependency = {};
-	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-	dependency.dstSubpass = 0;
+		std::array<VkSubpassDependency, 2> dependencys;
+		dependencys[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependencys[0].dstSubpass = 0;
 
-	/*
-	처음 두 필드는 종속성과 종속 서브패스의 색인을 지정 특수값 VK_SUBPASS_EXTERNAL은 srcSubpass또는 dstSubpass에 지정되었는지 여부에 따라 렌더 패스 전후의 암시적 서브 패스를 ㅏㅍㅁ조함
-	인덱스 0 은 처음이자 유일한 하나의 인 우리의 서브패스를 참조함
-	dstSubpass는 종속성 그래스에서 순환을 방지하기 위해 항상 srcSubpass보다 커야함
-	*/
-	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.srcAccessMask = 0;
+		/*
+		처음 두 필드는 종속성과 종속 서브패스의 색인을 지정 특수값 VK_SUBPASS_EXTERNAL은 srcSubpass또는 dstSubpass에 지정되었는지 여부에 따라 렌더 패스 전후의 암시적 서브 패스를 ㅏㅍㅁ조함
+		인덱스 0 은 처음이자 유일한 하나의 인 우리의 서브패스를 참조함
+		dstSubpass는 종속성 그래스에서 순환을 방지하기 위해 항상 srcSubpass보다 커야함
+		*/
+		dependencys[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencys[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		//VkDependencyFlagBits
 
-	/*
-	다음 두 필드는 대기할 작업과 이러한 작업이 수행되는 단계를 지정
-	스왑체인이 이미지에 접근하기 전에 스왑체인이 이미지 읽기를 끝내기를 기다려야 함
-	잊 작업은 색상 첨부 출력 단계자체를 기다ㅕㄹ 수행할 수 있음
-	*/
-	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-	/*
-	이 작업을 기다려야 하는 작업은 컬러 어테치먼트 단계에 있으며 컬러 어테치먼트를 읽고 쓰는 작업이 필요함
-	이러한 설정은 실제로 필요하고 일어나느 변화를 막을것
-	*/
+		/*
+		다음 두 필드는 대기할 작업과 이러한 작업이 수행되는 단계를 지정
+		스왑체인이 이미지에 접근하기 전에 스왑체인이 이미지 읽기를 끝내기를 기다려야 함
+		잊 작업은 색상 첨부 출력 단계자체를 기다ㅕㄹ 수행할 수 있음
+		*/
+		dependencys[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencys[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencys[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		/*
+		이 작업을 기다려야 하는 작업은 컬러 어테치먼트 단계에 있으며 컬러 어테치먼트를 읽고 쓰는 작업이 필요함
+		이러한 설정은 실제로 필요하고 일어나느 변화를 막을것
+		*/
 
-	std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+		dependencys[1].srcSubpass = 0;
+		dependencys[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+		dependencys[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencys[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencys[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;;
+		dependencys[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencys[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-	VkRenderPassCreateInfo renderPassInfo = {};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-	renderPassInfo.pAttachments = attachments.data();
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
+		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 
-	if (vkCreateRenderPass(DEVICE_MANAGER->getDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create render pass!");
+		VkRenderPassCreateInfo renderPassInfo = {};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		renderPassInfo.pAttachments = attachments.data();
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpass;
+		renderPassInfo.dependencyCount = dependencys.size();
+		renderPassInfo.pDependencies = dependencys.data();
+
+		if (vkCreateRenderPass(DEVICE_MANAGER->getDevice(), &renderPassInfo, nullptr, &render_pass_do_clear_) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create render pass!");
+		}
 	}
+	{
+		//render target 초기화 
+		VkAttachmentDescription colorAttachment = {};
+		colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
+		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		VkAttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		//depth, stencil,  
+		VkAttachmentDescription depthAttachment = {};
+		depthAttachment.format = findDepthFormat();
+		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depthAttachmentRef = {};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkSubpassDescription subpass = {};
+		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpass.colorAttachmentCount = 1;
+		subpass.pColorAttachments = &colorAttachmentRef;
+		subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+		std::array<VkSubpassDependency, 2> dependencys;
+		dependencys[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependencys[0].dstSubpass = 0;
+
+		/*
+		처음 두 필드는 종속성과 종속 서브패스의 색인을 지정 특수값 VK_SUBPASS_EXTERNAL은 srcSubpass또는 dstSubpass에 지정되었는지 여부에 따라 렌더 패스 전후의 암시적 서브 패스를 ㅏㅍㅁ조함
+		인덱스 0 은 처음이자 유일한 하나의 인 우리의 서브패스를 참조함
+		dstSubpass는 종속성 그래스에서 순환을 방지하기 위해 항상 srcSubpass보다 커야함
+		*/
+		dependencys[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencys[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		//VkDependencyFlagBits
+
+		/*
+		다음 두 필드는 대기할 작업과 이러한 작업이 수행되는 단계를 지정
+		스왑체인이 이미지에 접근하기 전에 스왑체인이 이미지 읽기를 끝내기를 기다려야 함
+		잊 작업은 색상 첨부 출력 단계자체를 기다ㅕㄹ 수행할 수 있음
+		*/
+		dependencys[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencys[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencys[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+		/*
+		이 작업을 기다려야 하는 작업은 컬러 어테치먼트 단계에 있으며 컬러 어테치먼트를 읽고 쓰는 작업이 필요함
+		이러한 설정은 실제로 필요하고 일어나느 변화를 막을것
+		*/
+
+		dependencys[1].srcSubpass = 0;
+		dependencys[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+		dependencys[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencys[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencys[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;;
+		dependencys[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencys[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
+
+		VkRenderPassCreateInfo renderPassInfo = {};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		renderPassInfo.pAttachments = attachments.data();
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpass;
+		renderPassInfo.dependencyCount = dependencys.size();
+		renderPassInfo.pDependencies = dependencys.data();
+
+		if (vkCreateRenderPass(DEVICE_MANAGER->getDevice(), &renderPassInfo, nullptr, &render_pass_do_not_clear_) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create render pass!");
+		}
+	}
+	
 }
 
 void Renderer::createFramebuffers()
@@ -415,7 +527,7 @@ void Renderer::createFramebuffers()
 
 		VkFramebufferCreateInfo framebufferInfo = {};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.renderPass = render_pass_do_clear_;
 		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		framebufferInfo.pAttachments = attachments.data();
 		framebufferInfo.width = swapChainExtent.width;
@@ -481,7 +593,10 @@ void Renderer::cleanupSwapChain()
 	}
 	
 	render_container_->cleanupSwapChain(commandPool);
-	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), renderPass, nullptr);
+	render_container2_->cleanupSwapChain(commandPool);
+
+	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), render_pass_do_not_clear_, nullptr);
+	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), render_pass_do_clear_, nullptr);
 
 	DEVICE_MANAGER->cleanupSwapChain();
 }
@@ -497,8 +612,11 @@ void Renderer::recreateSwapChain()
 	createDepthResources();
 	createFramebuffers();
 
-	render_container_->createGraphicsPipeline(renderPass);
-	render_container_->createCommandBuffers(swapChainFramebuffers, renderPass, commandPool);
+	render_container_->createGraphicsPipeline(render_pass_do_clear_);
+	render_container_->createCommandBuffers(swapChainFramebuffers, render_pass_do_clear_, commandPool);
+
+	render_container2_->createGraphicsPipeline(render_pass_do_not_clear_);
+	render_container2_->createCommandBuffers(swapChainFramebuffers, render_pass_do_not_clear_, commandPool);
 	/* vkDeviceWaitIdle을 호출하기 떄문에 사용중인 리소스에 접근하지 않음
 	목표 스왑체인 자체를 다시 만드는것
 	이미지 뷰는 스왑체인 이미지를 직접 기반으로 하므로 다시 만들어야함

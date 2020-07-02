@@ -50,6 +50,7 @@ void DeviceManager::destroy()
 	glfwDestroyWindow(window);
 
 	glfwTerminate();
+	ReleseInstance();
 }
 
 void DeviceManager::createInstance()

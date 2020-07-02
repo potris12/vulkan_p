@@ -16,7 +16,7 @@ public:
 	void awake();
 	void start() {};
 	void update();
-	void destroy() {};
+	void destroy() { ReleseInstance(); };
 
 	void processInput();
 

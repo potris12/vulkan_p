@@ -49,4 +49,5 @@ private:
 	
 public:
 	Camera(VkViewport viewport, VkRect2D scissor_rect);
+	~Camera();
 };

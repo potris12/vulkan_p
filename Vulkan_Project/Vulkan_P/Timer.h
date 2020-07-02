@@ -7,7 +7,7 @@ public:
 	void awake();
 	void start() {};
 	void update();
-	void destroy() {};
+	void destroy() { ReleseInstance(); };
 
 	std::chrono::time_point<std::chrono::steady_clock> prev_time_;
 	std::chrono::time_point<std::chrono::steady_clock> cur_time_;
