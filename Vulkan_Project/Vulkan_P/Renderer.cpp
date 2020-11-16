@@ -119,20 +119,20 @@ void Renderer::awake()
 
 	//두번째 render container 
 	render_container2_ = std::make_shared<RenderContainer>(camera_);
-
+	
 	std::vector<Vertex> vertices2 = {
 		{{-fx, 0.f, -fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 1.0f}},
 		{{-fx, 0.f, +fz}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}},
 		{{+fx, 0.f, -fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 1.0f}},
 		{{+fx, 0.f, +fz}, { 1.0f, 0.0f, 0.0f }, {1.0f, 0.0f}},
 	};
-
+	
 	auto mesh2 = std::make_shared<Mesh>(commandPool, "rect_mesh");
 	mesh2->createVertexBuffer<Vertex>(vertices2, { VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32_SFLOAT });
 	render_container2_->setMesh(mesh2);
-
+	
 	render_container2_->addTexture("texture/texture2.jpg");
-
+	
 	// create instancing buffer 
 	render_container2_->addInstancingBuffer<InstanceData>(INSTANCE_COUNT,
 		{
@@ -145,7 +145,7 @@ void Renderer::awake()
 	render_container2_->createDescriptorPool();
 	render_container2_->createDescriptorSetLayout();
 	render_container2_->createDescriptorSet();
-
+	
 	render_container2_->createGraphicsPipeline(render_pass_do_not_clear_);
 	render_container2_->createCommandBuffers(swapChainFramebuffers, render_pass_do_not_clear_, commandPool);
 
@@ -425,11 +425,11 @@ void Renderer::createRenderPass()
 		VkAttachmentDescription colorAttachment = {};
 		colorAttachment.format = DEVICE_MANAGER->getSwapChainImageFormat();
 		colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference colorAttachmentRef = {};
@@ -440,11 +440,11 @@ void Renderer::createRenderPass()
 		VkAttachmentDescription depthAttachment = {};
 		depthAttachment.format = findDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		VkAttachmentReference depthAttachmentRef = {};
@@ -460,28 +460,13 @@ void Renderer::createRenderPass()
 		std::array<VkSubpassDependency, 2> dependencys;
 		dependencys[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependencys[0].dstSubpass = 0;
-
-		/*
-		처음 두 필드는 종속성과 종속 서브패스의 색인을 지정 특수값 VK_SUBPASS_EXTERNAL은 srcSubpass또는 dstSubpass에 지정되었는지 여부에 따라 렌더 패스 전후의 암시적 서브 패스를 ㅏㅍㅁ조함
-		인덱스 0 은 처음이자 유일한 하나의 인 우리의 서브패스를 참조함
-		dstSubpass는 종속성 그래스에서 순환을 방지하기 위해 항상 srcSubpass보다 커야함
-		*/
 		dependencys[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 		dependencys[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		//VkDependencyFlagBits
 
-		/*
-		다음 두 필드는 대기할 작업과 이러한 작업이 수행되는 단계를 지정
-		스왑체인이 이미지에 접근하기 전에 스왑체인이 이미지 읽기를 끝내기를 기다려야 함
-		잊 작업은 색상 첨부 출력 단계자체를 기다ㅕㄹ 수행할 수 있음
-		*/
 		dependencys[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 		dependencys[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 		dependencys[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-		/*
-		이 작업을 기다려야 하는 작업은 컬러 어테치먼트 단계에 있으며 컬러 어테치먼트를 읽고 쓰는 작업이 필요함
-		이러한 설정은 실제로 필요하고 일어나느 변화를 막을것
-		*/
 
 		dependencys[1].srcSubpass = 0;
 		dependencys[1].dstSubpass = VK_SUBPASS_EXTERNAL;
@@ -595,8 +580,8 @@ void Renderer::cleanupSwapChain()
 	render_container_->cleanupSwapChain(commandPool);
 	render_container2_->cleanupSwapChain(commandPool);
 
-	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), render_pass_do_not_clear_, nullptr);
 	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), render_pass_do_clear_, nullptr);
+	vkDestroyRenderPass(DEVICE_MANAGER->getDevice(), render_pass_do_not_clear_, nullptr);
 
 	DEVICE_MANAGER->cleanupSwapChain();
 }
